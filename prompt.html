@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>和光堂眼鏡 AI Prompt 工作台 V2</title>
+    <link rel="icon" type="image/svg+xml" href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"%3E%3Ccircle cx="16" cy="16" r="15.6" fill="%23fff"/%3E%3Cg fill="none" stroke="%23111" stroke-linecap="round" stroke-linejoin="round"%3E%3Ccircle cx="16" cy="16" r="14.2" stroke-width="1.1"/%3E%3Ccircle cx="16" cy="16" r="11.9" stroke-width="0.8"/%3E%3Cg stroke-width="0.85"%3E%3Ccircle cx="16" cy="11.0" r="4.4"/%3E%3Ccircle cx="20.8" cy="13.6" r="4.4"/%3E%3Ccircle cx="19.6" cy="19.1" r="4.4"/%3E%3Ccircle cx="12.4" cy="19.1" r="4.4"/%3E%3Ccircle cx="11.2" cy="13.6" r="4.4"/%3E%3C/g%3E%3Ccircle cx="16" cy="15.2" r="2.2" stroke-width="0.7"/%3E%3C/g%3E%3C/svg%3E' />
+    <style>
+        :root {
+            --bg: #0d0e0f;
+            --panel: #171819;
+            --panel-soft: #1d1f20;
+            --input: #111213;
+            --text: #f7f5ef;
+            --muted: #92928e;
+            --gold: #c9a84c;
+            --gold-hover: #dfbd60;
+            --border: #303234;
+            --danger: #ff5d5d;
+            --success: #27c47d;
+            --font-en: Inter, ui-sans-serif, system-ui, sans-serif;
+            --font-zh: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            min-height: 100vh;
+            background: var(--bg);
+            color: var(--text);
+            font: 14px/1.6 var(--font-zh);
+        }
+        button, select, input, textarea { font: inherit; }
+        button { cursor: pointer; }
+
+        .app-shell { max-width: 1540px; margin: 0 auto; padding: 18px; }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            padding: 2px 2px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .brand h1 { color: var(--gold); font: 700 23px/1.2 var(--font-en); }
+        .brand p { color: var(--muted); margin-top: 3px; font-size: 12px; }
+        .status-wrap { display: flex; align-items: center; gap: 8px; }
+        #status { color: var(--gold); font-weight: 700; white-space: nowrap; }
+
+        .toolbar {
+            display: grid;
+            grid-template-columns: minmax(260px, 1.25fr) minmax(210px, 1fr) minmax(190px, .85fr) auto;
+            gap: 12px;
+            align-items: stretch;
+            margin: 16px 0;
+        }
+        .toolbar-card {
+            min-width: 0;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 6px;
+        }
+        .segmented { display: flex; gap: 5px; height: 100%; }
+        .segment-btn {
+            flex: 1;
+            border: 0;
+            border-radius: 7px;
+            padding: 9px 12px;
+            color: var(--muted);
+            background: transparent;
+            font-weight: 700;
+            transition: .18s ease;
+        }
+        .segment-btn:hover { color: var(--text); background: rgba(255,255,255,.04); }
+        .segment-btn.active { color: #111; background: var(--gold); }
+        .ratio-wrap { display: flex; align-items: center; gap: 8px; padding: 0 5px; }
+        .ratio-wrap label { color: var(--muted); white-space: nowrap; font-weight: 700; }
+
+        select, input, textarea {
+            width: 100%;
+            color: var(--text);
+            background: var(--input);
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            padding: 10px 11px;
+            outline: none;
+        }
+        select:focus, input:focus, textarea:focus { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(201,168,76,.10); }
+        textarea { resize: vertical; min-height: 90px; }
+
+        .btn {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 9px 13px;
+            color: var(--text);
+            background: var(--panel-soft);
+            font-weight: 700;
+            transition: .18s ease;
+        }
+        .btn:hover { border-color: var(--gold); color: var(--gold); }
+        .btn-gold { color: #111; background: var(--gold); border-color: var(--gold); }
+        .btn-gold:hover { color: #111; background: var(--gold-hover); }
+        .btn-danger { color: var(--danger); background: transparent; border-color: var(--danger); }
+        .btn-danger:hover { color: white; background: var(--danger); }
+        .btn-small { font-size: 12px; padding: 6px 9px; }
+        .toolbar-actions { display: flex; gap: 8px; }
+        .toolbar-actions .btn { white-space: nowrap; }
+
+        .workspace {
+            display: grid;
+            grid-template-columns: minmax(360px, .92fr) minmax(460px, 1.35fr);
+            gap: 16px;
+            min-height: calc(100vh - 170px);
+        }
+        .panel {
+            min-width: 0;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px;
+        }
+        .controls-panel { overflow-y: auto; }
+        .preview-panel { display: flex; flex-direction: column; min-height: 620px; }
+
+        .reference-card {
+            border: 1px solid rgba(201,168,76,.34);
+            background: rgba(201,168,76,.07);
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 18px;
+        }
+        .reference-card h2 { color: var(--gold); font-size: 14px; margin-bottom: 8px; }
+        .reference-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .reference-item { color: #d2d0ca; font-size: 13px; }
+        .reference-item strong { display: block; color: var(--text); margin-bottom: 2px; }
+
+        .form-group { margin-bottom: 17px; }
+        .form-label { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 7px; }
+        .form-label label { color: var(--gold); font-weight: 750; }
+        .form-label span { color: var(--muted); font-size: 11px; }
+        .option-summary {
+            margin-top: 7px;
+            padding: 8px 10px;
+            color: var(--muted);
+            background: rgba(255,255,255,.025);
+            border-left: 2px solid #555;
+            border-radius: 0 6px 6px 0;
+            font-size: 12px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        details.advanced {
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            background: var(--input);
+            margin-top: 6px;
+        }
+        details.advanced summary {
+            cursor: pointer;
+            list-style: none;
+            padding: 11px 13px;
+            color: var(--gold);
+            font-weight: 750;
+        }
+        details.advanced summary::-webkit-details-marker { display: none; }
+        .advanced-content { padding: 0 13px 13px; }
+        .advanced-content p { color: var(--muted); font-size: 12px; margin-bottom: 8px; }
+
+        .panel-footer { display: flex; justify-content: space-between; gap: 10px; padding-top: 10px; }
+
+        .preview-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; }
+        .preview-header h2 { color: var(--gold); font: 700 18px/1.2 var(--font-en); }
+        .preview-header p { color: var(--muted); font-size: 12px; margin-top: 2px; }
+        #previewSections { display: grid; gap: 10px; overflow-y: auto; padding-right: 3px; }
+        .preview-card {
+            border: 1px solid var(--border);
+            background: var(--input);
+            border-radius: 9px;
+            overflow: hidden;
+        }
+        .preview-card-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 11px;
+            border-bottom: 1px solid var(--border);
+        }
+        .preview-card-head h3 { color: var(--gold); font-size: 12px; letter-spacing: .03em; }
+        .preview-card pre {
+            color: #dddcd7;
+            font: 12px/1.55 var(--font-en);
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            padding: 11px;
+        }
+        .full-prompt {
+            margin-top: 12px;
+            border-top: 1px solid var(--border);
+            padding-top: 12px;
+        }
+        .full-prompt summary { cursor: pointer; color: var(--muted); font-weight: 700; margin-bottom: 8px; }
+        #promptOutput { min-height: 300px; font: 12px/1.55 var(--font-en); }
+
+        .product-hint {
+            margin-top: 12px;
+            padding: 13px;
+            color: #d3d1ca;
+            background: rgba(201,168,76,.07);
+            border: 1px dashed rgba(201,168,76,.55);
+            border-radius: 8px;
+            font-size: 12px;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(0,0,0,.82);
+        }
+        .modal-content {
+            width: min(1040px, 100%);
+            max-height: 92vh;
+            display: flex;
+            flex-direction: column;
+            background: var(--panel);
+            border: 1px solid var(--gold);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-bottom: 1px solid var(--border); }
+        .modal-header h2 { color: var(--gold); font-size: 18px; }
+        .close-btn { border: 0; color: var(--muted); background: transparent; font-size: 26px; }
+        .manager-tabs { display: flex; gap: 7px; padding: 11px 18px; overflow-x: auto; border-bottom: 1px solid var(--border); }
+        .manager-tab { white-space: nowrap; border: 1px solid var(--border); background: var(--input); color: var(--muted); border-radius: 999px; padding: 6px 10px; font-size: 12px; }
+        .manager-tab.active { color: #111; background: var(--gold); border-color: var(--gold); }
+        .modal-body { min-height: 0; display: grid; grid-template-columns: 1.05fr 1fr; gap: 18px; padding: 18px; overflow: hidden; }
+        .item-list { min-height: 360px; max-height: 60vh; overflow-y: auto; border-right: 1px solid var(--border); padding-right: 16px; }
+        .item-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 7px; border-bottom: 1px solid var(--border); }
+        .item-row:hover { background: rgba(255,255,255,.025); }
+        .item-row.dragging { opacity: .42; }
+        .item-row.drag-over { border-top: 2px solid var(--gold); }
+        .item-main { min-width: 0; display: flex; align-items: center; gap: 9px; }
+        .drag-handle { color: var(--muted); cursor: grab; font-size: 17px; }
+        .item-info { min-width: 0; }
+        .item-info strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .item-info span { color: var(--muted); font-size: 11px; }
+        .item-actions { display: flex; gap: 5px; }
+        .item-form { min-width: 0; overflow-y: auto; }
+        .item-form h3 { color: var(--gold); margin-bottom: 13px; }
+
+        .toast {
+            position: fixed;
+            bottom: 28px;
+            left: 50%;
+            z-index: 2000;
+            pointer-events: none;
+            opacity: 0;
+            transform: translate(-50%, 16px);
+            padding: 11px 18px;
+            color: var(--gold);
+            background: #171819;
+            border: 1px solid var(--gold);
+            border-radius: 8px;
+            font-weight: 700;
+            transition: .22s ease;
+        }
+        .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: #343638; border-radius: 8px; }
+
+        @media (max-width: 1040px) {
+            .toolbar { grid-template-columns: 1fr 1fr; }
+            .workspace { grid-template-columns: 1fr; }
+            .preview-panel { min-height: 520px; }
+        }
+        @media (max-width: 680px) {
+            .app-shell { padding: 10px; }
+            header { align-items: flex-start; }
+            .brand p { display: none; }
+            .toolbar { grid-template-columns: 1fr; }
+            .toolbar-actions { display: grid; grid-template-columns: 1fr 1fr; }
+            .reference-grid { grid-template-columns: 1fr; }
+            .modal-body { grid-template-columns: 1fr; overflow-y: auto; }
+            .item-list { max-height: 34vh; border-right: 0; border-bottom: 1px solid var(--border); padding: 0 0 12px; }
+        }
+    </style>
+</head>
+<body>
+<div class="app-shell">
+    <header>
+        <div class="brand">
+            <h1>Wako Eyewear AI Prompt Workspace</h1>
+            <p>Gemini 人像與眼鏡產品 Prompt 工作台 · 中文正式版</p>
+        </div>
+        <div class="status-wrap">
+            <span id="status">連線中…</span>
+            <button class="btn btn-small" type="button" onclick="reloadData()">重新載入資料</button>
+        </div>
+    </header>
+
+    <section class="toolbar" aria-label="工作台工具列">
+        <div class="toolbar-card segmented">
+            <button class="segment-btn active" type="button" onclick="setMode('model')" id="mode-model">人像模特</button>
+            <button class="segment-btn" type="button" onclick="setMode('product')" id="mode-product">產品靜物</button>
+        </div>
+
+        <div class="toolbar-card segmented" id="gender-toolbar">
+            <button class="segment-btn active" type="button" onclick="setGender('female')" id="btn-female">女模</button>
+            <button class="segment-btn" type="button" onclick="setGender('male')" id="btn-male">男模</button>
+        </div>
+
+        <div class="toolbar-card ratio-wrap">
+            <label for="select-ratio">圖片比例</label>
+            <select id="select-ratio" onchange="generatePrompt()">
+                <option value="4:5">4:5 · IG 貼文</option>
+                <option value="2:3">2:3 · 直式人像</option>
+                <option value="1:1">1:1 · 方形</option>
+                <option value="9:16">9:16 · 限動／Reels</option>
+                <option value="3:2">3:2 · 橫式相片</option>
+                <option value="16:9">16:9 · 寬螢幕</option>
+            </select>
+        </div>
+
+        <div class="toolbar-actions">
+            <button class="btn" type="button" onclick="openManager()">管理 Prompt</button>
+            <button class="btn btn-gold" type="button" onclick="copyPrompt()">複製完整 Prompt</button>
+        </div>
+    </section>
+
+    <main class="workspace">
+        <section class="panel controls-panel" aria-label="Prompt 設定">
+            <div id="section-model">
+                <div class="reference-card">
+                    <h2>參考圖分工</h2>
+                    <div class="reference-grid">
+                        <div class="reference-item">
+                            <strong>人物參考圖</strong>
+                            只用來鎖定人物身份、臉部與髮型
+                        </div>
+                        <div class="reference-item">
+                            <strong>眼鏡產品圖</strong>
+                            用來鎖定鏡框結構、比例、材質與顏色
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 外貌依目前性別自動套用，保留隱藏選單維持資料結構相容 -->
+                <select id="select-appearances" hidden></select>
+
+                <div class="form-group">
+                    <div class="form-label"><label for="select-outfits">1. 服裝</label><span>OUTFIT</span></div>
+                    <select id="select-outfits" onchange="generatePrompt()"></select>
+                    <div class="option-summary" id="summary-outfits"></div>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-label"><label for="select-scenes">2. 場景</label><span>SCENE</span></div>
+                    <select id="select-scenes" onchange="generatePrompt()"></select>
+                    <div class="option-summary" id="summary-scenes"></div>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-label"><label for="select-poses">3. 姿勢與取景</label><span>POSE & FRAMING</span></div>
+                    <select id="select-poses" onchange="generatePrompt()"></select>
+                    <div class="option-summary" id="summary-poses"></div>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-label"><label for="select-styles">4. 攝影風格</label><span>STYLE</span></div>
+                    <select id="select-styles" onchange="generatePrompt()"></select>
+                    <div class="option-summary" id="summary-styles"></div>
+                </div>
+
+                <details class="advanced">
+                    <summary>＋ 進階：補充眼鏡細節</summary>
+                    <div class="advanced-content">
+                        <p>只有參考圖難以辨識的型號文字、色號或特殊結構才需要填寫。</p>
+                        <textarea id="input-eyewear" oninput="generatePrompt()" placeholder="例如：鏡腳內側文字、色號、特殊鉸鏈結構……"></textarea>
+                    </div>
+                </details>
+            </div>
+
+            <div id="section-product" hidden>
+                <div class="form-group">
+                    <div class="form-label"><label for="select-product-layouts">產品佈局與材質</label><span>PRODUCT STILL LIFE</span></div>
+                    <select id="select-product-layouts" onchange="generatePrompt()"></select>
+                    <div class="option-summary" id="summary-product-layouts"></div>
+                </div>
+                <div class="product-hint">
+                    請在 Gemini 一併附上眼鏡產品實拍圖。此模式會依選定佈局建立純產品商業靜物照。
+                </div>
+            </div>
+
+            <div class="panel-footer">
+                <button class="btn" type="button" onclick="resetWorkspace()">重設目前選項</button>
+                <button class="btn btn-gold" type="button" onclick="copyPrompt()">複製完整 Prompt</button>
+            </div>
+        </section>
+
+        <section class="panel preview-panel" aria-label="Prompt 預覽">
+            <div class="preview-header">
+                <div>
+                    <h2>Prompt 分區預覽</h2>
+                    <p>每個模組獨立顯示，方便快速檢查組合內容</p>
+                </div>
+                <button class="btn btn-gold" type="button" onclick="copyPrompt()">複製全部</button>
+            </div>
+
+            <div id="previewSections"></div>
+
+            <details class="full-prompt">
+                <summary>查看完整純文字 Prompt</summary>
+                <textarea id="promptOutput" readonly placeholder="等待資料載入中……"></textarea>
+            </details>
+        </section>
+    </main>
+</div>
+
+<div class="modal-overlay" id="manageModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalTitle">管理 Prompt 資料</h2>
+            <button class="close-btn" type="button" onclick="closeModal()" aria-label="關閉">×</button>
+        </div>
+        <div class="manager-tabs" id="managerTabs"></div>
+        <div class="modal-body">
+            <div class="item-list" id="modalItemList"></div>
+            <div class="item-form">
+                <h3 id="formTitle">新增項目</h3>
+                <input type="hidden" id="edit-id">
+                <div class="form-group">
+                    <div class="form-label"><label for="edit-label">顯示名稱</label></div>
+                    <input type="text" id="edit-label" placeholder="輸入中文 Label">
+                </div>
+                <div class="form-group">
+                    <div class="form-label"><label for="edit-gender">適用性別</label></div>
+                    <select id="edit-gender">
+                        <option value="both">通用</option>
+                        <option value="female">限女性</option>
+                        <option value="male">限男性</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <div class="form-label"><label for="edit-prompt">英文 Prompt 內容</label></div>
+                    <textarea id="edit-prompt" style="min-height:190px" placeholder="輸入完整英文 Prompt 片段"></textarea>
+                </div>
+                <div style="display:flex; gap:8px">
+                    <button class="btn btn-gold" id="saveBtn" type="button" onclick="saveItem()">儲存至雲端</button>
+                    <button class="btn" type="button" onclick="resetForm()">取消／清空</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="toast" class="toast">Prompt 已複製</div>
+
+<script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+    const supabase = createClient(
+        "https://mdjnidbwqedzobjbhocd.supabase.co",
+        "sb_publishable_RoO2nFORoj-VzRqWt75wWQ_OnHAbl9Y"
+    );
+
+    const CATEGORY_META = {
+        APPEARANCES: "人物參考",
+        OUTFITS: "服裝",
+        SCENES: "場景",
+        POSES: "姿勢",
+        STYLES: "攝影風格",
+        PRODUCT_LAYOUTS: "產品佈局"
+    };
+
+    let currentMode = "model";
+    let currentGender = "female";
+    let currentManageCategory = "OUTFITS";
+    let DATA_MAP = { APPEARANCES: [], OUTFITS: [], SCENES: [], POSES: [], STYLES: [], PRODUCT_LAYOUTS: [] };
+    let draggedIndex = null;
+    let fullPromptText = "";
+    let currentPreviewSections = [];
+    const WORKSPACE_STATE_KEY = "wakoPromptWorkspaceStateV1";
+
+    window.showToast = function(message) {
+        const toast = document.getElementById("toast");
+        toast.textContent = message;
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 1900);
+    };
+
+    window.setMode = function(mode) {
+        currentMode = mode;
+        document.getElementById("mode-model").classList.toggle("active", mode === "model");
+        document.getElementById("mode-product").classList.toggle("active", mode === "product");
+        document.getElementById("section-model").hidden = mode !== "model";
+        document.getElementById("section-product").hidden = mode !== "product";
+        document.getElementById("gender-toolbar").style.visibility = mode === "model" ? "visible" : "hidden";
+        window.generatePrompt();
+    };
+
+    window.setGender = function(gender) {
+        currentGender = gender;
+        document.getElementById("btn-female").classList.toggle("active", gender === "female");
+        document.getElementById("btn-male").classList.toggle("active", gender === "male");
+        refreshAllSelects();
+        window.generatePrompt();
+    };
+
+    window.resetWorkspace = function() {
+        document.getElementById("select-ratio").value = "4:5";
+        document.getElementById("input-eyewear").value = "";
+        if (currentMode === "model") {
+            currentGender = "female";
+            document.getElementById("btn-female").classList.add("active");
+            document.getElementById("btn-male").classList.remove("active");
+            refreshAllSelects(false);
+            ["select-outfits", "select-scenes", "select-poses", "select-styles"].forEach(id => {
+                const el = document.getElementById(id);
+                if (el.options.length) el.selectedIndex = 0;
+            });
+        } else {
+            const el = document.getElementById("select-product-layouts");
+            if (el.options.length) el.selectedIndex = 0;
+        }
+        window.generatePrompt();
+    };
+
+    window.generatePrompt = function() {
+        const ratio = document.getElementById("select-ratio").value;
+        let sections = [];
+
+        if (currentMode === "model") {
+            const appearance = getAppearanceForGender();
+            const outfit = getSelectedItem("OUTFITS", "select-outfits");
+            const scene = getSelectedItem("SCENES", "select-scenes");
+            const pose = getSelectedItem("POSES", "select-poses");
+            const style = getSelectedItem("STYLES", "select-styles");
+            const eyewear = document.getElementById("input-eyewear").value.trim();
+
+            const referenceRules = `[CHARACTER REFERENCE — STRICT IDENTITY LOCK]
+Use the provided character reference images as the only source of the person's identity. Analyze all supplied three-view, multi-angle, and expression references together and reconstruct one consistent person. Preserve the exact facial identity, facial proportions, bone structure, hairstyle, hairline, ethnicity, skin tone, and natural skin character. Match the subject's apparent age exactly as shown in the reference images, but do not age the person up, harden the facial features, deepen expression lines, increase facial hollowness, or shift the person toward a more mature, tired, stern, or weathered appearance than the source images. Do not redesign, beautify, age-shift, or substitute the person. Character references define identity only; do not inherit clothing, background, lighting, or pose unless selected separately below.
+
+[EYEWEAR REFERENCE — FIXED PROTECTED ASSET]
+Treat the provided eyewear reference images as a fixed, protected visual asset and the only valid source of product truth, never as design inspiration. The generated person must wear this exact eyewear. Preserve the original front silhouette, overall proportions, perceived size, bridge, rim thickness, hinges, temples, nose pads, material, transparency, gloss, color, logo, printed details, and every visible feature. The eyewear may be positioned naturally on the face for realistic wear, but the product itself must not be redesigned, simplified, enlarged, beautified, or replaced with a similar pair.
+
+If a product detail is unclear in one reference image, resolve it only by cross-checking the other eyewear references. If it remains uncertain, preserve the visible product conservatively rather than inventing a new feature.
+
+[EYEWEAR ON-FACE SCALE]
+Keep the eyewear naturally fitted, moderate in size, and professionally proportioned to the face. The glasses must remain clearly visible without overpowering the face. The outer frame width should stay close to the subject's natural face width, and the lower rim should sit naturally. If actual product measurements are provided, treat them as hard constraints for on-face scale.`;
+
+            const composition = `Generate a photorealistic portrait in a ${ratio} aspect ratio.
+
+[CORE FRAMING]
+Keep the final image focused from the upper abdomen upward, primarily showing the face, eyewear, shoulders, arms, and upper-body gesture. Keep the hips, thighs, knees, and full lower body outside the frame. The face and eyewear must appear large enough for clear product inspection.
+
+Place the subject within a central 1:1 safe-crop zone so that a later crop from 4:5 to 1:1 still preserves the head, face, eyewear, shoulders, arms, and the key pose. Reserve at least about one-fifth of the full image height above the top of the hair as intentional environmental headroom. This upper area must continue the selected scene naturally — such as architecture, foliage, sky, interior depth, light, or texture — rather than becoming a featureless blank band. Keep clear visible separation between the top of the hair and the upper frame edge.
+
+Allow the subject to sit slightly lower in the frame when needed to protect this headroom, while keeping the face and eyewear large enough for clear product inspection and preserving the upper-abdomen-up composition. Do not enlarge or vertically shift the subject until the head crowds the top edge. Maintain clear physical distance between the subject and the main wall, furniture, curtains, or decorative objects whenever the scene allows it, so the background recedes naturally and creates visible spatial depth rather than a cramped room feeling.
+
+The selected pose controls the upper-body gesture, shoulder line, head angle, gaze, expression, and camera relationship. Seated, walking, or full-body implications are used only to establish posture and must not expand the camera crop beyond the upper-abdomen-up framing.
+
+[SCENE INTERPRETATION]
+Treat the selected scene as a direction for space, location, and atmosphere rather than a fixed prop inventory. Architectural lines, spatial layout, furniture choice, background details, and secondary objects may vary naturally from generation to generation while preserving the selected scene's visual identity. The background supports the person and eyewear with clear depth and hierarchy rather than competing with them.`;
+
+            const realism = `Skin should look natural, realistic, healthy, clean, fresh, and flattering. Preserve believable skin depth, fine natural texture, subtle tonal variation, and realistic light response while keeping the complexion lively, even, and well-rested. Do not deliberately intensify pores, blemishes, under-eye darkness, beard shadow, roughness, dullness, facial hollowness, deep lines, fatigue, or other aging cues. Keep real skin structure without beauty-filter smoothing, waxy skin, or a plastic appearance, but also avoid gritty, harsh, tired, or prematurely aged rendering.
+
+The selected photographic style may change color, contrast, grain, exposure, highlights, and overall rendering character, but it must not alter the subject's identity, facial structure, apparent age, or authentic skin character. Eyewear and scene materials must retain physically believable structure, scale, surface response, and reflections.`;
+
+            sections = [
+                { title: "Reference Rules", text: referenceRules },
+                { title: "Composition and Scene Rules", text: composition },
+                { title: "Realism Standards", text: realism },
+                { title: "Character Identity", text: appearance?.prompt_text || "" },
+                { title: "Outfit", text: outfit?.prompt_text || "" },
+                { title: "Scene and Background", text: scene?.prompt_text || "" },
+                { title: "Pose and Camera Angle", text: pose?.prompt_text || "" },
+                { title: "Photographic Style", text: style?.prompt_text || "" }
+            ];
+
+            if (eyewear) sections.splice(3, 0, { title: "Additional Eyewear Details", text: eyewear });
+            sections.push({
+                title: "Output Requirements",
+                text: `Output the highest-quality photorealistic final image the system can produce. Priority order: eyewear detail and visibility > character identity and pose > scene. Preserve the specified person, the exact eyewear product, upper-abdomen-up framing, the protected environmental headroom of at least about one-fifth of the frame height, and the central 1:1 safe crop. The head must remain visibly separated from the upper frame edge, with the headroom filled by a natural continuation of the selected scene rather than empty blank space. Keep skin, body structure, eyewear placement, material reflections, and scene lighting physically believable. Output ratio: ${ratio}.`
+            });
+        } else {
+            const layout = getSelectedItem("PRODUCT_LAYOUTS", "select-product-layouts");
+            sections = [
+                { title: "Still Life Background Mode", text: layout?.prompt_text || "" },
+                { title: "Output Requirements", text: `Output the highest-quality professional commercial still-life image the system can produce. Output ratio: ${ratio}.` }
+            ];
+        }
+
+        currentPreviewSections = sections;
+        fullPromptText = sections.map(section => `[${section.title}]\n${section.text}`).join("\n\n");
+        document.getElementById("promptOutput").value = fullPromptText;
+        renderPreviewSections();
+        updateSelectionSummaries();
+        saveWorkspaceState();
+    };
+
+    function renderPreviewSections() {
+        const container = document.getElementById("previewSections");
+        container.replaceChildren();
+
+        currentPreviewSections.forEach((section, index) => {
+            const card = document.createElement("article");
+            card.className = "preview-card";
+
+            const head = document.createElement("div");
+            head.className = "preview-card-head";
+            const title = document.createElement("h3");
+            title.textContent = section.title;
+            const copyButton = document.createElement("button");
+            copyButton.type = "button";
+            copyButton.className = "btn btn-small";
+            copyButton.textContent = "複製此區";
+            copyButton.addEventListener("click", () => copyText(`[${section.title}]\n${section.text}`, "此區段已複製"));
+            head.append(title, copyButton);
+
+            const pre = document.createElement("pre");
+            pre.textContent = section.text;
+            card.append(head, pre);
+            container.appendChild(card);
+        });
+    }
+
+    async function copyText(text, successMessage) {
+        try {
+            await navigator.clipboard.writeText(text);
+        } catch {
+            const helper = document.createElement("textarea");
+            helper.value = text;
+            helper.style.position = "fixed";
+            helper.style.opacity = "0";
+            document.body.appendChild(helper);
+            helper.select();
+            document.execCommand("copy");
+            helper.remove();
+        }
+        window.showToast(successMessage);
+    }
+
+    window.copyPrompt = function() {
+        if (!fullPromptText) return;
+        copyText(fullPromptText, "完整 Prompt 已複製");
+    };
+
+    window.openManager = function() {
+        const preferred = currentMode === "product" ? "PRODUCT_LAYOUTS" : "OUTFITS";
+        document.getElementById("manageModal").style.display = "flex";
+        switchManageCategory(preferred);
+    };
+
+    window.openModal = function(categoryKey) {
+        document.getElementById("manageModal").style.display = "flex";
+        switchManageCategory(categoryKey);
+    };
+
+    window.closeModal = function() {
+        document.getElementById("manageModal").style.display = "none";
+    };
+
+    function renderManagerTabs() {
+        const tabs = document.getElementById("managerTabs");
+        tabs.replaceChildren();
+        Object.entries(CATEGORY_META).forEach(([key, label]) => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "manager-tab";
+            button.dataset.category = key;
+            button.textContent = label;
+            button.addEventListener("click", () => switchManageCategory(key));
+            tabs.appendChild(button);
+        });
+    }
+
+    function switchManageCategory(categoryKey) {
+        currentManageCategory = categoryKey;
+        document.getElementById("modalTitle").textContent = `管理 Prompt：${CATEGORY_META[categoryKey]}`;
+        document.querySelectorAll(".manager-tab").forEach(tab => {
+            tab.classList.toggle("active", tab.dataset.category === categoryKey);
+        });
+        window.resetForm();
+        renderModalList();
+    }
+
+    window.resetForm = function() {
+        document.getElementById("formTitle").textContent = "新增項目";
+        document.getElementById("edit-id").value = "";
+        document.getElementById("edit-label").value = "";
+        document.getElementById("edit-gender").value = "both";
+        document.getElementById("edit-prompt").value = "";
+    };
+
+    window.editItem = function(id) {
+        const item = (DATA_MAP[currentManageCategory] || []).find(row => row.id === id);
+        if (!item) return;
+        document.getElementById("formTitle").textContent = "編輯項目";
+        document.getElementById("edit-id").value = item.id;
+        document.getElementById("edit-label").value = item.label;
+        document.getElementById("edit-gender").value = item.gender;
+        document.getElementById("edit-prompt").value = item.prompt_text;
+    };
+
+    window.saveItem = async function() {
+        const id = document.getElementById("edit-id").value;
+        const label = document.getElementById("edit-label").value.trim();
+        const gender = document.getElementById("edit-gender").value;
+        const prompt_text = document.getElementById("edit-prompt").value.trim();
+        if (!label || !prompt_text) return alert("請填寫顯示名稱與 Prompt 內容");
+
+        const button = document.getElementById("saveBtn");
+        button.disabled = true;
+        button.textContent = "儲存中…";
+        try {
+            if (id) {
+                const { error } = await supabase.from("wako_prompts").update({ label, gender, prompt_text }).eq("id", id);
+                if (error) throw error;
+                window.showToast("雲端修改成功");
+            } else {
+                const current = DATA_MAP[currentManageCategory] || [];
+                const maxSort = current.length ? Math.max(...current.map(item => item.sort_order ?? 0)) : -1;
+                const { error } = await supabase.from("wako_prompts").insert([{
+                    category: currentManageCategory,
+                    label,
+                    gender,
+                    prompt_text,
+                    sort_order: maxSort + 1
+                }]);
+                if (error) throw error;
+                window.showToast("雲端新增成功");
+            }
+            await loadData();
+            window.resetForm();
+            renderModalList();
+        } catch (error) {
+            alert(`儲存失敗：${error.message}`);
+        } finally {
+            button.disabled = false;
+            button.textContent = "儲存至雲端";
+        }
+    };
+
+    window.deleteItem = async function(id) {
+        if (!confirm("確定要刪除此項目嗎？")) return;
+        try {
+            const { error } = await supabase.from("wako_prompts").delete().eq("id", id);
+            if (error) throw error;
+            window.showToast("項目已刪除");
+            await loadData();
+            renderModalList();
+        } catch (error) {
+            alert(`刪除失敗：${error.message}`);
+        }
+    };
+
+    function captureWorkspaceState() {
+        return {
+            mode: currentMode,
+            gender: currentGender,
+            ratio: document.getElementById("select-ratio")?.value || "4:5",
+            eyewear: document.getElementById("input-eyewear")?.value || "",
+            selections: {
+                appearances: document.getElementById("select-appearances")?.value || "",
+                outfits: document.getElementById("select-outfits")?.value || "",
+                scenes: document.getElementById("select-scenes")?.value || "",
+                poses: document.getElementById("select-poses")?.value || "",
+                styles: document.getElementById("select-styles")?.value || "",
+                productLayouts: document.getElementById("select-product-layouts")?.value || ""
+            }
+        };
+    }
+
+    function saveWorkspaceState(state = captureWorkspaceState()) {
+        try {
+            sessionStorage.setItem(WORKSPACE_STATE_KEY, JSON.stringify(state));
+        } catch (error) {
+            console.warn("工作台狀態暫存失敗", error);
+        }
+    }
+
+    function readWorkspaceState() {
+        try {
+            const raw = sessionStorage.getItem(WORKSPACE_STATE_KEY);
+            return raw ? JSON.parse(raw) : null;
+        } catch (error) {
+            console.warn("工作台狀態讀取失敗", error);
+            return null;
+        }
+    }
+
+    function setSelectValueIfAvailable(selectId, value) {
+        if (!value) return;
+        const select = document.getElementById(selectId);
+        if (!select) return;
+        if ([...select.options].some(option => option.value === value)) select.value = value;
+    }
+
+    function restoreWorkspaceState(state) {
+        if (!state || typeof state !== "object") {
+            refreshAllSelects();
+            return;
+        }
+
+        currentMode = state.mode === "product" ? "product" : "model";
+        currentGender = state.gender === "male" ? "male" : "female";
+
+        document.getElementById("mode-model").classList.toggle("active", currentMode === "model");
+        document.getElementById("mode-product").classList.toggle("active", currentMode === "product");
+        document.getElementById("section-model").hidden = currentMode !== "model";
+        document.getElementById("section-product").hidden = currentMode !== "product";
+        document.getElementById("gender-toolbar").style.visibility = currentMode === "model" ? "visible" : "hidden";
+        document.getElementById("btn-female").classList.toggle("active", currentGender === "female");
+        document.getElementById("btn-male").classList.toggle("active", currentGender === "male");
+
+        const ratio = document.getElementById("select-ratio");
+        if (state.ratio && [...ratio.options].some(option => option.value === state.ratio)) ratio.value = state.ratio;
+        document.getElementById("input-eyewear").value = typeof state.eyewear === "string" ? state.eyewear : "";
+
+        refreshAllSelects(false);
+        const selections = state.selections || {};
+        setSelectValueIfAvailable("select-appearances", selections.appearances);
+        setSelectValueIfAvailable("select-outfits", selections.outfits);
+        setSelectValueIfAvailable("select-scenes", selections.scenes);
+        setSelectValueIfAvailable("select-poses", selections.poses);
+        setSelectValueIfAvailable("select-styles", selections.styles);
+        setSelectValueIfAvailable("select-product-layouts", selections.productLayouts);
+    }
+
+    window.reloadData = async function() {
+        const state = captureWorkspaceState();
+        saveWorkspaceState(state);
+        await loadData({ state, notifyReload: true });
+    };
+
+    async function loadData({ state = null, notifyReload = false } = {}) {
+        const workspaceState = state || readWorkspaceState();
+        setStatus("載入資料中…", "var(--muted)");
+        const { data, error } = await supabase.from("wako_prompts").select("*");
+        if (error) {
+            console.error(error);
+            setStatus("連線失敗", "var(--danger)");
+            window.showToast("Supabase 連線失敗");
+            return;
+        }
+
+        data.sort((a, b) => {
+            const orderA = a.sort_order ?? 9999;
+            const orderB = b.sort_order ?? 9999;
+            if (orderA !== orderB) return orderA - orderB;
+            return new Date(a.created_at) - new Date(b.created_at);
+        });
+
+        DATA_MAP = { APPEARANCES: [], OUTFITS: [], SCENES: [], POSES: [], STYLES: [], PRODUCT_LAYOUTS: [] };
+        data.forEach(item => {
+            if (DATA_MAP[item.category]) DATA_MAP[item.category].push(item);
+        });
+
+        setStatus("雲端同步完成", "var(--success)");
+        restoreWorkspaceState(workspaceState);
+        window.generatePrompt();
+        if (notifyReload) window.showToast("資料已重新載入，工作台設定已保留");
+    }
+
+    function setStatus(text, color) {
+        const status = document.getElementById("status");
+        status.textContent = text;
+        status.style.color = color;
+    }
+
+    function refreshAllSelects(preserveSelection = true) {
+        populateSelect("select-appearances", DATA_MAP.APPEARANCES, true, preserveSelection);
+        populateSelect("select-outfits", DATA_MAP.OUTFITS, true, preserveSelection);
+        populateSelect("select-scenes", DATA_MAP.SCENES, false, preserveSelection);
+        populateSelect("select-poses", DATA_MAP.POSES, false, preserveSelection);
+        populateSelect("select-styles", DATA_MAP.STYLES, false, preserveSelection);
+        populateSelect("select-product-layouts", DATA_MAP.PRODUCT_LAYOUTS, false, preserveSelection);
+    }
+
+    function populateSelect(selectId, dataArray, filterGender, preserveSelection) {
+        const select = document.getElementById(selectId);
+        if (!select) return;
+        const previous = preserveSelection ? select.value : "";
+        const filtered = filterGender
+            ? (dataArray || []).filter(item => item.gender === "both" || item.gender === currentGender)
+            : (dataArray || []);
+
+        select.replaceChildren();
+        if (!filtered.length) {
+            const option = document.createElement("option");
+            option.value = "";
+            option.textContent = "（無適用選項）";
+            select.appendChild(option);
+            return;
+        }
+
+        filtered.forEach(item => {
+            const option = document.createElement("option");
+            option.value = item.id;
+            option.textContent = item.label;
+            select.appendChild(option);
+        });
+        select.value = filtered.some(item => item.id === previous) ? previous : filtered[0].id;
+    }
+
+    function getAppearanceForGender() {
+        return DATA_MAP.APPEARANCES.find(item => item.gender === currentGender)
+            || DATA_MAP.APPEARANCES.find(item => item.gender === "both")
+            || null;
+    }
+
+    function getSelectedItem(category, selectId) {
+        const id = document.getElementById(selectId)?.value;
+        return (DATA_MAP[category] || []).find(item => item.id === id) || null;
+    }
+
+    function updateSelectionSummaries() {
+        const map = [
+            ["OUTFITS", "select-outfits", "summary-outfits"],
+            ["SCENES", "select-scenes", "summary-scenes"],
+            ["POSES", "select-poses", "summary-poses"],
+            ["STYLES", "select-styles", "summary-styles"],
+            ["PRODUCT_LAYOUTS", "select-product-layouts", "summary-product-layouts"]
+        ];
+        map.forEach(([category, selectId, summaryId]) => {
+            const summary = document.getElementById(summaryId);
+            if (!summary) return;
+            const item = getSelectedItem(category, selectId);
+            summary.textContent = item?.prompt_text || "尚無內容";
+            summary.title = item?.prompt_text || "";
+        });
+    }
+
+    function renderModalList() {
+        const container = document.getElementById("modalItemList");
+        container.replaceChildren();
+        const rows = DATA_MAP[currentManageCategory] || [];
+
+        rows.forEach((item, index) => {
+            const row = document.createElement("div");
+            row.className = "item-row";
+            row.draggable = true;
+            row.dataset.index = String(index);
+            row.addEventListener("dragstart", handleDragStart);
+            row.addEventListener("dragover", handleDragOver);
+            row.addEventListener("dragleave", handleDragLeave);
+            row.addEventListener("drop", handleDrop);
+            row.addEventListener("dragend", handleDragEnd);
+
+            const main = document.createElement("div");
+            main.className = "item-main";
+            const handle = document.createElement("span");
+            handle.className = "drag-handle";
+            handle.textContent = "☰";
+            const info = document.createElement("div");
+            info.className = "item-info";
+            const strong = document.createElement("strong");
+            strong.textContent = item.label;
+            const meta = document.createElement("span");
+            meta.textContent = item.gender === "both" ? "通用" : item.gender === "female" ? "女性" : "男性";
+            info.append(strong, meta);
+            main.append(handle, info);
+
+            const actions = document.createElement("div");
+            actions.className = "item-actions";
+            const edit = document.createElement("button");
+            edit.type = "button";
+            edit.className = "btn btn-small";
+            edit.textContent = "編輯";
+            edit.addEventListener("click", () => window.editItem(item.id));
+            const remove = document.createElement("button");
+            remove.type = "button";
+            remove.className = "btn btn-small btn-danger";
+            remove.textContent = "刪除";
+            remove.addEventListener("click", () => window.deleteItem(item.id));
+            actions.append(edit, remove);
+            row.append(main, actions);
+            container.appendChild(row);
+        });
+    }
+
+    function handleDragStart(event) {
+        draggedIndex = Number(this.dataset.index);
+        event.dataTransfer.effectAllowed = "move";
+        this.classList.add("dragging");
+    }
+    function handleDragOver(event) {
+        event.preventDefault();
+        this.classList.add("drag-over");
+    }
+    function handleDragLeave() { this.classList.remove("drag-over"); }
+    async function handleDrop(event) {
+        event.preventDefault();
+        this.classList.remove("drag-over");
+        const targetIndex = Number(this.dataset.index);
+        if (draggedIndex === null || draggedIndex === targetIndex) return;
+
+        const rows = DATA_MAP[currentManageCategory];
+        const [moved] = rows.splice(draggedIndex, 1);
+        rows.splice(targetIndex, 0, moved);
+        rows.forEach((item, index) => item.sort_order = index);
+        renderModalList();
+        refreshAllSelects();
+        window.generatePrompt();
+
+        const updates = rows.map(item => ({
+            id: item.id,
+            category: item.category,
+            label: item.label,
+            gender: item.gender,
+            prompt_text: item.prompt_text,
+            sort_order: item.sort_order
+        }));
+        const { error } = await supabase.from("wako_prompts").upsert(updates, { onConflict: "id" });
+        if (error) {
+            alert(`排序儲存失敗：${error.message}`);
+            await loadData();
+        } else {
+            window.showToast("排序已儲存");
+        }
+    }
+    function handleDragEnd() {
+        this.classList.remove("dragging");
+        document.querySelectorAll(".item-row").forEach(row => row.classList.remove("drag-over"));
+        draggedIndex = null;
+    }
+
+    document.getElementById("manageModal").addEventListener("click", event => {
+        if (event.target.id === "manageModal") window.closeModal();
+    });
+    document.addEventListener("keydown", event => {
+        if (event.key === "Escape") window.closeModal();
+    });
+
+    renderManagerTabs();
+    loadData();
+</script>
+</body>
+</html>
