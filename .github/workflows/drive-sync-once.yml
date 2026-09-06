@@ -1,0 +1,42 @@
+name: Drive HTML sync once
+
+on:
+  push:
+    paths:
+      - '.drive-sync/READY'
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Rebuild formal HTML files from Drive package
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .drive-sync/part-* | base64 -d > /tmp/drive-html-sync.tar.xz
+          mkdir -p /tmp/drive-html-sync
+          tar -xJf /tmp/drive-html-sync.tar.xz -C /tmp/drive-html-sync
+          cd /tmp/drive-html-sync
+          cat > /tmp/expected.sha256 <<'EOF'
+          3eba4458911ebcde78770c94d74c2dbbae5f65ed8cdc1a0d77164ff757623eb7  wakodohub.html
+          dc966dda53a512c006e579ca2bfda45b583f482d320c3a6ca769c79cf65a0c8d  index.html
+          5b5d09a790286e21b8bc22e14144d60e2c110a69d2bb05fe20b1ee882c457a98  performance.html
+          3999715141ff8da35644be2f5dcd27efd061bd2d0391d38df147ae3a3701ac70  marketing.html
+          6fb48fc89cf547e10977eb13ff6a732c5a298ccef55538d4e5c7972372a7df1c  social-analytics.html
+          EOF
+          sha256sum -c /tmp/expected.sha256
+          cp wakodohub.html index.html performance.html marketing.html social-analytics.html "$GITHUB_WORKSPACE/"
+          cd "$GITHUB_WORKSPACE"
+          git config user.name "Wakodo HTML Sync"
+          git config user.email "service@hgteyes.com.tw"
+          git add wakodohub.html index.html performance.html marketing.html social-analytics.html
+          git rm -r .drive-sync
+          git rm .github/workflows/drive-sync-once.yml
+          git commit -m "Deploy Drive formal HTML versions"
+          git push
