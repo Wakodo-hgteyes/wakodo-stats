@@ -240,19 +240,6 @@
     </div>
   </div>
 
-  <div id="adminLoginModal" class="modal">
-    <div class="modal-card" style="max-width:390px">
-      <div class="modal-title">管理員登入</div>
-      <div class="modal-desc">登入後可確認、覆寫或移除每週正式業績</div>
-      <div class="field"><label>Email</label><input type="email" id="admEmail" class="input" /></div>
-      <div class="field"><label>Password</label><input type="password" id="admPwd" class="input" /></div>
-      <div class="modal-actions">
-        <button id="btnCloseAdminLogin" class="btn">取消</button>
-        <button id="btnAdminLogin" class="btn btn-primary">登入</button>
-      </div>
-    </div>
-  </div>
-
   <header class="topbar">
     <div class="shell topbar-inner">
       <div class="brand">
@@ -261,9 +248,7 @@
       </div>
       <div class="nav-actions">
         <button class="btn" onclick="window.location.href='index.html'"><i class="fas fa-arrow-left"></i><span>客源分析</span></button>
-        <button id="btnLogin" class="btn"><i class="fas fa-user-shield"></i><span>管理員登入</span></button>
-        <button id="btnLogout" class="btn hidden"><i class="fas fa-sign-out-alt"></i><span>登出</span></button>
-        <span id="adminStatus" class="admin-chip hidden">✓ 管理模式</span>
+        <span id="adminStatus" class="admin-chip hidden">✓ Hub Owner 管理模式</span>
       </div>
     </div>
   </header>
@@ -420,8 +405,7 @@
     const $ = (id) => document.getElementById(id);
     const dom = {
       loader:$('pageLoader'), loaderText:$('loaderText'), lock:$('lockScreen'), pass:$('accessPassword'), enter:$('btnEnter'),
-      loginModal:$('adminLoginModal'), login:$('btnLogin'), logout:$('btnLogout'), adminStatus:$('adminStatus'),
-      admEmail:$('admEmail'), admPwd:$('admPwd'), btnAdminLogin:$('btnAdminLogin'), btnCloseAdminLogin:$('btnCloseAdminLogin'),
+      adminStatus:$('adminStatus'),
       dataStatus:$('dataStatus'), recentList:$('recentList'), historyList:$('historyList'), bars:$('fourWeekBars'),
       entryModal:$('entryModal'), form:$('performanceForm'), editId:$('editId'), inputDate:$('inputDate'), baseline:$('autoBaseline'),
       lNew:$('inputLinanNew'), lRet:$('inputLinanReturning'), nNew:$('inputNankeNew'), nRet:$('inputNankeReturning'), note:$('inputNote'),
@@ -700,13 +684,22 @@
     }
 
     function updateAdminUI(){
-      dom.login.classList.toggle('hidden',ST.isAdmin); dom.logout.classList.toggle('hidden',!ST.isAdmin); dom.adminStatus.classList.toggle('hidden',!ST.isAdmin); dom.btnAdd.classList.toggle('hidden',!ST.isAdmin); $('heroActions').classList.toggle('hidden',!ST.isAdmin||!ST.summaryWeeks.length);
+      dom.adminStatus.classList.toggle('hidden',!ST.isAdmin); dom.btnAdd.classList.toggle('hidden',!ST.isAdmin); $('heroActions').classList.toggle('hidden',!ST.isAdmin||!ST.summaryWeeks.length);
       renderRecent(); renderHistory();
     }
 
-    async function checkAdminSession(){ const {data:{session}}=await supabase.auth.getSession(); ST.isAdmin=!!session; updateAdminUI(); }
-    async function loginSupabase(){ const email=dom.admEmail.value.trim(),password=dom.admPwd.value.trim(); if(!email||!password)return; const {error}=await supabase.auth.signInWithPassword({email,password}); if(error){Swal.fire({icon:'error',title:'登入失敗',text:error.message});return;} dom.loginModal.classList.remove('show'); await checkAdminSession(); Swal.fire({icon:'success',title:'管理員登入成功',timer:900,showConfirmButton:false}); }
-    async function logoutSupabase(){ await supabase.auth.signOut(); await checkAdminSession(); }
+    async function checkAdminSession(){
+      ST.isAdmin=false;
+      try{
+        const {data:{user}}=await supabase.auth.getUser();
+        if(user){
+          const {data:member,error}=await supabase.from('hub_members').select('role,status').eq('user_id',user.id).maybeSingle();
+          ST.isAdmin=!error && member?.status==='active' && member?.role==='owner';
+        }
+      }catch(err){ console.warn('Hub Owner 權限確認失敗',err); }
+      updateAdminUI();
+      return ST.isAdmin;
+    }
 
     function autoForWeek(startIso){ return ST.autoWeekMap.get(startIso)||{week_start_date:startIso,week_end_date:toISO(addDays(parseISO(startIso),6)),linan_new:0,linan_returning:0,nanke_new:0,nanke_returning:0,linan_amount:0,nanke_amount:0,linan_visits:0,nanke_visits:0}; }
     function updateBaseline(startIso){ const a=autoForWeek(startIso); dom.baseline.innerHTML=`<b>客源表單自動底稿</b><br>臨安：新客 ${fmtTwd(a.linan_new)}／舊客 ${fmtTwd(a.linan_returning)}，南科：新客 ${fmtTwd(a.nanke_new)}／舊客 ${fmtTwd(a.nanke_returning)}<br>來客數：臨安 ${a.linan_visits||0}／南科 ${a.nanke_visits||0} 人。`; return a; }
@@ -742,8 +735,6 @@
     async function initApp(){ setLoading(true,'正在連線業績資料…'); await checkAdminSession(); await refreshData(); }
 
     dom.enter.addEventListener('click',unlock); dom.pass.addEventListener('keydown',e=>{if(e.key==='Enter')unlock();});
-    dom.login.addEventListener('click',()=>dom.loginModal.classList.add('show')); dom.btnCloseAdminLogin.addEventListener('click',()=>dom.loginModal.classList.remove('show')); dom.loginModal.addEventListener('click',e=>{if(e.target===dom.loginModal)dom.loginModal.classList.remove('show');});
-    dom.btnAdminLogin.addEventListener('click',loginSupabase); dom.admPwd.addEventListener('keydown',e=>{if(e.key==='Enter')loginSupabase();}); dom.logout.addEventListener('click',logoutSupabase);
     dom.btnAdd.addEventListener('click',()=>openModal(null)); dom.btnCloseEntry.addEventListener('click',closeModal); dom.entryModal.addEventListener('click',e=>{if(e.target===dom.entryModal)closeModal();}); dom.btnDelete.addEventListener('click',handleDelete); dom.form.addEventListener('submit',handleSubmit);
     [dom.lNew,dom.lRet,dom.nNew,dom.nRet].forEach(el=>el.addEventListener('input',updateModalTotals));
     dom.inputDate.addEventListener('change',()=>{const r=showWeekRange(dom.inputDate.value);const start=toISO(r.start);const existing=ST.manualWeekMap.get(start)||null;dom.editId.value=existing?.id||'';dom.btnDelete.classList.toggle('hidden',!existing);const auto=updateBaseline(start);const base=existing||auto;fillInputs(base);ST.editSnapshot={start,linan_new:Number(base.linan_new||0),linan_returning:Number(base.linan_returning||0),nanke_new:Number(base.nanke_new||0),nanke_returning:Number(base.nanke_returning||0)};dom.note.value=existing?.note||'';$('modalTitle').textContent=existing?'編輯手動覆寫':'確認／調整週業績';});
@@ -752,6 +743,8 @@
     $('rangeSeg').querySelectorAll('button').forEach(btn=>btn.addEventListener('click',()=>{ST.chartRange=btn.dataset.range;$('rangeSeg').querySelectorAll('button').forEach(b=>b.classList.toggle('active',b===btn));renderChart();}));
     ['toggleLinanSales','toggleNankeSales','toggleVisits'].forEach(id=>$(id).addEventListener('change',renderChart));
     window.addEventListener('resize',()=>requestAnimationFrame(updateRecentScrollState));
+
+    window.addEventListener('message',e=>{if(e.origin===location.origin&&e.data?.type==='wakodo-hub-auth-refresh')checkAdminSession();});
 
     showAppOrLock();
   </script>

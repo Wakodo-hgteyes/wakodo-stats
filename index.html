@@ -450,22 +450,15 @@
           </div>
         </div>
         <div style="display:flex;gap:12px;align-items:center;">
-          <button class="icon-btn" onclick="toggleAdminPanel()" style="background: #fff; border: 1px solid rgba(0,0,0,0.1); box-shadow: 0 2px 8px rgba(0,0,0,0.05);">⚙️</button>
-          <button id="logoutBtn" class="btn-danger-ghost hidden" onclick="logout()">🚪 登出管理</button>
+          <button id="adminToolsBtn" class="icon-btn hidden" onclick="toggleAdminPanel()" title="Hub Owner 管理工具" style="background: #fff; border: 1px solid rgba(0,0,0,0.1); box-shadow: 0 2px 8px rgba(0,0,0,0.05);">⚙️</button>
           <button class="btn btn-primary" onclick="location.href='form.html'" style="padding: 10px 20px; font-size: 15px;">+ 新增資料</button>
         </div>
       </div>
 
       <!-- 管理面板 -->
       <div id="adminPanel" class="admin-panel hidden" style="position: relative; z-index: 50;">
-        <div id="loginForm" style="display:flex;gap:10px;flex-wrap:wrap;">
-          <input id="admEmail" type="text" class="admin-input" placeholder="管理員信箱或帳號">
-          <input id="admPwd" type="password" class="admin-input" placeholder="密碼" onkeyup="if(event.key==='Enter')loginSupabase()">
-          <button onclick="loginSupabase()" class="admin-btn" style="background:var(--primary);">登入</button>
-        </div>
-        <div id="adminActions" class="admin-actions hidden">
-          <span id="adminRoleLabel" style="color:#81c995;font-weight:800;font-size:15px;">✓ 管理員模式</span>
-          <button id="btnManageAccounts" onclick="openAccountModal()" class="admin-btn hidden" style="background:#1a877a;">👥 帳號管理</button>
+        <div id="adminActions" class="admin-actions">
+          <span id="adminRoleLabel" style="color:#81c995;font-weight:800;font-size:15px;">✓ Hub Owner 管理模式</span>
           <button onclick="openExportModal()" class="admin-btn" style="background:var(--primary);">⬇ 進階匯出</button>
           <label class="admin-btn" style="background:#5f6368; cursor:pointer;">
             📂 匯入 CSV
@@ -1089,19 +1082,45 @@
     setTimeout(() => inp.focus(), 0);
   }
 
-  window.toggleAdminPanel = () => $("adminPanel").classList.toggle("hidden");
+  window.toggleAdminPanel = () => {
+    if (!ST.isAdmin) return;
+    $("adminPanel").classList.toggle("hidden");
+  };
+
+  function disableAdminUI(){
+    ST.isAdmin = false;
+    ST.adminRole = null;
+    $("adminPanel").classList.add("hidden");
+    $("adminToolsBtn") && $("adminToolsBtn").classList.add("hidden");
+    $("detailActions") && $("detailActions").classList.add("hidden");
+    $("requestEditSection") && $("requestEditSection").classList.add("hidden");
+    applyFilter();
+  }
 
   function enableAdminUI(){
     ST.isAdmin = true;
-    $("adminPanel").classList.remove("hidden");
-    $("loginForm").classList.add("hidden");
-    $("adminActions").classList.remove("hidden");
-    $("logoutBtn").classList.remove("hidden");
-    const isMain = ST.adminRole === "main";
-    $("adminRoleLabel").innerText = isMain ? "✓ 主管理員模式" : "✓ 次級管理員模式";
-    $("btnManageAccounts").classList.toggle("hidden", !isMain);
-    $("btnWipeData").classList.toggle("hidden", !isMain);
+    ST.adminRole = "main";
+    $("adminToolsBtn") && $("adminToolsBtn").classList.remove("hidden");
+    $("adminRoleLabel").innerText = "✓ Hub Owner 管理模式";
+    $("btnWipeData").classList.remove("hidden");
     applyFilter();
+  }
+
+  async function syncHubAdminAccess(){
+    try {
+      const { data:{ user } } = await window.supabase.auth.getUser();
+      if (!user) { disableAdminUI(); return false; }
+      const { data: member, error } = await window.supabase.from("hub_members")
+        .select("role,status")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (!error && member?.status === "active" && member?.role === "owner") {
+        enableAdminUI();
+        return true;
+      }
+    } catch (err) { console.warn("Hub Owner 權限確認失敗", err); }
+    disableAdminUI();
+    return false;
   }
 
   function maskName(name){
@@ -2229,7 +2248,7 @@
     const svcGrp = $("segEditService"); if (svcGrp) { const btns=qa(".ios-seg-btn",svcGrp); btns.forEach(b=>b.classList.remove("selected")); btns[0]&&btns[0].classList.add("selected"); ST.editSeg.service=false; updateIosPill(svcGrp); }
   }
 
-  window.openAddModal = () => { if (!ST.editingId) initAddModal(); $("addModal").classList.add("show"); };
+  window.openAddModal = () => { if (!ST.isAdmin) return; if (!ST.editingId) initAddModal(); $("addModal").classList.add("show"); };
   window.closeAddModal = () => { $("addModal").classList.remove("show"); };
 
   window.selectRadio = (groupId, val, el) => {
@@ -2277,6 +2296,7 @@
   }
 
   window.startEditCurrent = () => {
+    if (!ST.isAdmin) return;
     const v = ST.raw.find(x => String(x.id) === String(ST.currentDetailId)); if (!v) return;
     closeDetail(); initAddModal(); ST.editingId = v.id;
     $("mDate").value = s(v.form_date).slice(0,10); $("mStore").value = v.store_branch || "臨安店";
@@ -2429,8 +2449,8 @@ ${v.search_keywords ? `
 
     const isAdmin = ST.isAdmin;
     $("detailActions").classList.toggle("hidden", !isAdmin);
-    $("requestEditSection").classList.toggle("hidden", isAdmin);
-    $("btnDeleteDetail").classList.toggle("hidden", ST.adminRole !== "main");
+    $("requestEditSection").classList.add("hidden");
+    $("btnDeleteDetail").classList.toggle("hidden", !isAdmin);
     $("detailModal").classList.add("show");
   };
   window.closeDetail = () => $("detailModal").classList.remove("show");
@@ -2448,6 +2468,7 @@ ${v.search_keywords ? `
   window.openRequestEdit = () => { $("reqEditReason").value = ""; $("requestEditModal").classList.add("show"); };
   window.closeRequestEdit = () => $("requestEditModal").classList.remove("show");
   window.submitRequestEdit = async () => {
+    if (!ST.isAdmin) return;
     const reason = s($("reqEditReason").value).trim();
     if (!reason){ alert("請描述要修改的內容"); return; }
     try {
@@ -2460,24 +2481,8 @@ ${v.search_keywords ? `
     } catch (err){ alert("送出失敗：" + (err.message || err)); }
   };
 
-  window.loginSupabase = async () => {
-    const acc = s($("admEmail").value).trim(); const pwd = s($("admPwd").value);
-    if (!acc || !pwd){ alert("請輸入帳號與密碼"); return; }
-    try {
-      const { data: subs, error: subErr } = await window.supabase.from("sub_admins").select("*").eq("account", acc).eq("password", pwd).limit(1);
-      if (!subErr && subs && subs.length){ ST.adminRole = "sub"; enableAdminUI(); $("admPwd").value = ""; return; }
-      const { error } = await window.supabase.auth.signInWithPassword({ email: acc, password: pwd });
-      if (error) throw error;
-      ST.adminRole = "main"; enableAdminUI(); $("admPwd").value = ""; fetchSubAdmins();
-    } catch (err){ alert("登入失敗：帳號或密碼錯誤"); console.warn(err); }
-  };
-
-  window.logout = async () => {
-    try { await window.supabase.auth.signOut(); } catch {}
-    ST.isAdmin = false; ST.adminRole = null;
-    $("adminActions").classList.add("hidden"); $("loginForm").classList.remove("hidden"); $("logoutBtn").classList.add("hidden");
-    $("admEmail").value = ""; $("admPwd").value = ""; applyFilter();
-  };
+  window.loginSupabase = () => { alert("管理權限請由 WAKODO HUB 的 Owner 帳號登入後自動取得"); };
+  window.logout = () => { location.href = "wakodohub.html"; };
 
   window.openAccountModal = () => { fetchSubAdmins(); $("accountModal").classList.add("show"); };
   window.closeAccountModal = () => $("accountModal").classList.remove("show");
@@ -2545,6 +2550,7 @@ ${v.search_keywords ? `
   };
 
   window.previewCSV = (input) => {
+    if (!ST.isAdmin) { input.value = ""; return; }
     const file = input.files && input.files[0]; if (!file) return;
     if (!confirm(`確定匯入「${file.name}」？資料將逐筆寫入資料庫。`)){ input.value = ""; return; }
     const overlay = document.createElement("div");
@@ -2604,10 +2610,15 @@ ${v.search_keywords ? `
       });
     }
     initAddModal();
-    try { const { data } = await window.supabase.auth.getSession(); if (data && data.session){ ST.adminRole = "main"; enableAdminUI(); } } catch {}
+    await syncHubAdminAccess();
     const q = $("qSearch"); if (q) q.addEventListener("input", () => { $("btnClearSearch") && $("btnClearSearch").classList.toggle("hidden", !q.value); });
     await fetchAllData();
   }
+
+
+  window.addEventListener("message", (event) => {
+    if (event.origin === location.origin && event.data?.type === "wakodo-hub-auth-refresh") syncHubAdminAccess();
+  });
 
   window.addEventListener("load", () => {
     if (gateIsOk()){ $("gate").style.display = "none"; $("appRoot").style.display = "block"; initMain(); } else { showGate(); }

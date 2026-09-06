@@ -527,9 +527,9 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // WAKODO HUB v1.2.2 — Supabase Auth + one-time invites
+    // WAKODO HUB v1.2.3 — Supabase Auth + Hub Owner child-page authorization
     const HUB = Object.freeze({
-      VERSION: "1.2.2",
+      VERSION: "1.2.3",
       SUPABASE_URL: "https://mdjnidbwqedzobjbhocd.supabase.co",
       SUPABASE_KEY: "sb_publishable_RoO2nFORoi-VzRgWt75wWQ_OnHAbl9Y",
       LOGIN_AT_KEY: "wakodo_hub_login_at_v2",
@@ -604,6 +604,13 @@
         localStorage.removeItem("wakodo_perf_front_access_v3");
         localStorage.removeItem("wakodo_mkt_access_v3");
       }catch{}
+    }
+
+    function broadcastHubAuthRefresh(){
+      state.loaded.forEach(name=>{
+        const frame=document.querySelector(`[data-view-panel="${name}"] iframe`);
+        try{ frame?.contentWindow?.postMessage({type:"wakodo-hub-auth-refresh"}, location.origin); }catch{}
+      });
     }
 
     function inviteTokenFromHash(){
@@ -764,6 +771,7 @@
       updateUserChrome();
       const target=normalizeHash(location.hash);
       switchView(target,false);
+      setTimeout(broadcastHubAuthRefresh,0);
     }
 
     function normalizeHash(hash){
@@ -775,7 +783,7 @@
       if (state.loaded.has(name)) return;
       const panel=document.querySelector(`[data-view-panel="${name}"]`); if (!panel) return;
       const frame=panel.querySelector("iframe"), loading=panel.querySelector(".loading");
-      frame.addEventListener("load",()=>{ if(loading) loading.style.display="none"; grantChildAccess(); },{once:true});
+      frame.addEventListener("load",()=>{ if(loading) loading.style.display="none"; grantChildAccess(); try{frame.contentWindow?.postMessage({type:"wakodo-hub-auth-refresh"},location.origin);}catch{} },{once:true});
       frame.src=HUB.PAGES[name].src; state.loaded.add(name);
     }
 

@@ -192,6 +192,7 @@
 
     // ─── 1. 全域狀態變數宣告 ───
     let _sessionUnlocked = false; 
+    let isHubOwner = false;
     let isEditMode = false;
     let allSales = [];
     let allExpenses = [];
@@ -341,9 +342,25 @@
       initApp();
     }
 
+    async function checkHubOwner(){
+      isHubOwner = false;
+      try{
+        const { data:{ user } } = await supabase.auth.getUser();
+        if(user){
+          const { data:member, error } = await supabase.from("hub_members").select("role,status").eq("user_id",user.id).maybeSingle();
+          isHubOwner = !error && member?.status === "active" && member?.role === "owner";
+        }
+      }catch(err){ console.warn("Hub Owner 權限確認失敗", err); }
+      if(!isHubOwner) isEditMode = false;
+      dom.btnToggleMode.classList.toggle("hidden", !isHubOwner);
+      renderAll();
+      return isHubOwner;
+    }
+
     // ===== 6. 系統啟動進入點 =====
     async function initApp() {
       try {
+        await checkHubOwner();
         bindEvents();
         await refreshData();
         if (allMonthKeys.length > 0) {
@@ -357,9 +374,14 @@
       }
     }
 
+    window.addEventListener("message", e => {
+      if(e.origin === location.origin && e.data?.type === "wakodo-hub-auth-refresh") checkHubOwner();
+    });
+
     // ===== 7. DOM 事件綁定 =====
     function bindEvents() {
       dom.btnToggleMode.addEventListener("click", () => {
+        if(!isHubOwner) return;
         isEditMode = !isEditMode;
         if(isEditMode) {
           dom.btnToggleMode.innerHTML = `<i class="fas fa-check text-green-500"></i> <span>結束編輯</span>`;
@@ -660,6 +682,7 @@
 
     // ===== 11. 儲存/新增/刪除業務函數 =====
     function openExpenseModal(id = null, defYear = null, defMonth = null) {
+      if(!isHubOwner) return;
       dom.expenseModal.classList.remove("hidden");
       dom.expenseForm.reset();
 
@@ -689,6 +712,7 @@
 
     async function handleExpenseSubmit(e) {
       e.preventDefault();
+      if(!isHubOwner) return;
       try {
         const id = dom.editExpenseId.value.trim();
         const year = parseInt(dom.inputYear.value), month = parseInt(dom.inputMonth.value);
@@ -722,9 +746,10 @@
       }
     }
 
-    function editExpense(id) { openExpenseModal(id); }
+    function editExpense(id) { if(!isHubOwner) return; openExpenseModal(id); }
 
     async function deleteExpense(id, amount, desc) {
+      if(!isHubOwner) return;
       const confirm = await Swal.fire({
         title: "確認刪除此筆支出？", text: `金額：${fmtTwd(amount)} (${desc})`, icon: "warning",
         showCancelButton: true, confirmButtonColor: "#ef4444", cancelButtonColor: "#64748B", confirmButtonText: "確定刪除", background: "#FFFFFF", color: "#1F1F1F"
@@ -745,6 +770,7 @@
     }
 
     async function writeLog(action, details) {
+      if(!isHubOwner) return;
       try { await supabase.from("marketing_logs").insert([{ action, details }]); } 
       catch (err) { console.error("日誌寫入失敗:", err); }
     }
