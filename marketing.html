@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>和光堂行銷開支計算</title>
-  <!-- build: 2026-09-07-1848 -->
+  <!-- build: 2026-09-07-1914 -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2032%2032%27%3E%3Crect%20x%3D%270%27%20y%3D%270%27%20width%3D%2732%27%20height%3D%2732%27%20rx%3D%277%27%20fill%3D%27%23EA580C%27/%3E%3Cpath%20d%3D%27M7%2024.5H25%27%20stroke%3D%27%23FFFFFF%27%20stroke-width%3D%272%27%20stroke-linecap%3D%27round%27/%3E%3Cpath%20d%3D%27M8%2022%20L13%2017%20L17%2019%20L23%2011%27%20fill%3D%27none%27%20stroke%3D%27%23FFFFFF%27%20stroke-width%3D%272.4%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27/%3E%3C/svg%3E">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -70,31 +70,31 @@
     <!-- 主看板 -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div class="glass-panel p-6 border-l-4 border-[#EA580C]">
-        <p class="text-slate-500 text-xs font-semibold tracking-wider" id="summaryTitle1"><span>本月份總行銷開支</span></p>
+        <p class="text-slate-600 text-sm font-bold tracking-wide" id="summaryTitle1"><span>本月份總行銷開支</span></p>
         <div class="flex items-baseline gap-1.5 mt-2">
           <span class="text-3xl font-black text-slate-800 font-mono" id="summaryTotal">$0</span>
-          <span class="text-xs text-slate-400 font-semibold" id="summaryMonthLabel">--</span>
+          <span class="text-sm text-slate-600 font-semibold" id="summaryMonthLabel">--</span>
         </div>
       </div>
       <div class="glass-panel p-6 border-l-4 border-blue-500">
-        <p class="text-slate-500 text-xs font-semibold tracking-wider" id="summaryTitle2"><span>本月份平均每日支出</span></p>
+        <p class="text-slate-600 text-sm font-bold tracking-wide" id="summaryTitle2"><span>本月份平均每日支出</span></p>
         <div class="flex items-baseline gap-1.5 mt-2">
           <span class="text-3xl font-black text-slate-800 font-mono" id="summaryDaily">$0</span>
-          <span class="text-xs text-slate-400 font-semibold">/ 日</span>
+          <span class="text-sm text-slate-600 font-semibold">/ 日</span>
         </div>
       </div>
     </div>
 
     <!-- 控制區 -->
     <div class="flex justify-between items-center bg-white/50 backdrop-blur p-3.5 rounded-2xl border border-slate-100 shadow-sm">
-      <div class="text-xs text-slate-500 font-medium">
+      <div class="text-sm text-slate-600 font-medium">
         <i class="fas fa-info-circle mr-1 text-blue-500"></i> 智慧比例繼承已啟用。兩店依各筆比例加權分攤。
       </div>
       <div class="flex gap-2">
-        <button id="btnExpandAll" class="bg-white hover:bg-slate-50 text-xs font-bold px-3 py-1.5 rounded-xl border border-slate-200 text-slate-600 transition flex items-center gap-1">
+        <button id="btnExpandAll" class="bg-white hover:bg-slate-50 text-sm font-bold px-3 py-1.5 rounded-xl border border-slate-200 text-slate-600 transition flex items-center gap-1">
           <i class="fas fa-expand-arrows-alt text-orange-500"></i> 全部展開
         </button>
-        <button id="btnCollapseAll" class="bg-white hover:bg-slate-50 text-xs font-bold px-3 py-1.5 rounded-xl border border-slate-200 text-slate-600 transition flex items-center gap-1">
+        <button id="btnCollapseAll" class="bg-white hover:bg-slate-50 text-sm font-bold px-3 py-1.5 rounded-xl border border-slate-200 text-slate-600 transition flex items-center gap-1">
           <i class="fas fa-compress-arrows-alt"></i> 全部收折
         </button>
       </div>
@@ -489,18 +489,16 @@
       div.className = "glass-panel overflow-hidden transition-all duration-300 hover:shadow-md border border-white/50";
 
       const header = document.createElement("div");
-      header.className = "flex flex-col sm:flex-row sm:justify-between sm:items-center p-4 bg-white/40 cursor-pointer hover:bg-white/80 transition select-none gap-2";
+      header.className = "flex flex-col sm:flex-row sm:justify-between sm:items-center p-5 bg-white/45 cursor-pointer hover:bg-white/80 transition select-none gap-3";
       header.innerHTML = `
-        <div class="flex items-center gap-2.5">
-          <i class="fas ${isExpanded ? 'fa-chevron-down text-orange-500' : 'fa-chevron-right text-slate-400'}"></i>
-          <span class="text-sm font-bold text-slate-800 flex items-center gap-1.5"><i class="far fa-calendar-alt text-[#EA580C]"></i> ${mData.year}年 ${mData.month}月份</span>
-          ${key === allMonthKeys[0] ? '<span class="px-2 py-0.5 rounded-full text-[9px] font-black bg-orange-50 text-orange-600 border border-orange-100">最新月份</span>' : ''}
+        <div class="flex items-center gap-3">
+          <i class="fas ${isExpanded ? 'fa-chevron-down text-orange-500' : 'fa-chevron-right text-slate-500'}"></i>
+          <span class="text-base font-black text-slate-800 flex items-center gap-2"><i class="far fa-calendar-alt text-[#EA580C]"></i> ${mData.year}年 ${mData.month}月份</span>
+          ${key === allMonthKeys[0] ? '<span class="px-2.5 py-1 rounded-full text-[13px] font-black bg-orange-50 text-orange-700 border border-orange-200">最新月份</span>' : ''}
         </div>
-        <div class="flex items-center gap-4 text-xs font-semibold">
-          <span class="text-[#EA580C]">臨安: <strong class="font-mono">${fmtTwd(mData.totalLinanExpense)}</strong></span>
-          <span class="text-blue-500">南科: <strong class="font-mono">${fmtTwd(mData.totalNankeExpense)}</strong></span>
-          <span class="text-slate-400">|</span>
-          <span class="text-slate-500">總支出: <strong class="text-slate-800 font-mono">${fmtTwd(mData.totalExpense)}</strong></span>
+        <div class="flex items-baseline gap-2 text-sm text-slate-600 font-semibold">
+          <span>本月總支出</span>
+          <strong class="text-lg text-slate-900 font-mono font-black">${fmtTwd(mData.totalExpense)}</strong>
         </div>
       `;
       header.onclick = () => {
@@ -512,189 +510,202 @@
 
       if (isExpanded) {
         const body = document.createElement("div");
-        body.className = "p-4 border-t border-slate-100 bg-white/20 space-y-5";
+        body.className = "p-4 sm:p-5 border-t border-slate-100 bg-white/20 space-y-5";
 
-        // 本月行銷概況：先回答「這個月總共花多少、怎麼分」。
-        const overview = document.createElement("section");
-        overview.className = "rounded-2xl border border-slate-100 bg-white/55 p-4";
-        overview.innerHTML = `
-          <div class="flex items-start justify-between gap-3 mb-3">
-            <div>
-              <div class="text-[11px] font-black tracking-[0.16em] text-slate-400 uppercase">Monthly overview</div>
-              <h3 class="text-sm font-black text-slate-800 mt-0.5">本月行銷概況</h3>
-              <p class="text-[10px] text-slate-400 mt-0.5">先看投入總量與店別分攤，再往下看支出明細與每週效益。</p>
-            </div>
-          </div>
-          <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
-            <div class="rounded-xl bg-slate-50/80 border border-slate-100 p-3">
-              <div class="text-[10px] text-slate-400 font-bold">本月總支出</div>
-              <div class="text-[15px] font-black text-slate-800 font-mono mt-1">${fmtTwd(mData.totalExpense)}</div>
-            </div>
-            <div class="rounded-xl bg-slate-50/80 border border-slate-100 p-3">
-              <div class="text-[10px] text-slate-400 font-bold">每日平均支出</div>
-              <div class="text-[15px] font-black text-slate-800 font-mono mt-1">${fmtTwd(mData.dailyExpense)}</div>
-            </div>
-            <div class="rounded-xl bg-orange-50/55 border border-orange-100 p-3">
-              <div class="text-[10px] text-orange-500 font-bold">臨安分攤</div>
-              <div class="text-[15px] font-black text-orange-700 font-mono mt-1">${fmtTwd(mData.totalLinanExpense)}</div>
-            </div>
-            <div class="rounded-xl bg-blue-50/55 border border-blue-100 p-3">
-              <div class="text-[10px] text-blue-500 font-bold">南科分攤</div>
-              <div class="text-[15px] font-black text-blue-700 font-mono mt-1">${fmtTwd(mData.totalNankeExpense)}</div>
-            </div>
-          </div>
-        `;
-        body.appendChild(overview);
-
-        // A｜行銷支出明細：定位成帳務清單，視覺權重低於分析區。
-        const mktSection = document.createElement("section");
-        mktSection.className = "rounded-2xl border border-orange-100/80 bg-orange-50/20 p-4 space-y-3";
-        let mktHeadHTML = `
-          <div class="flex justify-between items-start gap-3">
-            <div>
-              <div class="flex items-center gap-2">
-                <span class="w-6 h-6 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center text-[10px] font-black">A</span>
-                <span class="text-sm font-black text-slate-800">行銷支出明細</span>
-                <span class="px-2 py-0.5 rounded-full text-[9px] bg-white text-slate-500 border border-slate-100">${mData.expenses.length} 筆</span>
-              </div>
-              <p class="text-[10px] text-slate-400 mt-1 ml-8">這裡看「錢花去哪裡」；總支出 ${fmtTwd(mData.totalExpense)}</p>
-            </div>
-        `;
-        if (isEditMode) {
-          mktHeadHTML += `<button onclick="event.stopPropagation(); openExpenseModal(null, ${mData.year}, ${mData.month})" class="text-xs text-[#EA580C] font-bold bg-white px-3 py-1.5 rounded-lg border border-orange-100 hover:bg-orange-50 transition">+ 新增支出</button>`;
-        }
-        mktHeadHTML += `</div>`;
-        mktSection.innerHTML = mktHeadHTML;
-
-        if (mData.expenses.length === 0) {
-          mktSection.innerHTML += `<p class="text-xs text-slate-400 italic py-2">尚未輸入任何支出數據。</p>`;
-        } else {
-          const list = document.createElement("div");
-          list.className = "divide-y divide-orange-100/70 rounded-xl overflow-hidden border border-orange-100/60 bg-white/70";
-          mData.expenses.forEach(exp => {
-            const ratio = exp.linan_ratio != null ? Number(exp.linan_ratio) : 0.72;
-            const row = document.createElement("div");
-            row.className = "px-3.5 py-3 text-xs flex justify-between items-center gap-3";
-            row.innerHTML = `
-              <div class="min-w-0">
-                <div class="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                  <span class="text-slate-800 font-black font-mono text-[13px]">${fmtTwd(exp.amount)}</span>
-                  <span class="text-slate-500 text-[11px] truncate">${exp.description || '無備註'}</span>
-                </div>
-                <div class="text-[10px] text-slate-400 mt-1">臨安 ${Math.round(ratio*100)}% · 南科 ${Math.round((1-ratio)*100)}%</div>
-              </div>
-              ${isEditMode ? `
-                <div class="flex gap-2 shrink-0">
-                  <button onclick="event.stopPropagation(); editExpense('${exp.id}')" class="w-7 h-7 bg-slate-50 hover:bg-slate-100 rounded-full flex items-center justify-center text-slate-500"><i class="fas fa-pencil-alt text-[10px]"></i></button>
-                  <button onclick="event.stopPropagation(); deleteExpense('${exp.id}', '${exp.amount}', '${exp.description}')" class="w-7 h-7 bg-red-50 hover:bg-red-100 rounded-full flex items-center justify-center text-red-500"><i class="fas fa-trash-alt text-[10px]"></i></button>
-                </div>
-              ` : ''}
-            `;
-            list.appendChild(row);
-          });
-          mktSection.appendChild(list);
-        }
-        body.appendChild(mktSection);
-
-        // B｜每週業績 × 行銷投入：主分析區，最新一週置頂。
+        // 先看每週效果：主管最需要先回答「這筆行銷花下去，帶回多少業績」。
         const salesSection = document.createElement("section");
-        salesSection.className = "rounded-2xl border border-blue-100 bg-blue-50/20 p-4 space-y-3";
+        salesSection.className = "rounded-2xl border border-blue-100 bg-blue-50/20 p-4 sm:p-5 space-y-4";
         salesSection.innerHTML = `
           <div>
-            <div class="flex items-center gap-2">
-              <span class="w-6 h-6 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-[10px] font-black">B</span>
-              <span class="text-sm font-black text-slate-800">每週業績 × 行銷投入</span>
+            <div class="flex items-center gap-2.5">
+              <i class="fas fa-chart-line text-blue-600"></i>
+              <span class="text-base font-black text-slate-900">每週業績 × 行銷投入</span>
             </div>
-            <p class="text-[10px] text-slate-400 mt-1 ml-8">比較各店當週業績、行銷分攤與投入效益；最新一週固定在最上方。</p>
+            <p class="text-[13px] leading-6 text-slate-600 mt-1">最新一週固定在最上方；先看業績與行銷投入，再看「賺了多少倍」與成本佔比。</p>
           </div>`;
 
         if (mData.weeks.length === 0) {
-          salesSection.innerHTML += `<p class="text-xs text-slate-400 italic py-2">無週業績數據（請在業績儀表板建立）。</p>`;
+          salesSection.innerHTML += `<p class="text-sm text-slate-600 italic py-2">無週業績數據（請在業績儀表板建立）。</p>`;
         } else {
-          const list = document.createElement("div"); list.className = "space-y-3";
+          const list = document.createElement("div");
+          list.className = "space-y-4";
           mData.weeks.forEach(row => {
             const s = parseISODateLocal(row.week_start_date), e = addDays(s, 6);
             const rangeText = `${s.getMonth() + 1}/${s.getDate()} ~ ${e.getMonth() + 1}/${e.getDate()}`;
             const isLatestWeek = latestWeekStart && row.week_start_date === latestWeekStart;
             const linanRev = Number(row.linan_amount || 0), nankeRev = Number(row.nanke_amount || 0);
-
             const linanWAlloc = mData.dailyLinanExpense * 7, nankeWAlloc = mData.dailyNankeExpense * 7;
 
             const getRatioUI = (rev, alloc) => {
               if (mData.totalExpense === 0) {
-                return { ratioPct: 0, multiple: 0, status: "無支出", light: "text-slate-500 bg-slate-100 border-slate-200" };
+                return { ratioPct: 0, multiple: 0, isProf: false, status: "無支出", light: "text-slate-700 bg-slate-100 border-slate-300" };
               }
               const ratioPct = (alloc / (rev || 1)) * 100;
               const multiple = rev / (alloc || 1);
-              let light = "text-emerald-600 bg-emerald-50 border-emerald-200";
+              const isProf = rev >= alloc;
+              let light = "text-emerald-700 bg-emerald-50 border-emerald-300";
               let status = "安全";
               if (ratioPct >= 3 && ratioPct <= 10) {
-                light = "text-amber-600 bg-amber-50 border-amber-200";
+                light = "text-amber-700 bg-amber-50 border-amber-300";
                 status = "健康";
               } else if (ratioPct > 10) {
-                light = "text-rose-600 bg-rose-50 border-rose-200";
+                light = "text-rose-700 bg-rose-50 border-rose-300";
                 status = "預警";
               }
-              return { ratioPct, multiple, light, status };
+              return { ratioPct, multiple, isProf, light, status };
             };
 
             const l = getRatioUI(linanRev, linanWAlloc);
             const n = getRatioUI(nankeRev, nankeWAlloc);
 
-            const item = document.createElement("div");
-            item.className = `bg-white/80 rounded-2xl p-4 border shadow-sm ${isLatestWeek ? 'border-blue-200 ring-1 ring-blue-100' : 'border-slate-100'}`;
-            item.innerHTML = `
-              <div class="flex flex-wrap justify-between items-center gap-2 pb-3 mb-3 border-b border-slate-100">
-                <div class="flex items-center gap-2 font-black text-slate-700">
-                  <i class="far fa-clock text-blue-500"></i>
-                  <span>${rangeText}</span>
-                  ${isLatestWeek ? '<span class="px-2 py-0.5 rounded-full text-[9px] font-black bg-blue-600 text-white">最新</span>' : ''}
-                </div>
-                <span class="text-[10px] text-slate-400">業績 → 投入 → 效益</span>
-              </div>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div class="rounded-xl border border-orange-100 bg-orange-50/25 p-3.5">
-                  <div class="flex items-center justify-between gap-2 mb-3">
-                    <div class="font-black text-slate-800 flex items-center gap-1.5 text-[13px]"><span class="w-2 h-3.5 bg-orange-500 rounded-full"></span> 臨安店</div>
-                    <span class="px-2 py-0.5 rounded-full text-[9px] border font-black ${l.light}">${l.status}</span>
+            const buildStoreCard = (storeName, accent, bgClass, borderClass, revenue, alloc, ratioData, dailyNeed) => {
+              const hasExpense = mData.totalExpense !== 0;
+              const resultText = !hasExpense ? '--' : `${ratioData.isProf ? '賺' : '賠'} ${ratioData.multiple.toFixed(1)} 倍`;
+              const resultColor = !hasExpense ? 'text-slate-700' : (ratioData.isProf ? 'text-emerald-700' : 'text-rose-700');
+              return `
+                <div class="rounded-2xl border ${borderClass} ${bgClass} p-4">
+                  <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                    <div class="font-black text-slate-900 flex items-center gap-2 text-base"><span class="w-2.5 h-4 ${accent} rounded-full"></span> ${storeName}</div>
+                    <span class="px-2.5 py-1 rounded-full text-[13px] border font-black ${ratioData.light}">${ratioData.status}</span>
                   </div>
-                  <div class="grid grid-cols-2 gap-2 mb-3">
-                    <div><div class="text-[9px] text-slate-400 font-bold">週業績</div><div class="text-sm font-black text-slate-800 font-mono mt-0.5">${fmtTwd(linanRev)}</div></div>
-                    <div><div class="text-[9px] text-slate-400 font-bold">行銷分攤</div><div class="text-sm font-black text-orange-600 font-mono mt-0.5">${fmtTwd(linanWAlloc)}</div></div>
-                  </div>
-                  <div class="rounded-lg bg-white/80 border border-orange-100/80 p-2.5">
-                    <div class="flex items-end justify-between gap-2">
-                      <div><div class="text-[9px] text-slate-400 font-bold">投入效益</div><div class="text-lg font-black text-slate-800 font-mono">${mData.totalExpense === 0 ? '--' : l.multiple.toFixed(1) + '×'}</div></div>
-                      <div class="text-right"><div class="text-[9px] text-slate-400 font-bold">行銷佔營收</div><div class="text-sm font-black text-slate-700 font-mono">${mData.totalExpense === 0 ? '--' : l.ratioPct.toFixed(1) + '%'}</div></div>
+                  <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <div class="text-[13px] text-slate-600 font-bold">週業績</div>
+                      <div class="text-xl font-black text-slate-900 font-mono mt-1">${fmtTwd(revenue)}</div>
+                    </div>
+                    <div>
+                      <div class="text-[13px] text-slate-600 font-bold">行銷投入</div>
+                      <div class="text-xl font-black ${storeName === '臨安店' ? 'text-orange-700' : 'text-blue-700'} font-mono mt-1">${fmtTwd(alloc)}</div>
                     </div>
                   </div>
-                  <div class="text-[10px] text-slate-400 mt-2">日營業額至少需達 ${fmtTwd(mData.dailyLinanExpense)} 才能覆蓋行銷成本</div>
-                </div>
+                  <div class="rounded-xl bg-white/90 border border-white p-3.5 flex flex-wrap items-end justify-between gap-3">
+                    <div>
+                      <div class="text-[13px] text-slate-600 font-bold">投入結果</div>
+                      <div class="text-2xl font-black ${resultColor} font-mono mt-1">${resultText}</div>
+                    </div>
+                    <div class="text-left sm:text-right">
+                      <div class="text-[13px] text-slate-600 font-bold">行銷佔營收</div>
+                      <div class="text-lg font-black text-slate-800 font-mono mt-1">${!hasExpense ? '--' : ratioData.ratioPct.toFixed(1) + '%'}</div>
+                    </div>
+                  </div>
+                  <div class="text-[13px] leading-6 text-slate-600 mt-3">日營業額至少需達 <strong class="text-slate-800 font-mono">${fmtTwd(dailyNeed)}</strong> 才能覆蓋行銷成本</div>
+                </div>`;
+            };
 
-                <div class="rounded-xl border border-blue-100 bg-blue-50/25 p-3.5">
-                  <div class="flex items-center justify-between gap-2 mb-3">
-                    <div class="font-black text-slate-800 flex items-center gap-1.5 text-[13px]"><span class="w-2 h-3.5 bg-blue-500 rounded-full"></span> 南科店</div>
-                    <span class="px-2 py-0.5 rounded-full text-[9px] border font-black ${n.light}">${n.status}</span>
-                  </div>
-                  <div class="grid grid-cols-2 gap-2 mb-3">
-                    <div><div class="text-[9px] text-slate-400 font-bold">週業績</div><div class="text-sm font-black text-slate-800 font-mono mt-0.5">${fmtTwd(nankeRev)}</div></div>
-                    <div><div class="text-[9px] text-slate-400 font-bold">行銷分攤</div><div class="text-sm font-black text-blue-600 font-mono mt-0.5">${fmtTwd(nankeWAlloc)}</div></div>
-                  </div>
-                  <div class="rounded-lg bg-white/80 border border-blue-100/80 p-2.5">
-                    <div class="flex items-end justify-between gap-2">
-                      <div><div class="text-[9px] text-slate-400 font-bold">投入效益</div><div class="text-lg font-black text-slate-800 font-mono">${mData.totalExpense === 0 ? '--' : n.multiple.toFixed(1) + '×'}</div></div>
-                      <div class="text-right"><div class="text-[9px] text-slate-400 font-bold">行銷佔營收</div><div class="text-sm font-black text-slate-700 font-mono">${mData.totalExpense === 0 ? '--' : n.ratioPct.toFixed(1) + '%'}</div></div>
-                    </div>
-                  </div>
-                  <div class="text-[10px] text-slate-400 mt-2">日營業額至少需達 ${fmtTwd(mData.dailyNankeExpense)} 才能覆蓋行銷成本</div>
+            const item = document.createElement("div");
+            item.className = `bg-white/85 rounded-2xl p-4 sm:p-5 border shadow-sm ${isLatestWeek ? 'border-blue-300 ring-1 ring-blue-100' : 'border-slate-200'}`;
+            item.innerHTML = `
+              <div class="flex flex-wrap justify-between items-center gap-3 pb-3 mb-4 border-b border-slate-200">
+                <div class="flex items-center gap-2.5 font-black text-slate-800 text-base">
+                  <i class="far fa-clock text-blue-600"></i>
+                  <span>${rangeText}</span>
+                  ${isLatestWeek ? '<span class="px-2.5 py-1 rounded-full text-[13px] font-black bg-blue-600 text-white">最新一週</span>' : ''}
                 </div>
+                <span class="text-[13px] font-semibold text-slate-600">業績 → 投入 → 結果</span>
               </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                ${buildStoreCard('臨安店', 'bg-orange-500', 'bg-orange-50/35', 'border-orange-200', linanRev, linanWAlloc, l, mData.dailyLinanExpense)}
+                ${buildStoreCard('南科店', 'bg-blue-500', 'bg-blue-50/35', 'border-blue-200', nankeRev, nankeWAlloc, n, mData.dailyNankeExpense)}
+              </div>
+              <div class="text-[13px] leading-6 text-slate-600 mt-3">「賺／賠 X 倍」＝當週業績 ÷ 當週行銷分攤費用，用於快速判讀投入效率，並非實際淨利。</div>
             `;
             list.appendChild(item);
           });
           salesSection.appendChild(list);
         }
         body.appendChild(salesSection);
+
+        // 行銷支出明細：一列看完「總金額 → 臨安負擔 → 南科負擔」，不重複上方分攤卡。
+        const mktSection = document.createElement("section");
+        mktSection.className = "rounded-2xl border border-orange-100 bg-orange-50/15 p-4 sm:p-5 space-y-4";
+        let mktHeadHTML = `
+          <div class="flex flex-wrap justify-between items-start gap-3">
+            <div>
+              <div class="flex items-center gap-2.5">
+                <i class="fas fa-bullhorn text-orange-600"></i>
+                <span class="text-base font-black text-slate-900">行銷支出明細</span>
+                <span class="px-2.5 py-1 rounded-full text-[13px] bg-white text-slate-700 border border-slate-200 font-bold">${mData.expenses.length} 筆</span>
+              </div>
+              <p class="text-[13px] leading-6 text-slate-600 mt-1">每筆直接列出兩店負擔比例與實際金額，月底在最下方加總。</p>
+            </div>
+        `;
+        if (isEditMode) {
+          mktHeadHTML += `<button onclick="event.stopPropagation(); openExpenseModal(null, ${mData.year}, ${mData.month})" class="text-sm text-[#EA580C] font-bold bg-white px-3.5 py-2 rounded-lg border border-orange-200 hover:bg-orange-50 transition">+ 新增支出</button>`;
+        }
+        mktHeadHTML += `</div>`;
+        mktSection.innerHTML = mktHeadHTML;
+
+        if (mData.expenses.length === 0) {
+          mktSection.innerHTML += `<p class="text-sm text-slate-600 italic py-2">尚未輸入任何支出數據。</p>`;
+        } else {
+          const list = document.createElement("div");
+          list.className = "rounded-2xl overflow-hidden border border-slate-200 bg-white/90";
+
+          // 桌面欄位標題，手機版隱藏。
+          const colHead = document.createElement("div");
+          colHead.className = "hidden md:grid md:grid-cols-[minmax(0,1.35fr)_minmax(180px,0.85fr)_minmax(180px,0.85fr)_auto] gap-0 bg-slate-50 border-b border-slate-200 text-[13px] font-black text-slate-700";
+          colHead.innerHTML = `
+            <div class="px-4 py-3">支出項目 / 總金額</div>
+            <div class="px-5 py-3 border-l border-slate-200">臨安店負擔</div>
+            <div class="px-5 py-3 border-l border-slate-200">南科店負擔</div>
+            <div class="w-[72px]"></div>`;
+          list.appendChild(colHead);
+
+          mData.expenses.forEach(exp => {
+            const ratio = exp.linan_ratio != null ? Number(exp.linan_ratio) : 0.72;
+            const linanAmount = Number(exp.amount || 0) * ratio;
+            const nankeAmount = Number(exp.amount || 0) * (1 - ratio);
+            const row = document.createElement("div");
+            row.className = "grid grid-cols-1 md:grid-cols-[minmax(0,1.35fr)_minmax(180px,0.85fr)_minmax(180px,0.85fr)_auto] gap-0 border-b last:border-b-0 border-slate-200";
+            row.innerHTML = `
+              <div class="px-4 py-4 min-w-0">
+                <div class="text-[13px] text-slate-600 font-bold mb-1">支出項目</div>
+                <div class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                  <span class="text-lg text-slate-900 font-black font-mono">${fmtTwd(exp.amount)}</span>
+                  <span class="text-sm text-slate-700 font-semibold break-words">${exp.description || '無備註'}</span>
+                </div>
+              </div>
+              <div class="px-4 py-4 md:px-5 md:border-l border-slate-200 bg-orange-50/25">
+                <div class="text-sm text-orange-800 font-black">臨安店 <span class="font-mono">${Math.round(ratio*100)}%</span></div>
+                <div class="text-lg text-orange-700 font-black font-mono mt-1">${fmtTwd(linanAmount)}</div>
+              </div>
+              <div class="px-4 py-4 md:px-5 md:border-l border-slate-200 bg-blue-50/25">
+                <div class="text-sm text-blue-800 font-black">南科店 <span class="font-mono">${Math.round((1-ratio)*100)}%</span></div>
+                <div class="text-lg text-blue-700 font-black font-mono mt-1">${fmtTwd(nankeAmount)}</div>
+              </div>
+              ${isEditMode ? `
+                <div class="px-4 py-3 md:px-3 md:border-l border-slate-200 flex md:flex-col items-center justify-end md:justify-center gap-2 bg-slate-50/50">
+                  <button onclick="event.stopPropagation(); editExpense('${exp.id}')" class="w-9 h-9 bg-white hover:bg-slate-100 rounded-full flex items-center justify-center text-slate-600 border border-slate-200" title="編輯"><i class="fas fa-pencil-alt text-sm"></i></button>
+                  <button onclick="event.stopPropagation(); deleteExpense('${exp.id}', '${exp.amount}', '${exp.description}')" class="w-9 h-9 bg-white hover:bg-red-50 rounded-full flex items-center justify-center text-red-600 border border-red-200" title="刪除"><i class="fas fa-trash-alt text-sm"></i></button>
+                </div>
+              ` : '<div class="hidden md:block w-[1px]"></div>'}
+            `;
+            list.appendChild(row);
+          });
+
+          const linanSharePct = mData.totalExpense > 0 ? (mData.totalLinanExpense / mData.totalExpense * 100) : 0;
+          const nankeSharePct = mData.totalExpense > 0 ? (mData.totalNankeExpense / mData.totalExpense * 100) : 0;
+          const totalRow = document.createElement("div");
+          totalRow.className = "grid grid-cols-1 md:grid-cols-[minmax(0,1.35fr)_minmax(180px,0.85fr)_minmax(180px,0.85fr)_auto] gap-0 bg-slate-50 border-t-2 border-slate-300";
+          totalRow.innerHTML = `
+            <div class="px-4 py-4">
+              <div class="text-base font-black text-slate-900">本月分攤合計</div>
+              <div class="text-[13px] text-slate-600 mt-1">共 ${mData.expenses.length} 筆支出</div>
+            </div>
+            <div class="px-4 py-4 md:px-5 md:border-l border-slate-300 bg-orange-50/50">
+              <div class="text-sm font-black text-orange-800">臨安店合計 <span class="font-mono">${linanSharePct.toFixed(1)}%</span></div>
+              <div class="text-xl font-black text-orange-700 font-mono mt-1">${fmtTwd(mData.totalLinanExpense)}</div>
+            </div>
+            <div class="px-4 py-4 md:px-5 md:border-l border-slate-300 bg-blue-50/50">
+              <div class="text-sm font-black text-blue-800">南科店合計 <span class="font-mono">${nankeSharePct.toFixed(1)}%</span></div>
+              <div class="text-xl font-black text-blue-700 font-mono mt-1">${fmtTwd(mData.totalNankeExpense)}</div>
+            </div>
+            <div class="hidden md:block w-[72px] md:border-l border-slate-300"></div>
+          `;
+          list.appendChild(totalRow);
+          mktSection.appendChild(list);
+        }
+        body.appendChild(mktSection);
         div.appendChild(body);
       }
       return div;
