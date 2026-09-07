@@ -294,6 +294,9 @@
     .tag-store-a { background:rgba(66,133,244,0.15); color:var(--store-a); }
     .tag-store-b { background:rgba(52,168,83,0.15); color:var(--store-b); }
     .tag-service { background:rgba(66,133,244,0.07); color:var(--google-blue); border:1px solid rgba(66,133,244,.28); margin-left:6px; }
+    .date-risk-badge { display:inline-flex;align-items:center;justify-content:center;margin-left:6px;vertical-align:middle;cursor:help;font-size:14px;line-height:1;filter:drop-shadow(0 1px 1px rgba(0,0,0,.08)); }
+    .date-risk-badge.high { padding:2px 4px;border-radius:6px;background:rgba(234,67,53,.10);outline:1px solid rgba(234,67,53,.22); }
+    .date-risk-badge.warn { padding:2px 4px;border-radius:6px;background:rgba(251,188,5,.14);outline:1px solid rgba(251,188,5,.28); }
     .jwrap { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
     .jbadge { display:inline-flex; align-items:center; gap:4px; font-size:12px; font-weight:800; padding:4px 10px; border-radius:999px; color:#fff; background:var(--c,var(--text-hint)); white-space:nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
     .jbadge .jarrow { color:rgba(255,255,255,0.8); margin:0 2px; font-weight:900; }
@@ -747,7 +750,7 @@
           </div>
         </div>
         <div class="field"><label class="field-label">年齡層 <span class="req">*</span></label><div class="radio-group" id="grpAge"></div></div>
-        <div class="field"><label class="field-label">客源旅程追蹤 <span class="req">*</span>（依序點擊）</label>
+        <div class="field"><label class="field-label">客源旅程追蹤 <span id="mJourneyReq" class="req">*</span><span id="mJourneyOptional" class="hint hidden" style="margin-left:6px;">老客可留空，系統會依消費狀態保留老客標記</span>（依序點擊）</label>
           <div id="mJourneyTrack" class="journey-track"></div>
           <div id="boxKeyword" class="hidden" style="margin-bottom:16px;"><input id="mKeyword" type="text" class="input" placeholder="Google 搜尋關鍵字..."></div>
           <div class="chk-grid" id="grpSource"></div>
@@ -952,7 +955,8 @@
     editJourney: [],
     touchMode: "first", sankeyMode: "all", sankeyView: "compact", keywordRawView: "popular", keywordShowAll: false,
     subAdmins: [],
-    sourceColors: {}, colorPoolIdx: 0
+    sourceColors: {}, colorPoolIdx: 0,
+    dateRisks: new Map()
   };
 
   const CHART_SCHEDULE = {};
@@ -1030,6 +1034,106 @@
   function cleanTags(tags){
     const mapped = arr(tags).map(t => CFG.SOURCE_ALIAS[t] || t);
     return [...new Set(mapped)];
+  }
+
+
+  function localTodayStr(){
+    const d=new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  }
+
+  function previousMonthSameDay(dateStr){
+    const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s(dateStr).slice(0,10));
+    if(!m)return "";
+    let y=Number(m[1]), mon=Number(m[2]), day=Number(m[3]);
+    mon--; if(mon===0){mon=12;y--;}
+    const maxDay=new Date(y,mon,0).getDate();
+    if(day>maxDay)return "";
+    return `${y}-${String(mon).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+  }
+
+  function sameSetValues(a,b){
+    const aa=[...new Set(arr(a).map(s).filter(Boolean))].sort();
+    const bb=[...new Set(arr(b).map(s).filter(Boolean))].sort();
+    return aa.length===bb.length && aa.every((v,i)=>v===bb[i]);
+  }
+
+  function paidState(v){
+    return v?.has_purchased===true || Number(v?.amount)>0;
+  }
+
+  function sameVisitConditions(a,b){
+    return s(a?.store_branch)===s(b?.store_branch)
+      && a?.is_new_customer===b?.is_new_customer
+      && paidState(a)===paidState(b)
+      && s(a?.gender)===s(b?.gender)
+      && s(a?.age_range)===s(b?.age_range)
+      && sameSetValues(cleanTags(a?.source_tags),cleanTags(b?.source_tags))
+      && sameSetValues(a?.visit_purposes,b?.visit_purposes);
+  }
+
+  function assessFutureDateRisk(v, rows=ST.raw){
+    const date=s(v?.form_date).slice(0,10);
+    if(!date || date<=localTodayStr())return null;
+    const compareDate=previousMonthSameDay(date);
+    if(!compareDate)return null;
+    const candidates=(rows||[]).filter(x=>s(x?.form_date).slice(0,10)===compareDate && String(x?.id)!==String(v?.id||""));
+    let best=null;
+    for(const c of candidates){
+      const nameA=s(v?.customer_name).trim(), nameB=s(c?.customer_name).trim();
+      const sameName=!!nameA && nameA!=="未留資料" && nameA===nameB;
+      const sameConditions=sameVisitConditions(v,c);
+      const sameAmount=Number(v?.amount||0)===Number(c?.amount||0);
+      const matches=[];
+      if(sameName)matches.push("姓名");
+      if(sameConditions)matches.push("其他條件");
+      if(sameAmount)matches.push("消費金額");
+      if(matches.length<2)continue;
+      const risk={level:matches.length===3?"high":"warn",score:matches.length,matches,compareDate,matchId:c.id};
+      if(!best || risk.score>best.score)best=risk;
+    }
+    return best;
+  }
+
+  function rebuildDateRisks(){
+    ST.dateRisks=new Map();
+    const canSensitive=__hubProfile?.role==="owner" || __hubProfile?.can_view_index_sensitive===true;
+    if(!canSensitive)return;
+    const byDate=new Map();
+    ST.raw.forEach(v=>{
+      const d=s(v.form_date).slice(0,10);
+      if(!byDate.has(d))byDate.set(d,[]);
+      byDate.get(d).push(v);
+    });
+    ST.raw.forEach(v=>{
+      const date=s(v.form_date).slice(0,10);
+      if(!date || date<=localTodayStr())return;
+      const prev=previousMonthSameDay(date);
+      if(!prev)return;
+      const risk=assessFutureDateRisk(v,byDate.get(prev)||[]);
+      if(risk)ST.dateRisks.set(String(v.id),risk);
+    });
+  }
+
+  function dateRiskBadge(v){
+    const risk=ST.dateRisks.get(String(v?.id));
+    if(!risk)return "";
+    const level=risk.level==="high"?"高風險":"注意";
+    const msg=`${level}：此筆日期 ${s(v.form_date).slice(0,10)} 晚於今天，且與 ${risk.compareDate} 的資料有 ${risk.matches.join("、")}相同，疑似月份誤填，請確認日期。`;
+    return `<span class="date-risk-badge ${risk.level}" title="${escapeHtml(msg)}">⚠️</span>`;
+  }
+
+  function friendlyVisitSaveError(err, editing=false){
+    const code=s(err?.code);
+    const message=s(err?.message);
+    if(code==="23505" || message.includes("idx_visits_unique") || message.includes("duplicate key")){
+      return editing
+        ? "日期修改失敗：你選擇的日期已存在同一位顧客與相同來店目的的紀錄。本次修改沒有寫入，原資料仍保持不變。請確認是否選錯日期，或回到既有紀錄處理。"
+        : "無法新增：這個日期已存在同一位顧客與相同來店目的的紀錄。請確認是否重複填寫或日期誤填。";
+    }
+    if(code==="42501" || /permission|權限/i.test(message))return "儲存失敗：目前帳號沒有修改這筆資料的權限。";
+    if(/network|fetch|連線/i.test(message))return "儲存失敗：目前連線不穩定，請確認網路後再試一次。";
+    return "儲存失敗：系統未寫入本次修改，請稍後再試。";
   }
 
 
@@ -2175,7 +2279,7 @@
       return `<tr onclick="showDetail('${v.id}')" onmouseenter="showPreview(event,'${v.id}')" onmouseleave="hidePreview()" class="flight-row-enter" style="animation-delay: ${i * 30}ms;">
         <td class="mono">${s(v.form_date).slice(0,10)}</td>
         <td><span class="tag ${v.store_branch==='臨安店'?'tag-store-a':'tag-store-b'}">${s(v.store_branch)}</span></td>
-        <td>${maskName(v.customer_name)}${serviceTag}</td>
+        <td>${maskName(v.customer_name)}${dateRiskBadge(v)}${serviceTag}</td>
         <td>${cust}</td><td>${pay}</td>
         <td class="mono hint">${s(v.gender)||'-'} / ${s(v.age_range)||'-'}</td>
         <td><div class="jwrap">${journeyBadges(v.source_tags)||'<span class="hint">-</span>'}</div></td>
@@ -2243,7 +2347,7 @@
         from += CFG.PAGE_SIZE;
       }
       all.forEach(v => { v.source_tags = cleanTags(v.source_tags); });
-      ST.raw = all; buildDynamicColors(); populateYearSelect();
+      ST.raw = all; buildDynamicColors(); populateYearSelect(); rebuildDateRisks();
       const latest = all.length ? s(all[0].form_date).slice(0,10) : "";
       $("lastDataDisp") && ($("lastDataDisp").innerText = latest ? "last data " + latest : "尚無資料");
       applyFilter();
@@ -2261,6 +2365,7 @@
     const gs = $("grpSource"); if (gs) gs.innerHTML = knownSources().map(src => `<div class="chk-btn" data-val="${src}" onclick="hEditSrc('${src.replace(/'/g,"\\'")}',this)">${src}</div>`).join("");
     const gp = $("grpPurpose"); if (gp) gp.innerHTML = knownPurposes().map(p => `<div class="chk-btn" data-val="${p}" onclick="this.classList.toggle('checked')">${p}</div>`).join("");
     const svcGrp = $("segEditService"); if (svcGrp) { const btns=qa(".ios-seg-btn",svcGrp); btns.forEach(b=>b.classList.remove("selected")); btns[0]&&btns[0].classList.add("selected"); ST.editSeg.service=false; updateIosPill(svcGrp); }
+    syncEditJourneyRule();
   }
 
   window.openAddModal = () => { if (!ST.isAdmin) return; if (!ST.editingId) initAddModal(); $("addModal").classList.add("show"); };
@@ -2278,9 +2383,16 @@
     const set = new Set(arr(texts)); qa("#" + groupId + " .chk-btn").forEach(b => b.classList.toggle("checked", set.has(b.dataset.val)));
   }
 
+  function syncEditJourneyRule(){
+    const oldCustomer=ST.editSeg.cust===false;
+    $("mJourneyReq")?.classList.toggle("hidden",oldCustomer);
+    $("mJourneyOptional")?.classList.toggle("hidden",!oldCustomer);
+  }
+
   window.setEditSeg = (dim, val, el) => {
     ST.editSeg.cust = val; const grp = el.parentElement;
     qa(".ios-seg-btn", grp).forEach(b => b.classList.remove("selected")); el && el.classList.add("selected"); updateIosPill(grp);
+    syncEditJourneyRule();
   };
   window.setEditPay = (val, el) => {
     ST.editSeg.pay = val; const grp = el.parentElement;
@@ -2323,7 +2435,7 @@
     if (v.is_new_customer === true){ ST.editSeg.cust = true; cBtns[1]&&cBtns[1].classList.add("selected"); }
     else if (v.is_new_customer === false){ ST.editSeg.cust = false; cBtns[2]&&cBtns[2].classList.add("selected"); }
     else { ST.editSeg.cust = null; cBtns[0]&&cBtns[0].classList.add("selected"); }
-    updateIosPill(cGrp);
+    updateIosPill(cGrp); syncEditJourneyRule();
 
     const pGrp = $("segEditPay"); setEditPay(Number(v.amount) > 0, qa(".ios-seg-btn", pGrp)[Number(v.amount)>0?0:1]);
     const svcGrp = $("segEditService"), svcBtns = qa(".ios-seg-btn", svcGrp);
@@ -2344,13 +2456,22 @@
     const sourceBase = [...ST.editJourney]; let sources = [...sourceBase]; const isNew = ST.editSeg.cust; const isService = ST.editSeg.service === true;
 
     if (!date){ alert("請選擇日期"); return; } if (!gender){ alert("請選擇性別"); return; } if (!age){ alert("請選擇年齡層"); return; }
-    if (!sources.length){ alert("請至少選一個客源"); return; } if (!purposes.length){ alert("請至少選一個目的"); return; }
+    if (isNew !== false && !sources.length){ alert("新客資料請至少選一個客源旅程"); return; } if (!purposes.length){ alert("請至少選一個目的"); return; }
     if (pay && !(amount > 0)){ alert("有消費時金額需大於 0"); return; }
 
     if (isNew === false){
       const flag = amount > 0 ? "老客回購" : "老客-未購";
       sources = sources.filter(t => t !== "老客回購" && t !== "老客-未購");
       if (!sources.includes(flag)) sources.push(flag);
+    }
+
+    if (date > localTodayStr()){
+      const candidate={id:ST.editingId,form_date:date,store_branch:store,customer_name:name,gender,age_range:age,source_tags:sources,visit_purposes:purposes,is_new_customer:isNew,amount,has_purchased:amount>0};
+      const risk=assessFutureDateRisk(candidate,ST.raw);
+      const warning=risk
+        ? `${risk.level==="high"?"高風險":"注意"}：你選擇的是未來日期 ${date}。\n系統發現 ${risk.compareDate} 有一筆相似資料，${risk.matches.join("、")}相同，疑似月份誤填。\n\n請確認日期。仍要儲存嗎？`
+        : `你選擇的 ${date} 是未來日期。\n\n請確認日期沒有選錯。仍要儲存嗎？`;
+      if(!confirm(warning))return;
     }
 
     const btn = $("btnSave"); btn && (btn.disabled = true, btn.innerText = "儲存中...");
@@ -2387,7 +2508,7 @@
         if (error) throw error;
       }
       closeAddModal(); ST.editingId = null; await fetchAllData(); alert("✅ 儲存成功");
-    } catch (err){ console.error("saveData 失敗：", err); alert("儲存失敗：" + (err.message || err)); } finally { btn && (btn.disabled = false, btn.innerText = "確認儲存"); }
+    } catch (err){ console.error("saveData 失敗：", err); alert(friendlyVisitSaveError(err,!!ST.editingId)); } finally { btn && (btn.disabled = false, btn.innerText = "確認儲存"); }
   };
 
   /* ===== 完美重製的詳細 Modal ===== */
