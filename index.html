@@ -15,6 +15,7 @@
   <!-- Supabase -->
   <script type="module">
     import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+    window.__wakodoCreateClient = createClient;
     window.supabase = createClient(
       "https://mdjnidbwqedzobjbhocd.supabase.co",
       "sb_publishable_RoO2nFORoi-VzRgWt75wWQ_OnHAbl9Y"
@@ -831,73 +832,42 @@
 
 
   const __HUB_PAGE = "index";
-  const __HUB_TICKET = (() => {
-    const raw = String(location.hash || "");
-    const m = raw.match(/^#hub=([^&]+)$/);
-    if (!m) return "";
-    try { return decodeURIComponent(m[1]); } catch { return ""; }
-  })();
-  let __hubProfile = null;
-
-  function __showHubOnly(message="此頁面僅能由 WAKODO HUB 授權開啟。") {
-    document.documentElement.innerHTML = `<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>WAKODO HUB｜權限驗證</title></head><body style="margin:0;min-height:100vh;display:grid;place-items:center;background:#f4f5f6;color:#252525;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans TC',sans-serif"><main style="width:min(420px,calc(100% - 40px));padding:30px;border-radius:24px;background:#fff;border:1px solid rgba(0,0,0,.08);box-shadow:0 18px 50px rgba(30,35,40,.10);text-align:center"><div style="font-size:13px;font-weight:900;letter-spacing:.12em;color:#4285f4">WAKODO HUB</div><h1 style="margin:12px 0 8px;font-size:24px">請洽管理員</h1><p style="margin:0;color:#74777b;font-size:14px;line-height:1.7">${message}</p></main></body>`;
-  }
-
-  async function __hubFunctionError(error, fallback="權限驗證失敗") {
-    try {
-      if (error?.context && typeof error.context.json === "function") {
-        const body = await error.context.json();
-        if (body?.error) return body.error;
-      }
-    } catch {}
-    return error?.message || fallback;
-  }
-
-  async function __initHubPageAccess() {
-    if (window.top === window.self || !__HUB_TICKET) { __showHubOnly(); return false; }
-    const { data:{ session } } = await window.supabase.auth.getSession();
-    if (!session) { __showHubOnly("登入狀態無效，請回到 WAKODO HUB 重新登入。"); return false; }
-    const { data, error } = await window.supabase.functions.invoke("hub-access", { body:{ action:"me" } });
-    if (error || data?.error || !data?.member || data.member.status !== "active") {
-      __showHubOnly(data?.error || await __hubFunctionError(error)); return false;
+    const __HUB_TICKET = (() => {
+      const raw = String(location.hash || "");
+      const m = raw.match(/^#hub=([^&]+)$/);
+      if (!m) return "";
+      try { return decodeURIComponent(m[1]); } catch { return ""; }
+    })();
+    const __HUB_SUPABASE_URL = "https://mdjnidbwqedzobjbhocd.supabase.co";
+    const __HUB_SUPABASE_KEY = "sb_publishable_RoO2nFORoi-VzRgWt75wWQ_OnHAbl9Y";
+    let __hubProfile = null;
+    let hubDb = null;
+  
+    function __showHubOnly(message="此頁面僅能由 WAKODO HUB 授權開啟。") {
+      document.documentElement.innerHTML = `<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>WAKODO HUB｜權限驗證</title></head><body style="margin:0;min-height:100vh;display:grid;place-items:center;background:#f4f5f6;color:#252525;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans TC',sans-serif"><main style="width:min(420px,calc(100% - 40px));padding:30px;border-radius:24px;background:#fff;border:1px solid rgba(0,0,0,.08);box-shadow:0 18px 50px rgba(30,35,40,.10);text-align:center"><div style="font-size:13px;font-weight:900;letter-spacing:.12em;color:#4285f4">WAKODO HUB</div><h1 style="margin:12px 0 8px;font-size:24px">請洽管理員</h1><p style="margin:0;color:#74777b;font-size:14px;line-height:1.7">${message}</p></main></body>`;
     }
-    const p=data.member;
-    const allowed = p.role === "owner" || p[{index:"can_view_index",performance:"can_view_performance",marketing:"can_view_marketing",social:"can_view_social"}[__HUB_PAGE]] === true;
-    if (!allowed) { __showHubOnly("您的帳號沒有此頁面的查看權限。"); return false; }
-    __hubProfile = p;
-    return true;
-  }
-
-  async function __hubExec(query) {
-    const { data, error } = await window.supabase.functions.invoke("hub-data", { body:{ page:__HUB_PAGE, ticket:__HUB_TICKET, query } });
-    if (error) return { data:null, error:{ message:await __hubFunctionError(error,"資料存取失敗") } };
-    if (data?.error && data?.ok !== false) return { data:null, error:{ message:data.error } };
-    return { data:data?.data ?? null, error:data?.error ?? null };
-  }
-
-  function __hubFrom(table) {
-    const q={table,method:"select",columns:"*",filters:[],orders:[]};
-    const b={
-      select(columns="*"){ if(q.method==="select") q.columns=columns; else q.returning=columns; return b; },
-      insert(payload){ q.method="insert"; q.payload=payload; return b; },
-      update(payload){ q.method="update"; q.payload=payload; return b; },
-      upsert(payload,opts={}){ q.method="upsert"; q.payload=payload; q.onConflict=opts?.onConflict || null; return b; },
-      delete(){ q.method="delete"; return b; },
-      eq(column,value){ q.filters.push({op:"eq",column,value}); return b; },
-      neq(column,value){ q.filters.push({op:"neq",column,value}); return b; },
-      ilike(column,value){ q.filters.push({op:"ilike",column,value}); return b; },
-      is(column,value){ q.filters.push({op:"is",column,value}); return b; },
-      order(column,opts={}){ q.orders.push({column,ascending:opts?.ascending!==false}); return b; },
-      range(from,to){ q.range=[from,to]; return b; },
-      limit(value){ q.limit=value; return b; },
-      single(){ q.single="single"; return b; },
-      maybeSingle(){ q.single="maybeSingle"; return b; },
-      then(resolve,reject){ return __hubExec(q).then(resolve,reject); },
-      catch(reject){ return __hubExec(q).catch(reject); }
-    };
-    return b;
-  }
-  const hubDb={from:__hubFrom};
+  
+    async function __initHubPageAccess() {
+      if (window.top === window.self || !__HUB_TICKET) { __showHubOnly(); return false; }
+      const { data:{ session } } = await window.supabase.auth.getSession();
+      if (!session?.access_token) { __showHubOnly("登入狀態無效，請回到 WAKODO HUB 重新登入。"); return false; }
+      const createPageClient = window.__wakodoCreateClient;
+      if (typeof createPageClient !== "function") { __showHubOnly("頁面授權模組尚未就緒，請回到 WAKODO HUB 重新開啟。"); return false; }
+      hubDb = createPageClient(__HUB_SUPABASE_URL, __HUB_SUPABASE_KEY, {
+        global: { headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          "x-hub-ticket": __HUB_TICKET,
+          "x-hub-page": __HUB_PAGE
+        } },
+        auth: { persistSession:false, autoRefreshToken:false, detectSessionInUrl:false }
+      });
+      const { data, error } = await hubDb.rpc("hub_ticket_profile", { p_page:__HUB_PAGE });
+      if (error || !data?.ok || !data?.member || data.member.status !== "active") {
+        __showHubOnly(data?.error || error?.message || "HUB 通行證無效、已過期或沒有此頁權限"); return false;
+      }
+      __hubProfile = data.member;
+      return true;
+    }
 
   const CFG = Object.freeze({
     VERSION: "14.5.2",
@@ -2339,7 +2309,8 @@
     try {
       let all = [], from = 0;
       while (true){
-        const { data, error } = await hubDb.from("visits").select("*").order("form_date", { ascending:false }).range(from, from + CFG.PAGE_SIZE - 1);
+        const visitSource = (__hubProfile?.role === "owner" || __hubProfile?.can_view_index_sensitive === true) ? "visits" : "hub_index_visits_safe";
+        const { data, error } = await hubDb.from(visitSource).select("*").order("form_date", { ascending:false }).range(from, from + CFG.PAGE_SIZE - 1);
         if (error) throw error;
         if (!data || !data.length) break;
         all = all.concat(data);
