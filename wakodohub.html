@@ -338,6 +338,15 @@
       .action-btn.reload{display:none}
       .tab{padding:7px 8px;font-size:11px}
     }
+
+    .perm-grid{display:flex;flex-wrap:wrap;gap:7px;align-items:center}
+    .perm-check{display:inline-flex;align-items:center;gap:5px;padding:6px 8px;border:1px solid var(--line);border-radius:9px;background:#f8f9fa;color:#555b61;font-size:10px;font-weight:850;white-space:nowrap}
+    .perm-check input{accent-color:var(--blue)}
+    .member-access-row,.code-access-row{padding:13px;border:1px solid var(--line);border-radius:14px;background:#fff;display:grid;gap:10px}
+    .member-access-head,.code-access-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+    .member-access-meta,.code-access-meta{font-size:10px;color:#85898e;font-weight:750;line-height:1.55;margin-top:3px}
+    .access-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+    .pending-label{color:#d97706;font-weight:900}.rejected-label{color:#b3261e;font-weight:900}
   </style>
 </head>
 <body>
@@ -348,54 +357,38 @@
         <div class="gate-brand-name">WAKODO HUB</div>
       </div>
       <h1 id="authTitle" class="gate-title">登入 WAKODO HUB</h1>
-      <p id="authDesc" class="gate-desc">使用您的手機號碼與個人密碼登入。沒有公開註冊入口，新帳號僅能透過一次性邀請建立。</p>
+      <p id="authDesc" class="gate-desc">使用您的手機號碼與個人密碼登入。WAKODO HUB 是所有功能頁的唯一授權入口。</p>
 
       <div id="loginPanel">
-        <div class="field">
-          <label class="field-label" for="loginPhone">手機號碼</label>
-          <input id="loginPhone" class="gate-input" type="tel" inputmode="numeric" placeholder="09xxxxxxxx" autocomplete="username" />
-        </div>
-        <div class="field">
-          <label class="field-label" for="loginPassword">密碼</label>
-          <input id="loginPassword" class="gate-input" type="password" placeholder="輸入密碼" autocomplete="current-password" />
-        </div>
+        <div class="field"><label class="field-label" for="loginPhone">手機號碼</label><input id="loginPhone" class="gate-input" type="tel" inputmode="numeric" placeholder="09xxxxxxxx" autocomplete="username" /></div>
+        <div class="field"><label class="field-label" for="loginPassword">密碼</label><input id="loginPassword" class="gate-input" type="password" placeholder="輸入密碼" autocomplete="current-password" /></div>
         <button id="hubEnter" class="gate-btn" type="button">登入 WAKODO HUB</button>
         <div id="hubGateError" class="gate-error"></div>
+        <button id="openRegister" class="gate-link-btn" type="button">申請／建立新帳號</button>
       </div>
 
-      <div id="invitePanel" class="hidden">
-        <div id="inviteBadge" class="invite-badge">正在確認邀請…</div>
-        <div class="field">
-          <label class="field-label" for="registerName">姓名／稱呼</label>
-          <input id="registerName" class="gate-input" type="text" maxlength="80" placeholder="請填寫方便辨識的姓名或稱呼" autocomplete="name" />
-        </div>
-        <div class="field">
-          <label class="field-label" for="registerPhone">手機號碼</label>
-          <input id="registerPhone" class="gate-input" type="tel" inputmode="numeric" placeholder="09xxxxxxxx" autocomplete="tel" />
-        </div>
+      <div id="registerPanel" class="hidden">
+        <div class="field"><label class="field-label" for="accessCode">邀請碼（選填）</label><input id="accessCode" class="gate-input" type="text" maxlength="32" placeholder="XXXX-XXXX-XXXX" autocomplete="off" /></div>
+        <p class="gate-note" style="margin-top:8px">擁有邀請碼者無需等待審核；自行註冊者需經管理員審核後方可查看。</p>
+        <div id="codeBadge" class="invite-badge hidden" style="margin-top:12px"></div>
+        <div class="field"><label class="field-label" for="registerName">姓名／稱呼</label><input id="registerName" class="gate-input" type="text" maxlength="80" placeholder="請填寫方便辨識的姓名或稱呼" autocomplete="name" /></div>
+        <div class="field"><label class="field-label" for="registerPhone">手機號碼</label><input id="registerPhone" class="gate-input" type="tel" inputmode="numeric" placeholder="09xxxxxxxx" autocomplete="tel" /></div>
         <div class="gate-row">
-          <div class="field">
-            <label class="field-label" for="registerPassword">設定密碼</label>
-            <input id="registerPassword" class="gate-input" type="password" placeholder="至少 8 個字元" autocomplete="new-password" />
-          </div>
-          <div class="field">
-            <label class="field-label" for="registerPassword2">再次輸入</label>
-            <input id="registerPassword2" class="gate-input" type="password" placeholder="再次輸入密碼" autocomplete="new-password" />
-          </div>
+          <div class="field"><label class="field-label" for="registerPassword">設定密碼</label><input id="registerPassword" class="gate-input" type="password" placeholder="至少 8 個字元" autocomplete="new-password" /></div>
+          <div class="field"><label class="field-label" for="registerPassword2">再次輸入</label><input id="registerPassword2" class="gate-input" type="password" placeholder="再次輸入密碼" autocomplete="new-password" /></div>
         </div>
-        <p class="gate-note">註冊成功後，這一條邀請連結會立即永久失效。系統不會保存可讀取的原始密碼。</p>
-        <button id="registerSubmit" class="gate-btn" type="button">建立帳號並登入</button>
+        <button id="registerSubmit" class="gate-btn" type="button">送出註冊</button>
         <div id="registerError" class="gate-error"></div>
-        <button id="backToLogin" class="gate-link-btn" type="button">返回一般登入</button>
+        <button id="backToLogin" class="gate-link-btn" type="button">返回登入</button>
       </div>
 
-      <div id="inviteInvalid" class="hidden">
-        <div class="invite-badge" style="color:#b3261e;background:rgba(234,67,53,.07);border-color:rgba(234,67,53,.14)">此邀請連結無法使用</div>
-        <p id="inviteInvalidText" class="gate-desc" style="margin-bottom:12px">邀請可能已使用、被停用或已過期。</p>
-        <button id="invalidBackLogin" class="gate-btn" type="button">返回登入</button>
+      <div id="pendingPanel" class="hidden">
+        <div class="invite-badge" style="color:#806d43;background:#fff8e9;border-color:#f0dfb9">帳號申請已送出</div>
+        <p class="gate-desc" style="margin-bottom:14px">您的帳號目前等待管理員審核。核准後即可依授權範圍使用 WAKODO HUB。</p>
+        <button id="pendingBackLogin" class="gate-btn" type="button">返回登入</button>
       </div>
 
-      <div class="gate-foot">WAKODO HUB v1.2.2 · 個人帳號登入 · 登入狀態最長保留 30 天</div>
+      <div class="gate-foot">WAKODO HUB v2.0 · 個人帳號與權限管理 · 登入狀態最長保留 30 天</div>
     </div>
   </div>
 
@@ -490,36 +483,32 @@
     </div>
   </div>
 
-  <div id="adminModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-label="帳號與邀請管理">
+  <div id="adminModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-label="帳號與邀請碼管理">
     <div class="hub-modal admin">
       <div class="modal-head">
-        <div><div class="modal-title">帳號與邀請管理</div><div class="modal-sub">Owner 專屬 · 管理成員與一次性邀請</div></div>
+        <div><div class="modal-title">帳號與權限管理</div><div class="modal-sub">Owner 專屬 · 審核帳號、頁面權限、Index 敏感資料與多人邀請碼</div></div>
         <button class="modal-close" type="button" data-close-modal="adminModal">×</button>
       </div>
       <div class="modal-body">
         <div class="admin-tabs">
-          <button class="admin-tab active" type="button" data-admin-tab="members">成員</button>
-          <button class="admin-tab" type="button" data-admin-tab="invites">邀請連結</button>
+          <button class="admin-tab active" type="button" data-admin-tab="members">成員與審核</button>
+          <button class="admin-tab" type="button" data-admin-tab="codes">邀請碼</button>
         </div>
-
         <div id="adminMembersPanel" class="admin-panel">
           <div class="admin-summary"><div><strong>成員名單</strong><span id="memberCount"></span></div><button id="refreshAdmin" class="secondary-btn" type="button">重新整理</button></div>
           <div id="memberList" class="member-list"><div class="empty-state">正在載入…</div></div>
         </div>
-
-        <div id="adminInvitesPanel" class="admin-panel hidden">
-          <div class="admin-summary"><div><strong>一次性邀請</strong><span>每條連結只能成功註冊一個帳號</span></div></div>
-          <div class="invite-create">
-            <input id="inviteLabel" class="modal-input" type="text" maxlength="120" placeholder="對象姓名／稱呼（選填）" />
-            <select id="inviteDays" class="modal-select"><option value="1">1 天</option><option value="3">3 天</option><option value="7" selected>7 天</option><option value="30">30 天</option><option value="90">90 天</option></select>
-            <button id="createInviteBtn" class="primary-small" type="button">建立邀請</button>
+        <div id="adminCodesPanel" class="admin-panel hidden">
+          <div class="admin-summary"><div><strong>多人邀請碼</strong><span>同一組邀請碼可依設定重複使用；持碼者無需人工審核</span></div></div>
+          <div class="invite-create" style="grid-template-columns:minmax(150px,1fr) 105px 105px auto">
+            <input id="codeLabel" class="modal-input" type="text" maxlength="120" placeholder="邀請碼用途／對象" />
+            <select id="codeDays" class="modal-select"><option value="7">7 天</option><option value="30" selected>30 天</option><option value="90">90 天</option><option value="365">365 天</option></select>
+            <input id="codeMaxUses" class="modal-input" type="number" min="1" placeholder="不限人數" title="留空代表不限使用次數" />
+            <button id="createCodeBtn" class="primary-small" type="button">建立邀請碼</button>
           </div>
-          <div id="newInviteResult" class="new-invite-result hidden">
-            <strong>邀請已建立，請把這條連結傳給對方</strong>
-            <div class="copy-row"><input id="newInviteLink" class="modal-input" type="text" readonly /><button id="copyInviteBtn" class="secondary-btn" type="button">複製</button></div>
-            <div class="gate-note">邀請連結可在下方清單重新查看與複製；成功註冊後連結會永久失效。</div>
-          </div>
-          <div id="inviteList" class="invite-list"><div class="empty-state">正在載入…</div></div>
+          <div id="codeCreatePerms" class="perm-grid" style="margin:0 0 12px"></div>
+          <div id="newCodeResult" class="new-invite-result hidden"><strong>邀請連結已建立</strong><div class="copy-row"><input id="newCodeLink" class="modal-input" type="text" readonly /><button id="copyCodeBtn" class="secondary-btn" type="button">複製</button></div></div>
+          <div id="codeList" class="invite-list"><div class="empty-state">正在載入…</div></div>
         </div>
       </div>
     </div>
@@ -527,543 +516,73 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // WAKODO HUB v1.2.3 — Supabase Auth + Hub Owner child-page authorization
-    const HUB = Object.freeze({
-      VERSION: "1.2.3",
-      SUPABASE_URL: "https://mdjnidbwqedzobjbhocd.supabase.co",
-      SUPABASE_KEY: "sb_publishable_RoO2nFORoi-VzRgWt75wWQ_OnHAbl9Y",
-      LOGIN_AT_KEY: "wakodo_hub_login_at_v2",
-      MAX_LOGIN_AGE: 30 * 24 * 60 * 60 * 1000,
-      CHILD_TTL: 48 * 60 * 60 * 1000,
-      STORE_RADIUS_M: 150,
-      STORE_COORDS_KEY: "wakodo_hub_store_coords_v1",
-      STORES: {
-        linan: { label:"臨安店", address:"台南市中西區臨安路一段100號" },
-        nanke: { label:"南科店", address:"台南市新市區龍目井路165號" }
-      },
-      PAGES: {
-        customer: { label: "客源分析", src: "index.html" },
-        performance: { label: "業績分析", src: "performance.html" },
-        marketing: { label: "行銷開支分析", src: "marketing.html" },
-        social: { label: "社群發文成效分析", src: "social-analytics.html" }
-      }
+    const HUB=Object.freeze({
+      VERSION:"2.0.0",SUPABASE_URL:"https://mdjnidbwqedzobjbhocd.supabase.co",SUPABASE_KEY:"sb_publishable_RoO2nFORoi-VzRgWt75wWQ_OnHAbl9Y",
+      LOGIN_AT_KEY:"wakodo_hub_login_at_v2",MAX_LOGIN_AGE:30*24*60*60*1000,STORE_RADIUS_M:150,STORE_COORDS_KEY:"wakodo_hub_store_coords_v1",
+      STORES:{linan:{label:"臨安店",address:"台南市中西區臨安路一段100號"},nanke:{label:"南科店",address:"台南市新市區龍目井路165號"}},
+      PAGES:{customer:{label:"客源分析",src:"index.html",permission:"can_view_index",ticketPage:"index"},performance:{label:"業績分析",src:"performance.html",permission:"can_view_performance",ticketPage:"performance"},marketing:{label:"行銷開支分析",src:"marketing.html",permission:"can_view_marketing",ticketPage:"marketing"},social:{label:"社群發文成效分析",src:"social-analytics.html",permission:"can_view_social",ticketPage:"social"}}
     });
+    const sb=window.supabase.createClient(HUB.SUPABASE_URL,HUB.SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
+    const state={active:"customer",loaded:new Set(),profile:null,members:[],codes:[],codeFromHash:""};
+    const $=id=>document.getElementById(id),qa=sel=>Array.from(document.querySelectorAll(sel));
+    const esc=t=>String(t??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
+    const fmtDate=v=>{if(!v)return"—";try{return new Intl.DateTimeFormat("zh-TW",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"}).format(new Date(v));}catch{return"—";}};
+    function showToast(t){const e=$("hubToast");e.textContent=t;e.classList.add("show");clearTimeout(showToast._t);showToast._t=setTimeout(()=>e.classList.remove("show"),1800);}
+    function normalizePhone(v){let d=String(v||"").replace(/\D/g,"");if(d.startsWith("8869")&&d.length===12)d="0"+d.slice(3);if(!/^09\d{8}$/.test(d))throw new Error("請輸入有效的台灣手機號碼");return d;}
+    const authEmailForPhone=p=>`886${p.slice(1)}@hub.wakodo.invalid`;
+    async function functionError(error,fallback="操作失敗"){try{if(error?.context&&typeof error.context.json==="function"){const b=await error.context.json();return b?.error||fallback;}}catch{}return error?.message||fallback;}
+    function codeFromHash(){const raw=String(location.hash||"");if(!raw.toLowerCase().startsWith("#code="))return"";try{return decodeURIComponent(raw.slice(6)).trim();}catch{return"";}}
+    const codeLink=c=>`${location.origin}${location.pathname}#code=${encodeURIComponent(c)}`;
+    function setGateError(t=""){$("hubGateError").textContent=t;$("hubGateError").classList.toggle("visible",!!t);}
+    function setRegisterError(t=""){$("registerError").textContent=t;$("registerError").classList.toggle("visible",!!t);}
+    function showPanel(name){for(const id of ["loginPanel","registerPanel","pendingPanel"])$(id).classList.toggle("hidden",id!==name);}
+    function showLoginGate(message=""){$("hubApp").classList.add("hidden");$("hubGate").style.display="flex";showPanel("loginPanel");$("authTitle").textContent="登入 WAKODO HUB";$("authDesc").textContent="使用您的手機號碼與個人密碼登入。WAKODO HUB 是所有功能頁的唯一授權入口。";setGateError(message);}
+    async function openRegister(code=""){$("hubApp").classList.add("hidden");$("hubGate").style.display="flex";showPanel("registerPanel");$("authTitle").textContent="建立 WAKODO HUB 帳號";$("authDesc").textContent="邀請碼可直接取得預設權限；未填邀請碼則送出審核申請。";$("accessCode").value=code||"";$("codeBadge").classList.add("hidden");setRegisterError("");if(code)await validateCode();}
+    async function validateCode(){const code=$("accessCode").value.trim();if(!code){$("codeBadge").classList.add("hidden");return true;}const {data,error}=await sb.functions.invoke("hub-register",{body:{action:"validate_code",access_code:code}});if(error||data?.error){$("codeBadge").classList.add("hidden");setRegisterError(data?.error||await functionError(error,"邀請碼無效"));return false;}const p=data.code?.permissions||{};const labels=[];if(p.index)labels.push("客源");if(p.performance)labels.push("業績");if(p.marketing)labels.push("行銷");if(p.social)labels.push("社群");if(p.index_sensitive)labels.push("Index敏感資料");$("codeBadge").textContent=`邀請碼有效${data.code?.label?" · "+data.code.label:""}｜${labels.join("、")||"無頁面權限"}`;$("codeBadge").classList.remove("hidden");setRegisterError("");return true;}
+    async function register(){setRegisterError("");const name=$("registerName").value.trim(),pwd=$("registerPassword").value,pwd2=$("registerPassword2").value,code=$("accessCode").value.trim();let phone;try{phone=normalizePhone($("registerPhone").value);}catch(e){return setRegisterError(e.message);}if(!name)return setRegisterError("請填寫姓名或稱呼");if(pwd.length<8)return setRegisterError("密碼至少需要 8 個字元");if(pwd!==pwd2)return setRegisterError("兩次輸入的密碼不一致");if(code&&!(await validateCode()))return;const btn=$("registerSubmit");btn.disabled=true;btn.textContent="送出中…";try{const action=code?"register_code":"register_self";const {data,error}=await sb.functions.invoke("hub-register",{body:{action,access_code:code||undefined,display_name:name,phone,password:pwd}});if(error||data?.error)throw new Error(data?.error||await functionError(error,"註冊失敗"));if(data.status==="pending"){showPanel("pendingPanel");$("authTitle").textContent="等待管理員審核";$("authDesc").textContent="申請已成功建立。";return;}const {error:loginErr}=await sb.auth.signInWithPassword({email:authEmailForPhone(phone),password:pwd});if(loginErr)throw new Error("帳號建立成功，請返回登入");localStorage.setItem(HUB.LOGIN_AT_KEY,String(Date.now()));const profile=await loadMyProfile();if(!profile||profile.status!=="active")throw new Error("帳號尚未取得使用權限");await sb.rpc("hub_touch_my_session");history.replaceState(null,"",`${location.pathname}${location.search}#customer`);showHub(profile);requestCurrentLocation(false);}catch(e){setRegisterError(e.message||"註冊失敗");}finally{btn.disabled=false;btn.textContent="送出註冊";}}
+    async function loadMyProfile(){const {data,error}=await sb.functions.invoke("hub-access",{body:{action:"me"}});if(error||data?.error)return null;state.profile=data.member||null;return state.profile;}
+    async function login(){setGateError("");let phone;try{phone=normalizePhone($("loginPhone").value);}catch(e){return setGateError(e.message);}const password=$("loginPassword").value;if(!password)return setGateError("請輸入密碼");const btn=$("hubEnter");btn.disabled=true;btn.textContent="登入中…";try{const {error}=await sb.auth.signInWithPassword({email:authEmailForPhone(phone),password});if(error)throw new Error("手機號碼或密碼錯誤");const profile=await loadMyProfile();if(!profile){await sb.auth.signOut();throw new Error("此帳號沒有 WAKODO HUB 使用權限");}if(profile.status==="pending"){await sb.auth.signOut();showPanel("pendingPanel");$("authTitle").textContent="等待管理員審核";$("authDesc").textContent="您的申請已送出，管理員核准後即可登入。";return;}if(profile.status!=="active"){await sb.auth.signOut();throw new Error(profile.status==="rejected"?"此帳號申請未獲核准":"此帳號目前已停用，請聯絡管理員");}localStorage.setItem(HUB.LOGIN_AT_KEY,String(Date.now()));await sb.rpc("hub_touch_my_session");showHub(profile);requestCurrentLocation(false);}catch(e){setGateError(e.message||"登入失敗");}finally{btn.disabled=false;btn.textContent="登入 WAKODO HUB";}}
+    function canPage(name){const p=state.profile;if(!p)return false;return p.role==="owner"||p[HUB.PAGES[name]?.permission]===true;}
+    function permittedPages(){return Object.keys(HUB.PAGES).filter(canPage);}
+    function updateUserChrome(){const p=state.profile;if(!p)return;$("userAvatar").textContent=(p.display_name||"W").trim().charAt(0).toUpperCase()||"W";$("userMenuName").textContent=p.display_name;$("menuProfileName").textContent=p.display_name;$("menuProfileRole").textContent=p.role==="owner"?"Owner · 最高管理員":"Member · 成員";$("openHubAdmin").classList.toggle("hidden",p.role!=="owner");$("profileName").textContent=p.display_name;$("profilePhone").textContent=p.phone;$("profileRole").textContent=p.role==="owner"?"Owner":"Member";$("profileRole").classList.toggle("owner",p.role==="owner");renderMyLocation();}
+    function showHub(profile){state.profile=profile;$("hubGate").style.display="none";$("hubApp").classList.remove("hidden");qa(".tab").forEach(btn=>btn.classList.toggle("hidden",!canPage(btn.dataset.view)));qa(".view").forEach(panel=>panel.classList.toggle("hidden",!canPage(panel.dataset.viewPanel)));$("openCurrent").classList.add("hidden");updateUserChrome();const allowed=permittedPages();if(!allowed.length){return showLoginGate("此帳號目前沒有任何頁面查看權限");}const raw=String(location.hash||"").replace(/^#/,"");const target=allowed.includes(raw)?raw:allowed[0];switchView(target,false);}
+    async function issueTicket(name){const page=HUB.PAGES[name];const {data,error}=await sb.functions.invoke("hub-access",{body:{action:"ticket",page:page.ticketPage}});if(error||data?.error)throw new Error(data?.error||await functionError(error,"無法取得頁面通行證"));return data.ticket;}
+    async function loadView(name,force=false){if(!canPage(name))return;if(state.loaded.has(name)&&!force)return;const panel=document.querySelector(`[data-view-panel="${name}"]`),frame=panel?.querySelector("iframe"),loading=panel?.querySelector(".loading");if(!frame)return;if(loading)loading.style.display="grid";try{const ticket=await issueTicket(name);frame.src=`${HUB.PAGES[name].src}#hub=${encodeURIComponent(ticket)}`;state.loaded.add(name);frame.onload=()=>{if(loading)loading.style.display="none";};}catch(e){if(loading){loading.innerHTML=`<div class="loading-inner">${esc(e.message||"沒有查看權限")}</div>`;}showToast(e.message||"無法開啟頁面");}}
+    function syncTabSlider(name=state.active){const tabs=document.querySelector(".tabs"),slider=document.querySelector(".tab-slider"),active=document.querySelector(`.tab[data-view="${name}"]:not(.hidden)`);if(!tabs||!slider||!active)return;slider.style.width=active.offsetWidth+"px";slider.style.left=active.offsetLeft+"px";}
+    async function switchView(name,updateHash=true){if(!canPage(name))name=permittedPages()[0];if(!name)return;state.active=name;qa(".tab").forEach(btn=>btn.classList.toggle("active",btn.dataset.view===name));qa(".view").forEach(panel=>panel.classList.toggle("active",panel.dataset.viewPanel===name));requestAnimationFrame(()=>syncTabSlider(name));await loadView(name);if(updateHash&&location.hash!==`#${name}`)history.replaceState(null,"",`${location.pathname}${location.search}#${name}`);document.title=`${HUB.PAGES[name].label}｜WAKODO HUB`;}
+    async function logout(show=true){await sb.auth.signOut();localStorage.removeItem(HUB.LOGIN_AT_KEY);state.profile=null;state.loaded.forEach(name=>{const f=document.querySelector(`[data-view-panel="${name}"] iframe`);if(f)f.removeAttribute("src");});state.loaded.clear();$("loginPassword").value="";history.replaceState(null,"",`${location.pathname}${location.search}`);showLoginGate();if(show)showToast("已登出 WAKODO HUB");}
+    function openModal(id){const e=$(id);if(!e)return;clearTimeout(e._closeTimer);e.classList.remove("closing","hidden");}
+    function closeModal(id){const e=$(id);if(!e||e.classList.contains("hidden"))return;e.classList.add("closing");clearTimeout(e._closeTimer);e._closeTimer=setTimeout(()=>{e.classList.add("hidden");e.classList.remove("closing");},165);}
+    function closeMenu(){$("userMenu").classList.add("hidden");$("userMenuBtn").setAttribute("aria-expanded","false");}
+    function locationText(scope,distance,accuracy,at){const labels={linan:"臨安店附近",nanke:"南科店附近",outside:"非公司範圍",denied:"未授權位置",unknown:"尚未判定"};const bits=[];if(Number.isFinite(Number(distance)))bits.push(scope==="outside"?`距最近門市約 ${distance>=1000?(distance/1000).toFixed(1)+" km":distance+" m"}`:`距門市約 ${distance} m`);if(Number.isFinite(Number(accuracy)))bits.push(`定位精度 ±${accuracy} m`);if(at)bits.push(`更新於 ${fmtDate(at)}`);return{main:labels[scope]||labels.unknown,sub:bits.join(" · ")||(scope==="denied"?"瀏覽器未允許取得位置":"尚無位置紀錄")};}
+    function renderMyLocation(){const p=state.profile||{},t=locationText(p.last_location_scope,p.last_location_distance_m,p.last_location_accuracy_m,p.last_location_at);$("myLocationMain").textContent=t.main;$("myLocationSub").textContent=t.sub;}
+    function haversineM(a,b){const R=6371000,rad=x=>x*Math.PI/180,dLat=rad(b.lat-a.lat),dLon=rad(b.lon-a.lon),lat1=rad(a.lat),lat2=rad(b.lat);const h=Math.sin(dLat/2)**2+Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.sqrt(h));}
+    async function geocodeStore(store){const r=await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=tw&accept-language=zh-TW&q=${encodeURIComponent(store.address)}`,{headers:{Accept:"application/json"}});if(!r.ok)throw new Error("門市座標服務暫時無法使用");const rows=await r.json();if(!rows?.[0])throw new Error("找不到門市座標");return{lat:Number(rows[0].lat),lon:Number(rows[0].lon)};}
+    async function getStoreCoords(){try{const c=JSON.parse(localStorage.getItem(HUB.STORE_COORDS_KEY)||"null");if(c?.linan?.lat&&c?.nanke?.lat)return c;}catch{}const c={};for(const k of ["linan","nanke"])c[k]=await geocodeStore(HUB.STORES[k]);localStorage.setItem(HUB.STORE_COORDS_KEY,JSON.stringify(c));return c;}
+    async function saveLocation(scope,distance=null,accuracy=null){const {error}=await sb.rpc("hub_update_my_location",{p_scope:scope,p_distance_m:distance,p_accuracy_m:accuracy});if(error)throw error;if(state.profile){Object.assign(state.profile,{last_location_scope:scope,last_location_distance_m:distance,last_location_accuracy_m:accuracy,last_location_at:new Date().toISOString()});renderMyLocation();}}
+    async function requestCurrentLocation(userInitiated=true){if(!state.profile)return;const btn=$("refreshMyLocation");if(btn){btn.disabled=true;btn.textContent="定位中…";}if(!navigator.geolocation){if(userInitiated)showToast("此瀏覽器不支援位置功能");if(btn){btn.disabled=false;btn.textContent="更新位置";}return;}navigator.geolocation.getCurrentPosition(async pos=>{try{const c=await getStoreCoords(),here={lat:pos.coords.latitude,lon:pos.coords.longitude},dL=Math.round(haversineM(here,c.linan)),dN=Math.round(haversineM(here,c.nanke)),n=dL<=dN?{scope:"linan",distance:dL}:{scope:"nanke",distance:dN},scope=n.distance<=HUB.STORE_RADIUS_M?n.scope:"outside";await saveLocation(scope,n.distance,Math.max(0,Math.round(pos.coords.accuracy||0)));if(userInitiated)showToast("位置已更新");}catch{if(userInitiated)showToast("已取得位置，但暫時無法判定門市範圍");}finally{if(btn){btn.disabled=false;btn.textContent="更新位置";}}},async err=>{try{await saveLocation(err?.code===1?"denied":"unknown");}catch{}if(userInitiated)showToast(err?.code===1?"您尚未允許位置權限":"目前無法取得位置");if(btn){btn.disabled=false;btn.textContent="更新位置";}},{enableHighAccuracy:true,timeout:10000,maximumAge:60000});}
+    async function changePassword(){const current=$("currentPassword").value,np=$("newPassword").value,np2=$("newPassword2").value,msg=$("passwordMessage");msg.style.color="var(--red)";msg.textContent="";if(!current)return msg.textContent="請輸入目前密碼";if(np.length<8)return msg.textContent="新密碼至少需要 8 個字元";if(np!==np2)return msg.textContent="兩次輸入的新密碼不一致";const btn=$("changePasswordBtn");btn.disabled=true;try{const {error:v}=await sb.auth.signInWithPassword({email:authEmailForPhone(state.profile.phone),password:current});if(v)throw new Error("目前密碼不正確");const {error}=await sb.auth.updateUser({password:np});if(error)throw error;$("currentPassword").value=$("newPassword").value=$("newPassword2").value="";msg.style.color="#188038";msg.textContent="密碼已更新";showToast("密碼已更新");}catch(e){msg.textContent=e.message||"密碼更新失敗";}finally{btn.disabled=false;}}
+    async function callAdmin(action,payload={}){const {data,error}=await sb.functions.invoke("hub-admin",{body:{action,...payload}});if(error)throw new Error(await functionError(error,"管理操作失敗"));if(data?.error)throw new Error(data.error);return data;}
+    const permDefs=[['can_view_index','客源'],['can_view_performance','業績'],['can_view_marketing','行銷'],['can_view_social','社群'],['can_view_index_sensitive','Index姓名/單筆金額']];
+    function permHtml(obj,prefix,disabled=false){return permDefs.map(([k,label])=>`<label class="perm-check"><input type="checkbox" data-perm-owner="${prefix}" data-perm-key="${k}" ${obj?.[k]?'checked':''} ${disabled?'disabled':''}>${label}</label>`).join("");}
+    function readPerms(prefix){const out={};permDefs.forEach(([k])=>{const e=document.querySelector(`[data-perm-owner="${prefix}"][data-perm-key="${k}"]`);out[k]=!!e?.checked;});return out;}
+    async function loadAdminData(){if(state.profile?.role!=="owner")return;try{const [m,c]=await Promise.all([callAdmin("list_members"),callAdmin("list_access_codes")]);state.members=m.members||[];state.codes=c.codes||[];renderMembers();renderCodes();}catch(e){showToast(e.message||"管理資料載入失敗");}}
+    function statusText(m){if(m.status==="pending")return'<span class="pending-label">待審核</span>';if(m.status==="rejected")return'<span class="rejected-label">未核准</span>';if(m.status==="disabled")return'已停用';return'使用中';}
+    function renderMembers(){$("memberCount").textContent=`${state.members.length} 位`;if(!state.members.length){$("memberList").innerHTML='<div class="empty-state">尚無成員</div>';return;}$("memberList").innerHTML=state.members.map((m,i)=>{const owner=m.role==="owner",prefix=`m-${m.user_id}`;let actions=owner?'':m.status==="pending"?`<button class="tiny-btn" data-approve="${m.user_id}">核准</button><button class="tiny-btn danger" data-reject="${m.user_id}">拒絕</button>`:`<button class="tiny-btn" data-save-member="${m.user_id}">儲存權限</button><button class="tiny-btn ${m.status==='active'?'danger':''}" data-status="${m.user_id}" data-next="${m.status==='active'?'disabled':'active'}">${m.status==='active'?'停用':'啟用'}</button>`;return`<div class="member-access-row" style="animation-delay:${Math.min(i,8)*20}ms"><div class="member-access-head"><div class="row-main"><strong>${esc(m.display_name)} ${owner?'<span class="mini-pill owner">Owner</span>':''}</strong><div class="member-access-meta">${esc(m.phone)} · ${statusText(m)} · ${esc(m.registration_source||'legacy')} · 建立 ${fmtDate(m.created_at)}</div></div><div class="access-actions">${actions}</div></div><div class="perm-grid">${permHtml(m,prefix,owner)}</div></div>`;}).join("");qa('[data-save-member]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{await callAdmin('set_member_permissions',{user_id:b.dataset.saveMember,...readPerms(`m-${b.dataset.saveMember}`)});showToast('權限已更新');await loadAdminData();}catch(e){showToast(e.message);}finally{b.disabled=false;}});qa('[data-approve]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{await callAdmin('approve_member',{user_id:b.dataset.approve,...readPerms(`m-${b.dataset.approve}`)});showToast('已核准帳號');await loadAdminData();}catch(e){showToast(e.message);}finally{b.disabled=false;}});qa('[data-reject]').forEach(b=>b.onclick=async()=>{if(!confirm('確定拒絕這個帳號申請？'))return;try{await callAdmin('reject_member',{user_id:b.dataset.reject});showToast('已拒絕申請');await loadAdminData();}catch(e){showToast(e.message);}});qa('[data-status]').forEach(b=>b.onclick=async()=>{try{await callAdmin('set_member_status',{user_id:b.dataset.status,status:b.dataset.next});showToast('帳號狀態已更新');await loadAdminData();}catch(e){showToast(e.message);}});}
+    function codeStatus(c){if(new Date(c.expires_at).getTime()<=Date.now())return'已過期';if(c.max_uses!=null&&Number(c.use_count)>=Number(c.max_uses))return'已額滿';return c.is_active?'有效':'已停用';}
+    function renderCodes(){if(!state.codes.length){$("codeList").innerHTML='<div class="empty-state">尚未建立邀請碼</div>';return;}$("codeList").innerHTML=state.codes.map((c,i)=>{const prefix=`c-${c.id}`,usable=c.code&&c.is_active&&new Date(c.expires_at).getTime()>Date.now();return`<div class="code-access-row"><div class="code-access-head"><div class="row-main"><strong>${esc(c.label||'未命名邀請碼')}</strong><div class="code-access-meta">${esc(c.code||'舊資料未保存可讀邀請碼')} · ${codeStatus(c)} · 已使用 ${c.use_count}${c.max_uses==null?' / 不限':` / ${c.max_uses}`} · 到期 ${fmtDate(c.expires_at)}</div></div><div class="access-actions">${usable?`<button class="tiny-btn" data-copy-code="${c.id}">複製連結</button>`:''}<button class="tiny-btn" data-save-code="${c.id}">儲存權限</button><button class="tiny-btn ${c.is_active?'danger':''}" data-toggle-code="${c.id}" data-active="${c.is_active?'false':'true'}">${c.is_active?'停用':'啟用'}</button></div></div><div class="perm-grid">${permHtml(c,prefix,false)}</div></div>`;}).join("");qa('[data-copy-code]').forEach(b=>b.onclick=async()=>{const c=state.codes.find(x=>x.id===b.dataset.copyCode);if(!c?.code)return;try{await navigator.clipboard.writeText(codeLink(c.code));showToast('邀請連結已複製');}catch{showToast('無法自動複製');}});qa('[data-save-code]').forEach(b=>b.onclick=async()=>{try{await callAdmin('update_access_code',{id:b.dataset.saveCode,...readPerms(`c-${b.dataset.saveCode}`)});showToast('邀請碼權限已更新');await loadAdminData();}catch(e){showToast(e.message);}});qa('[data-toggle-code]').forEach(b=>b.onclick=async()=>{try{await callAdmin('set_access_code_active',{id:b.dataset.toggleCode,active:b.dataset.active==='true'});showToast('邀請碼狀態已更新');await loadAdminData();}catch(e){showToast(e.message);}});}
+    function initCodePerms(){const defaults={can_view_index:true,can_view_performance:true,can_view_marketing:false,can_view_social:false,can_view_index_sensitive:false};$("codeCreatePerms").innerHTML=permHtml(defaults,'newcode',false);}
+    async function createCode(){const btn=$("createCodeBtn");btn.disabled=true;try{const data=await callAdmin('create_access_code',{label:$("codeLabel").value.trim(),expires_days:Number($("codeDays").value||30),max_uses:$("codeMaxUses").value?Number($("codeMaxUses").value):null,...readPerms('newcode')});const link=codeLink(data.code.code);$("newCodeLink").value=link;$("newCodeResult").classList.remove('hidden');$("codeLabel").value='';try{await navigator.clipboard.writeText(link);showToast('邀請連結已建立並複製');}catch{showToast('邀請連結已建立');}await loadAdminData();}catch(e){showToast(e.message||'建立邀請碼失敗');}finally{btn.disabled=false;}}
+    async function restoreSession(){const code=codeFromHash();if(code){state.codeFromHash=code;await openRegister(code);return;}const {data:{session}}=await sb.auth.getSession();if(!session)return showLoginGate();const at=Number(localStorage.getItem(HUB.LOGIN_AT_KEY)||0);if(at&&Date.now()-at>HUB.MAX_LOGIN_AGE){await logout(false);return showLoginGate('登入狀態已超過 30 天，請重新登入');}if(!at)localStorage.setItem(HUB.LOGIN_AT_KEY,String(Date.now()));const p=await loadMyProfile();if(!p)return showLoginGate('此帳號沒有 WAKODO HUB 使用權限');if(p.status==='pending'){await sb.auth.signOut();showPanel('pendingPanel');$("authTitle").textContent='等待管理員審核';return;}if(p.status!=='active'){await sb.auth.signOut();return showLoginGate(p.status==='rejected'?'此帳號申請未獲核准':'此帳號目前已停用，請聯絡管理員');}await sb.rpc('hub_touch_my_session');showHub(p);requestCurrentLocation(false);}
 
-    const sb = window.supabase.createClient(HUB.SUPABASE_URL, HUB.SUPABASE_KEY, {
-      auth: { persistSession:true, autoRefreshToken:true, detectSessionInUrl:false }
-    });
-    const state = { active:"customer", loaded:new Set(), profile:null, members:[], invites:[], inviteToken:null };
-    const $ = id => document.getElementById(id);
-    const qa = sel => Array.from(document.querySelectorAll(sel));
-
-    function showToast(text){
-      const el = $("hubToast");
-      el.textContent = text;
-      el.classList.add("show");
-      clearTimeout(showToast._t);
-      showToast._t = setTimeout(() => el.classList.remove("show"), 1800);
-    }
-
-    function normalizePhone(input){
-      let digits = String(input || "").replace(/\D/g, "");
-      if (digits.startsWith("8869") && digits.length === 12) digits = "0" + digits.slice(3);
-      if (!/^09\d{8}$/.test(digits)) throw new Error("請輸入有效的台灣手機號碼");
-      return digits;
-    }
-
-    function authEmailForPhone(phone){ return `886${phone.slice(1)}@hub.wakodo.invalid`; }
-    function maskPhone(phone){ return String(phone || "").replace(/^(09\d{2})\d{3}(\d{3})$/, "$1•••$2"); }
-    function esc(text){ return String(text ?? "").replace(/[&<>'"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c])); }
-    function fmtDate(value){ if (!value) return "—"; try{return new Intl.DateTimeFormat("zh-TW",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"}).format(new Date(value));}catch{return "—";} }
-
-    async function functionError(error, fallback="操作失敗"){
-      try{
-        if (error?.context && typeof error.context.json === "function") {
-          const body = await error.context.json();
-          return body?.error || fallback;
-        }
-      }catch{}
-      return error?.message || fallback;
-    }
-
-    function grantChildAccess(){
-      const now = Date.now();
-      const expire = now + HUB.CHILD_TTL;
-      try{
-        sessionStorage.setItem("wakodo_gate_ok", "1");
-        localStorage.setItem("wakodo_gate_ok_time", String(now));
-        localStorage.setItem("wakodo_perf_front_access_v3", JSON.stringify({ expire }));
-        localStorage.setItem("wakodo_mkt_access_v3", JSON.stringify({ expire }));
-      }catch(err){ console.warn("WAKODO HUB 無法同步子頁登入狀態", err); }
-    }
-
-    function clearChildAccess(){
-      try{
-        sessionStorage.removeItem("wakodo_gate_ok");
-        localStorage.removeItem("wakodo_gate_ok_time");
-        localStorage.removeItem("wakodo_perf_front_access_v3");
-        localStorage.removeItem("wakodo_mkt_access_v3");
-      }catch{}
-    }
-
-    function broadcastHubAuthRefresh(){
-      state.loaded.forEach(name=>{
-        const frame=document.querySelector(`[data-view-panel="${name}"] iframe`);
-        try{ frame?.contentWindow?.postMessage({type:"wakodo-hub-auth-refresh"}, location.origin); }catch{}
-      });
-    }
-
-    function inviteTokenFromHash(){
-      const raw = String(location.hash || "");
-      const lower = raw.toLowerCase();
-      let value = null;
-      if (lower.startsWith("#i=")) value = raw.slice(3);
-      else if (lower.startsWith("#invite=")) value = raw.slice(8);
-      else return null;
-      try{return decodeURIComponent(value).trim() || null;}catch{return null;}
-    }
-
-    function inviteLinkFromToken(token){
-      return `${location.origin}${location.pathname}#i=${encodeURIComponent(token)}`;
-    }
-
-    function showLoginGate(message=""){
-      state.inviteToken = null;
-      $("hubApp").classList.add("hidden");
-      $("hubGate").style.display = "flex";
-      $("loginPanel").classList.remove("hidden");
-      $("invitePanel").classList.add("hidden");
-      $("inviteInvalid").classList.add("hidden");
-      $("authTitle").textContent = "登入 WAKODO HUB";
-      $("authDesc").textContent = "使用您的手機號碼與個人密碼登入。沒有公開註冊入口，新帳號僅能透過一次性邀請建立。";
-      setGateError(message);
-      setTimeout(() => $("loginPhone").focus(), 0);
-    }
-
-    function setGateError(text){
-      const el = $("hubGateError");
-      el.textContent = text || "";
-      el.classList.toggle("visible", !!text);
-    }
-    function setRegisterError(text){
-      const el = $("registerError");
-      el.textContent = text || "";
-      el.classList.toggle("visible", !!text);
-    }
-
-    async function showInviteGate(token){
-      state.inviteToken = token;
-      $("hubApp").classList.add("hidden");
-      $("hubGate").style.display = "flex";
-      $("loginPanel").classList.add("hidden");
-      $("inviteInvalid").classList.add("hidden");
-      $("invitePanel").classList.remove("hidden");
-      $("authTitle").textContent = "建立 WAKODO HUB 帳號";
-      $("authDesc").textContent = "這是一條一次性邀請。請填寫姓名、手機號碼並自行設定密碼。";
-      $("inviteBadge").textContent = "正在確認邀請…";
-      $("registerSubmit").disabled = true;
-      setRegisterError("");
-
-      const { data, error } = await sb.functions.invoke("hub-register", { body:{ action:"validate", invite_token:token } });
-      if (error || !data?.ok) {
-        $("invitePanel").classList.add("hidden");
-        $("inviteInvalid").classList.remove("hidden");
-        $("inviteInvalidText").textContent = error ? await functionError(error, "邀請無法使用") : (data?.error || "邀請無法使用");
-        return;
-      }
-      const inv = data.invite || {};
-      const isOwner = inv.role === "owner";
-      $("inviteBadge").classList.toggle("owner", isOwner);
-      $("inviteBadge").textContent = isOwner
-        ? "Owner 初始設定邀請 · 完成後您會成為唯一最高管理員"
-        : (inv.label ? `邀請對象：${inv.label}` : "有效的一次性成員邀請");
-      $("registerSubmit").disabled = false;
-      setTimeout(() => $("registerName").focus(), 0);
-    }
-
-    async function registerFromInvite(){
-      if (!state.inviteToken) return setRegisterError("邀請連結無效");
-      let phone;
-      try{ phone = normalizePhone($("registerPhone").value); }
-      catch(e){ return setRegisterError(e.message); }
-      const name = $("registerName").value.trim();
-      const password = $("registerPassword").value;
-      const password2 = $("registerPassword2").value;
-      if (!name) return setRegisterError("請填寫姓名或稱呼");
-      if (password.length < 8) return setRegisterError("密碼至少需要 8 個字元");
-      if (password !== password2) return setRegisterError("兩次輸入的密碼不一致");
-
-      const btn = $("registerSubmit");
-      btn.disabled = true; btn.textContent = "正在建立帳號…"; setRegisterError("");
-      try{
-        const { data, error } = await sb.functions.invoke("hub-register", {
-          body:{ action:"register", invite_token:state.inviteToken, display_name:name, phone, password }
-        });
-        if (error || !data?.ok) throw new Error(error ? await functionError(error, "帳號建立失敗") : (data?.error || "帳號建立失敗"));
-
-        const { error:loginErr } = await sb.auth.signInWithPassword({ email:authEmailForPhone(phone), password });
-        if (loginErr) throw new Error("帳號已建立，但自動登入失敗，請回登入頁重新登入");
-        localStorage.setItem(HUB.LOGIN_AT_KEY, String(Date.now()));
-        history.replaceState(null, "", `${location.pathname}${location.search}#customer`);
-        state.inviteToken = null;
-        const profile = await loadMyProfile();
-        if (!profile) throw new Error("帳號資料讀取失敗");
-        showHub(profile);
-        showToast("帳號建立完成");
-        requestCurrentLocation(false);
-      }catch(e){ setRegisterError(e.message || "帳號建立失敗"); }
-      finally{ btn.disabled = false; btn.textContent = "建立帳號並登入"; }
-    }
-
-    async function login(){
-      let phone;
-      try{ phone = normalizePhone($("loginPhone").value); }
-      catch(e){ return setGateError(e.message); }
-      const password = $("loginPassword").value;
-      if (!password) return setGateError("請輸入密碼");
-      const btn=$("hubEnter"); btn.disabled=true; btn.textContent="登入中…"; setGateError("");
-      try{
-        const { error } = await sb.auth.signInWithPassword({ email:authEmailForPhone(phone), password });
-        if (error) throw new Error("手機號碼或密碼錯誤");
-        const profile = await loadMyProfile();
-        if (!profile) { await sb.auth.signOut(); throw new Error("此帳號沒有 WAKODO HUB 使用權限"); }
-        if (profile.status !== "active") { await sb.auth.signOut(); throw new Error("此帳號已停用，請聯絡管理員"); }
-        localStorage.setItem(HUB.LOGIN_AT_KEY, String(Date.now()));
-        await sb.rpc("hub_touch_my_session");
-        showHub(profile);
-        requestCurrentLocation(false);
-      }catch(e){ setGateError(e.message || "登入失敗"); }
-      finally{ btn.disabled=false; btn.textContent="登入 WAKODO HUB"; }
-    }
-
-    async function loadMyProfile(){
-      const { data:{ user } } = await sb.auth.getUser();
-      if (!user) return null;
-      const { data, error } = await sb.from("hub_members")
-        .select("user_id,display_name,phone,role,status,last_seen_at,last_location_scope,last_location_distance_m,last_location_accuracy_m,last_location_at,created_at")
-        .eq("user_id", user.id).maybeSingle();
-      if (error) { console.error(error); return null; }
-      state.profile = data || null;
-      return state.profile;
-    }
-
-    function updateUserChrome(){
-      const p=state.profile; if (!p) return;
-      const initial=(p.display_name || "W").trim().charAt(0).toUpperCase() || "W";
-      $("userAvatar").textContent=initial;
-      $("userMenuName").textContent=p.display_name;
-      $("menuProfileName").textContent=p.display_name;
-      $("menuProfileRole").textContent=p.role === "owner" ? "Owner · 最高管理員" : "Member · 成員";
-      $("openHubAdmin").classList.toggle("hidden", p.role !== "owner");
-      $("profileName").textContent=p.display_name;
-      $("profilePhone").textContent=p.phone;
-      $("profileRole").textContent=p.role === "owner" ? "Owner" : "Member";
-      $("profileRole").classList.toggle("owner", p.role === "owner");
-      renderMyLocation();
-    }
-
-    function showHub(profile=state.profile){
-      if (!profile) return showLoginGate();
-      state.profile=profile;
-      grantChildAccess();
-      $("hubGate").style.display="none";
-      $("hubApp").classList.remove("hidden");
-      updateUserChrome();
-      const target=normalizeHash(location.hash);
-      switchView(target,false);
-      setTimeout(broadcastHubAuthRefresh,0);
-    }
-
-    function normalizeHash(hash){
-      const key=String(hash||"").replace(/^#/,"");
-      return HUB.PAGES[key] ? key : "customer";
-    }
-
-    function loadView(name){
-      if (state.loaded.has(name)) return;
-      const panel=document.querySelector(`[data-view-panel="${name}"]`); if (!panel) return;
-      const frame=panel.querySelector("iframe"), loading=panel.querySelector(".loading");
-      frame.addEventListener("load",()=>{ if(loading) loading.style.display="none"; grantChildAccess(); try{frame.contentWindow?.postMessage({type:"wakodo-hub-auth-refresh"},location.origin);}catch{} },{once:true});
-      frame.src=HUB.PAGES[name].src; state.loaded.add(name);
-    }
-
-    function syncTabSlider(name=state.active,scrollIntoView=false){
-      const tabs=document.querySelector(".tabs"),slider=document.querySelector(".tab-slider"),active=document.querySelector(`.tab[data-view="${name}"]`);
-      if(!tabs||!slider||!active)return;
-      slider.style.width=active.offsetWidth+"px"; slider.style.left=active.offsetLeft+"px";
-      if(scrollIntoView&&typeof active.scrollIntoView==="function")active.scrollIntoView({behavior:"smooth",block:"nearest",inline:"center"});
-    }
-
-    function switchView(name,updateHash=true){
-      if(!HUB.PAGES[name])name="customer"; state.active=name;
-      qa(".tab").forEach(btn=>btn.classList.toggle("active",btn.dataset.view===name));
-      requestAnimationFrame(()=>syncTabSlider(name,true));
-      qa(".view").forEach(panel=>panel.classList.toggle("active",panel.dataset.viewPanel===name));
-      loadView(name);
-      if(updateHash&&location.hash!==`#${name}`)history.replaceState(null,"",`${location.pathname}${location.search}#${name}`);
-      document.title=`${HUB.PAGES[name].label}｜WAKODO HUB`;
-    }
-
-    async function logout(showMessage=true){
-      await sb.auth.signOut();
-      localStorage.removeItem(HUB.LOGIN_AT_KEY);
-      clearChildAccess();
-      state.profile=null;
-      state.loaded.forEach(name=>{
-        const panel=document.querySelector(`[data-view-panel="${name}"]`),frame=panel&&panel.querySelector("iframe"),loading=panel&&panel.querySelector(".loading");
-        if(frame)frame.removeAttribute("src"); if(loading)loading.style.display="grid";
-      });
-      state.loaded.clear();
-      $("loginPassword").value="";
-      closeMenu();
-      history.replaceState(null,"",`${location.pathname}${location.search}#customer`);
-      showLoginGate();
-      if(showMessage)showToast("已登出 WAKODO HUB");
-    }
-
-    function openModal(id){
-      const el=$(id); if(!el)return;
-      clearTimeout(el._closeTimer); el.classList.remove("closing","hidden");
-    }
-    function closeModal(id){
-      const el=$(id); if(!el||el.classList.contains("hidden"))return;
-      el.classList.add("closing"); clearTimeout(el._closeTimer);
-      el._closeTimer=setTimeout(()=>{el.classList.add("hidden");el.classList.remove("closing");},165);
-    }
-    function closeMenu(){ $("userMenu").classList.add("hidden"); $("userMenuBtn").setAttribute("aria-expanded","false"); }
-
-    function locationText(scope,distance,accuracy,at){
-      const labels={linan:"臨安店附近",nanke:"南科店附近",outside:"非公司範圍",denied:"未授權位置",unknown:"尚未判定"};
-      let main=labels[scope]||labels.unknown;
-      const bits=[];
-      if(Number.isFinite(Number(distance))) bits.push(scope==="outside"?`距最近門市約 ${distance>=1000?(distance/1000).toFixed(1)+" km":distance+" m"}`:`距門市約 ${distance} m`);
-      if(Number.isFinite(Number(accuracy)))bits.push(`定位精度 ±${accuracy} m`);
-      if(at)bits.push(`更新於 ${fmtDate(at)}`);
-      return {main,sub:bits.join(" · ") || (scope==="denied"?"瀏覽器未允許取得位置":"尚無位置紀錄")};
-    }
-
-    function renderMyLocation(){
-      const p=state.profile||{};
-      const t=locationText(p.last_location_scope,p.last_location_distance_m,p.last_location_accuracy_m,p.last_location_at);
-      $("myLocationMain").textContent=t.main; $("myLocationSub").textContent=t.sub;
-    }
-
-    function haversineM(a,b){
-      const R=6371000, rad=x=>x*Math.PI/180;
-      const dLat=rad(b.lat-a.lat),dLon=rad(b.lon-a.lon),lat1=rad(a.lat),lat2=rad(b.lat);
-      const h=Math.sin(dLat/2)**2+Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)**2;
-      return 2*R*Math.asin(Math.sqrt(h));
-    }
-
-    async function geocodeStore(store){
-      const url=`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=tw&accept-language=zh-TW&q=${encodeURIComponent(store.address)}`;
-      const res=await fetch(url,{headers:{"Accept":"application/json"}});
-      if(!res.ok)throw new Error("門市座標服務暫時無法使用");
-      const rows=await res.json(); if(!rows?.[0])throw new Error("找不到門市座標");
-      return {lat:Number(rows[0].lat),lon:Number(rows[0].lon)};
-    }
-
-    async function getStoreCoords(){
-      try{
-        const cached=JSON.parse(localStorage.getItem(HUB.STORE_COORDS_KEY)||"null");
-        if(cached?.linan?.lat&&cached?.nanke?.lat)return cached;
-      }catch{}
-      const coords={};
-      for(const key of ["linan","nanke"])coords[key]=await geocodeStore(HUB.STORES[key]);
-      localStorage.setItem(HUB.STORE_COORDS_KEY,JSON.stringify(coords));
-      return coords;
-    }
-
-    async function saveLocation(scope,distance=null,accuracy=null){
-      const { error }=await sb.rpc("hub_update_my_location",{p_scope:scope,p_distance_m:distance,p_accuracy_m:accuracy});
-      if(error)throw error;
-      if(state.profile){
-        state.profile.last_location_scope=scope;
-        state.profile.last_location_distance_m=distance;
-        state.profile.last_location_accuracy_m=accuracy;
-        state.profile.last_location_at=new Date().toISOString();
-        renderMyLocation();
-      }
-    }
-
-    async function requestCurrentLocation(userInitiated=true){
-      if(!state.profile)return;
-      const btn=$("refreshMyLocation"); if(btn){btn.disabled=true;btn.textContent="定位中…";}
-      if(!navigator.geolocation){
-        try{await saveLocation("unknown");}catch{}
-        if(userInitiated)showToast("此瀏覽器不支援位置功能");
-        if(btn){btn.disabled=false;btn.textContent="更新位置";} return;
-      }
-      navigator.geolocation.getCurrentPosition(async pos=>{
-        try{
-          const coords=await getStoreCoords();
-          const here={lat:pos.coords.latitude,lon:pos.coords.longitude};
-          const dL=Math.round(haversineM(here,coords.linan)), dN=Math.round(haversineM(here,coords.nanke));
-          const nearest=dL<=dN?{scope:"linan",distance:dL}:{scope:"nanke",distance:dN};
-          const scope=nearest.distance<=HUB.STORE_RADIUS_M?nearest.scope:"outside";
-          await saveLocation(scope,nearest.distance,Math.max(0,Math.round(pos.coords.accuracy||0)));
-          if(userInitiated)showToast("位置已更新");
-        }catch(e){
-          console.warn(e);
-          try{await saveLocation("unknown",null,Math.max(0,Math.round(pos.coords.accuracy||0)));}catch{}
-          if(userInitiated)showToast("已取得位置，但暫時無法判定門市範圍");
-        }finally{if(btn){btn.disabled=false;btn.textContent="更新位置";}}
-      },async err=>{
-        try{await saveLocation(err?.code===1?"denied":"unknown");}catch{}
-        if(userInitiated)showToast(err?.code===1?"您尚未允許位置權限":"目前無法取得位置");
-        if(btn){btn.disabled=false;btn.textContent="更新位置";}
-      },{enableHighAccuracy:true,timeout:10000,maximumAge:60000});
-    }
-
-    async function changePassword(){
-      const current=$("currentPassword").value,newPwd=$("newPassword").value,newPwd2=$("newPassword2").value,msg=$("passwordMessage");
-      msg.style.color="var(--red)"; msg.textContent="";
-      if(!current)return msg.textContent="請輸入目前密碼";
-      if(newPwd.length<8)return msg.textContent="新密碼至少需要 8 個字元";
-      if(newPwd!==newPwd2)return msg.textContent="兩次輸入的新密碼不一致";
-      const btn=$("changePasswordBtn");btn.disabled=true;btn.textContent="更新中…";
-      try{
-        const email=authEmailForPhone(state.profile.phone);
-        const {error:verifyErr}=await sb.auth.signInWithPassword({email,password:current});
-        if(verifyErr)throw new Error("目前密碼不正確");
-        const {error}=await sb.auth.updateUser({password:newPwd});
-        if(error)throw error;
-        $("currentPassword").value=$("newPassword").value=$("newPassword2").value="";
-        msg.style.color="#188038";msg.textContent="密碼已更新";showToast("密碼已更新");
-      }catch(e){msg.textContent=e.message||"密碼更新失敗";}
-      finally{btn.disabled=false;btn.textContent="更新密碼";}
-    }
-
-    async function callAdmin(action,payload={}){
-      const {data,error}=await sb.functions.invoke("hub-admin",{body:{action,...payload}});
-      if(error)throw new Error(await functionError(error,"管理操作失敗"));
-      if(data?.error)throw new Error(data.error);
-      return data;
-    }
-
-    async function loadAdminData(){
-      $("memberList").innerHTML='<div class="empty-state">正在載入…</div>';
-      $("inviteList").innerHTML='<div class="empty-state">正在載入…</div>';
-      try{
-        const [m,i]=await Promise.all([callAdmin("list_members"),callAdmin("list_invites")]);
-        state.members=m.members||[];state.invites=i.invites||[];renderMembers();renderInvites();
-      }catch(e){
-        $("memberList").innerHTML=`<div class="empty-state">${esc(e.message)}</div>`;
-        $("inviteList").innerHTML=`<div class="empty-state">${esc(e.message)}</div>`;
-      }
-    }
-
-    function renderMembers(){
-      $("memberCount").textContent=`共 ${state.members.length} 個帳號`;
-      if(!state.members.length){$("memberList").innerHTML='<div class="empty-state">尚無成員</div>';return;}
-      $("memberList").innerHTML=state.members.map((m,index)=>{
-        const loc=locationText(m.last_location_scope,m.last_location_distance_m,m.last_location_accuracy_m,m.last_location_at);
-        const role=m.role==="owner"?'<span class="mini-pill owner">Owner</span>':'<span class="mini-pill">Member</span>';
-        const status=m.status==="active"?'<span class="status-tag active">使用中</span>':'<span class="status-tag disabled">已停用</span>';
-        const action=m.role==="owner"?'':`<button class="tiny-btn ${m.status==="active"?'danger':''}" data-member-status="${esc(m.user_id)}" data-next-status="${m.status==="active"?'disabled':'active'}">${m.status==="active"?'停用':'啟用'}</button>`;
-        return `<div class="member-row" style="animation-delay:${Math.min(index,8)*24}ms"><div class="row-main"><strong>${esc(m.display_name)} ${role}</strong><span>${esc(m.phone)} · 建立 ${fmtDate(m.created_at)}</span></div><div class="row-cell">${status}<span>最後使用 ${fmtDate(m.last_seen_at)}</span></div><div class="row-cell"><strong>${esc(loc.main)}</strong><span>${esc(loc.sub)}</span></div><div class="row-actions">${action}</div></div>`;
-      }).join("");
-      qa("[data-member-status]").forEach(btn=>btn.addEventListener("click",async()=>{
-        btn.disabled=true;try{await callAdmin("set_member_status",{user_id:btn.dataset.memberStatus,status:btn.dataset.nextStatus});showToast("帳號狀態已更新");await loadAdminData();}catch(e){showToast(e.message);}finally{btn.disabled=false;}
-      }));
-    }
-
-    function inviteStatus(inv){
-      if(inv.used_at)return {key:"used",label:"已使用"};
-      if(new Date(inv.expires_at).getTime()<=Date.now())return {key:"expired",label:"已過期"};
-      if(!inv.is_active)return {key:"disabled",label:"已停用"};
-      return {key:"active",label:"有效"};
-    }
-
-    function renderInvites(){
-      if(!state.invites.length){$("inviteList").innerHTML='<div class="empty-state">尚未建立邀請</div>';return;}
-      const memberByInvite=Object.fromEntries(state.members.filter(m=>m.invitation_id).map(m=>[m.invitation_id,m]));
-      $("inviteList").innerHTML=state.invites.map((inv,index)=>{
-        const st=inviteStatus(inv),used=memberByInvite[inv.id];
-        const target=inv.label||"未指定對象";
-        const legacyNote=(!inv.token && !inv.used_at && new Date(inv.expires_at).getTime()>Date.now())?" · 舊版連結未保存":"";
-        const detail=used?`註冊者：${used.display_name} · ${maskPhone(used.phone)}`:`到期：${fmtDate(inv.expires_at)}${legacyNote}`;
-        let action="";
-        if(st.key==="active" && inv.token)action+=`<button class="tiny-btn" data-invite-open="${inv.id}">開啟</button><button class="tiny-btn" data-invite-copy="${inv.id}">複製</button>`;
-        if((st.key==="active" || st.key==="disabled") && !inv.token)action+=`<button class="tiny-btn" data-invite-rotate="${inv.id}">重建連結</button>`;
-        if(st.key==="active")action+=`<button class="tiny-btn danger" data-invite-toggle="${inv.id}" data-active="false">停用</button>`;
-        if(st.key==="disabled"&&new Date(inv.expires_at).getTime()>Date.now())action+=`<button class="tiny-btn" data-invite-toggle="${inv.id}" data-active="true">重新啟用</button>`;
-        return `<div class="invite-row" style="animation-delay:${Math.min(index,8)*24}ms"><div class="row-main"><strong>${esc(target)}</strong><span>${esc(detail)}</span></div><div class="row-cell"><span class="status-tag ${st.key}">${st.label}</span></div><div class="row-cell">建立 ${fmtDate(inv.created_at)}<span>${inv.used_at?`使用 ${fmtDate(inv.used_at)}`:"一次性註冊"}</span></div><div class="row-actions">${action}</div></div>`;
-      }).join("");
-      qa("[data-invite-open]").forEach(btn=>btn.addEventListener("click",()=>{const inv=state.invites.find(x=>x.id===btn.dataset.inviteOpen);if(inv?.token)window.open(inviteLinkFromToken(inv.token),"_blank","noopener");}));
-      qa("[data-invite-copy]").forEach(btn=>btn.addEventListener("click",async()=>{const inv=state.invites.find(x=>x.id===btn.dataset.inviteCopy);if(!inv?.token)return;const link=inviteLinkFromToken(inv.token);try{await navigator.clipboard.writeText(link);showToast("邀請連結已複製");}catch{showToast("無法自動複製，請使用開啟查看");}}));
-      qa("[data-invite-rotate]").forEach(btn=>btn.addEventListener("click",async()=>{
-        const inv=state.invites.find(x=>x.id===btn.dataset.inviteRotate);if(!inv)return;
-        const ok=confirm("這是舊版建立的邀請，原始連結沒有被保存，因此無法復原。\n\n重新產生後，舊連結會立即失效。確定要重建這條邀請嗎？");if(!ok)return;
-        btn.disabled=true;try{const data=await callAdmin("rotate_invite",{id:inv.id});const link=inviteLinkFromToken(data.token);$("newInviteLink").value=link;$("newInviteResult").classList.remove("hidden");try{await navigator.clipboard.writeText(link);showToast("新連結已產生並複製");}catch{showToast("新連結已產生");}await loadAdminData();}catch(e){showToast(e.message||"重建連結失敗");}finally{btn.disabled=false;}
-      }));
-      qa("[data-invite-toggle]").forEach(btn=>btn.addEventListener("click",async()=>{btn.disabled=true;try{await callAdmin("set_invite_active",{id:btn.dataset.inviteToggle,active:btn.dataset.active==="true"});showToast("邀請狀態已更新");await loadAdminData();}catch(e){showToast(e.message);}finally{btn.disabled=false;}}));
-    }
-
-    async function createInvite(){
-      const btn=$("createInviteBtn"),label=$("inviteLabel").value.trim(),days=Number($("inviteDays").value||7);
-      btn.disabled=true;btn.textContent="建立中…";
-      try{
-        const data=await callAdmin("create_invite",{label,expires_days:days});
-        const link=inviteLinkFromToken(data.token);
-        $("newInviteLink").value=link;$("newInviteResult").classList.remove("hidden");$("inviteLabel").value="";
-        try{await navigator.clipboard.writeText(link);showToast("邀請已建立並複製");}catch{showToast("邀請已建立");}
-        await loadAdminData();
-      }catch(e){showToast(e.message||"建立邀請失敗");}
-      finally{btn.disabled=false;btn.textContent="建立邀請";}
-    }
-
-    async function restoreSession(){
-      const invite=inviteTokenFromHash();
-      if(invite){ await showInviteGate(invite); return; }
-      const {data:{session}}=await sb.auth.getSession();
-      if(!session)return showLoginGate();
-      const loginAt=Number(localStorage.getItem(HUB.LOGIN_AT_KEY)||0);
-      if(loginAt && Date.now()-loginAt>HUB.MAX_LOGIN_AGE){await logout(false);showLoginGate("登入狀態已超過 30 天，請重新登入");return;}
-      if(!loginAt)localStorage.setItem(HUB.LOGIN_AT_KEY,String(Date.now()));
-      const profile=await loadMyProfile();
-      if(!profile||profile.status!=="active"){await sb.auth.signOut();showLoginGate(profile?.status==="disabled"?"此帳號已停用，請聯絡管理員":"此帳號沒有 WAKODO HUB 使用權限");return;}
-      await sb.rpc("hub_touch_my_session");showHub(profile);requestCurrentLocation(false);
-    }
-
-    qa(".tab").forEach(btn=>btn.addEventListener("click",()=>switchView(btn.dataset.view)));
-    $("hubEnter").addEventListener("click",login);
-    $("loginPassword").addEventListener("keydown",e=>{if(e.key==="Enter")login();});
-    $("loginPhone").addEventListener("keydown",e=>{if(e.key==="Enter")$("loginPassword").focus();});
-    $("loginPhone").addEventListener("input",()=>setGateError(""));$("loginPassword").addEventListener("input",()=>setGateError(""));
-    $("registerSubmit").addEventListener("click",registerFromInvite);
-    $("registerPassword2").addEventListener("keydown",e=>{if(e.key==="Enter")registerFromInvite();});
-    ["registerName","registerPhone","registerPassword","registerPassword2"].forEach(id=>$(id).addEventListener("input",()=>setRegisterError("")));
-    $("backToLogin").addEventListener("click",()=>{history.replaceState(null,"",`${location.pathname}${location.search}#customer`);showLoginGate();});
-    $("invalidBackLogin").addEventListener("click",()=>{history.replaceState(null,"",`${location.pathname}${location.search}#customer`);showLoginGate();});
-
-    $("userMenuBtn").addEventListener("click",e=>{e.stopPropagation();const menu=$("userMenu");const open=menu.classList.toggle("hidden")===false;$("userMenuBtn").setAttribute("aria-expanded",String(open));});
-    document.addEventListener("click",e=>{if(!e.target.closest(".user-wrap"))closeMenu();});
-    $("openMyAccount").addEventListener("click",()=>{closeMenu();updateUserChrome();openModal("accountModal");});
-    $("openHubAdmin").addEventListener("click",async()=>{closeMenu();if(state.profile?.role!=="owner")return;openModal("adminModal");await loadAdminData();});
-    $("menuLogout").addEventListener("click",()=>logout(true));
-    qa("[data-close-modal]").forEach(btn=>btn.addEventListener("click",()=>closeModal(btn.dataset.closeModal)));
-    qa(".modal-backdrop").forEach(el=>el.addEventListener("click",e=>{if(e.target===el)closeModal(el.id);}));
-    $("refreshMyLocation").addEventListener("click",()=>requestCurrentLocation(true));
-    $("changePasswordBtn").addEventListener("click",changePassword);
-
-    qa("[data-admin-tab]").forEach(btn=>btn.addEventListener("click",()=>{
-      qa("[data-admin-tab]").forEach(b=>b.classList.toggle("active",b===btn));
-      $("adminMembersPanel").classList.toggle("hidden",btn.dataset.adminTab!=="members");
-      $("adminInvitesPanel").classList.toggle("hidden",btn.dataset.adminTab!=="invites");
-    }));
-    $("refreshAdmin").addEventListener("click",loadAdminData);
-    $("createInviteBtn").addEventListener("click",createInvite);
-    $("copyInviteBtn").addEventListener("click",async()=>{try{await navigator.clipboard.writeText($("newInviteLink").value);showToast("邀請連結已複製");}catch{ $("newInviteLink").select();document.execCommand("copy");showToast("邀請連結已複製"); }});
-
-    $("reloadCurrent").addEventListener("click",()=>{
-      const panel=document.querySelector(`[data-view-panel="${state.active}"]`),frame=panel&&panel.querySelector("iframe"),loading=panel&&panel.querySelector(".loading");
-      if(!frame||!frame.src)return;if(loading)loading.style.display="grid";try{frame.contentWindow.location.reload();}catch{frame.src=frame.src;}setTimeout(()=>{if(loading)loading.style.display="none";},2500);
-    });
-    $("openCurrent").addEventListener("click",()=>{const page=HUB.PAGES[state.active];if(page)window.open(page.src,"_blank","noopener");});
-    window.addEventListener("hashchange",async()=>{const inv=inviteTokenFromHash();if(inv){await showInviteGate(inv);return;}if(state.profile)switchView(normalizeHash(location.hash),false);});
-    window.addEventListener("resize",()=>requestAnimationFrame(()=>syncTabSlider(state.active,false)));
-    window.addEventListener("load",async()=>{await restoreSession();requestAnimationFrame(()=>syncTabSlider(state.active,false));});
+    qa('.tab').forEach(b=>b.addEventListener('click',()=>switchView(b.dataset.view)));
+    $('hubEnter').addEventListener('click',login);$('loginPassword').addEventListener('keydown',e=>{if(e.key==='Enter')login();});$('openRegister').addEventListener('click',()=>openRegister(''));
+    $('registerSubmit').addEventListener('click',register);$('accessCode').addEventListener('blur',()=>{if($('accessCode').value.trim())validateCode();});$('backToLogin').addEventListener('click',()=>{history.replaceState(null,'',location.pathname+location.search);showLoginGate();});$('pendingBackLogin').addEventListener('click',()=>showLoginGate());
+    $('userMenuBtn').addEventListener('click',e=>{e.stopPropagation();const m=$('userMenu');const open=!m.classList.contains('hidden');m.classList.toggle('hidden',open);$('userMenuBtn').setAttribute('aria-expanded',String(!open));});document.addEventListener('click',e=>{if(!e.target.closest('.user-wrap'))closeMenu();});$('openMyAccount').addEventListener('click',()=>{closeMenu();updateUserChrome();openModal('accountModal');});$('openHubAdmin').addEventListener('click',async()=>{closeMenu();if(state.profile?.role!=='owner')return;openModal('adminModal');await loadAdminData();});$('menuLogout').addEventListener('click',()=>logout(true));
+    qa('[data-close-modal]').forEach(b=>b.addEventListener('click',()=>closeModal(b.dataset.closeModal)));qa('.modal-backdrop').forEach(e=>e.addEventListener('click',x=>{if(x.target===e)closeModal(e.id);}));$('refreshMyLocation').addEventListener('click',()=>requestCurrentLocation(true));$('changePasswordBtn').addEventListener('click',changePassword);
+    qa('[data-admin-tab]').forEach(b=>b.addEventListener('click',()=>{qa('[data-admin-tab]').forEach(x=>x.classList.toggle('active',x===b));$('adminMembersPanel').classList.toggle('hidden',b.dataset.adminTab!=='members');$('adminCodesPanel').classList.toggle('hidden',b.dataset.adminTab!=='codes');}));$('refreshAdmin').addEventListener('click',loadAdminData);$('createCodeBtn').addEventListener('click',createCode);$('copyCodeBtn').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('newCodeLink').value);showToast('邀請連結已複製');}catch{showToast('無法自動複製');}});initCodePerms();
+    $('reloadCurrent').addEventListener('click',()=>loadView(state.active,true));$('openCurrent').addEventListener('click',()=>showToast('功能頁僅可於 WAKODO HUB 內使用'));
+    window.addEventListener('hashchange',async()=>{const code=codeFromHash();if(code){await openRegister(code);return;}if(state.profile){const key=String(location.hash||'').replace(/^#/,'');if(canPage(key))await switchView(key,false);}});window.addEventListener('resize',()=>requestAnimationFrame(()=>syncTabSlider(state.active)));window.addEventListener('load',restoreSession);
   </script>
 </body>
 </html>

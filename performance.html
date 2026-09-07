@@ -230,15 +230,6 @@
 </head>
 <body>
   <div id="pageLoader" class="page-loader" aria-live="polite"><div class="loader-card"><span class="loader-ring"></span><span id="loaderText">正在載入業績資料…</span></div></div>
-  <div id="lockScreen" class="lock">
-    <div class="lock-card">
-      <div class="lock-icon">🔒</div>
-      <div class="lock-title">業績儀表板</div>
-      <div class="lock-desc">輸入密碼後即可檢視資料</div>
-      <input id="accessPassword" type="password" class="input" style="margin-top:18px" placeholder="Password" autocomplete="current-password" />
-      <button id="btnEnter" class="btn btn-primary" style="width:100%;margin-top:10px;padding:11px">進入儀表板</button>
-    </div>
-  </div>
 
   <header class="topbar">
     <div class="shell topbar-inner">
@@ -390,9 +381,75 @@
     const SUPABASE_KEY = "sb_publishable_RoO2nFORoi-VzRgWt75wWQ_OnHAbl9Y";
     const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    const FRONT_PASS = "wakodo";
-    const FRONT_KEY  = "wakodo_perf_front_access_v3";
-    const FRONT_TTL  = 10 * 24 * 60 * 60 * 1000;
+
+  const __HUB_PAGE = "performance";
+  const __HUB_TICKET = (() => {
+    const raw = String(location.hash || "");
+    const m = raw.match(/^#hub=([^&]+)$/);
+    if (!m) return "";
+    try { return decodeURIComponent(m[1]); } catch { return ""; }
+  })();
+  let __hubProfile = null;
+
+  function __showHubOnly(message="此頁面僅能由 WAKODO HUB 授權開啟。") {
+    document.documentElement.innerHTML = `<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>WAKODO HUB｜權限驗證</title></head><body style="margin:0;min-height:100vh;display:grid;place-items:center;background:#f4f5f6;color:#252525;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans TC',sans-serif"><main style="width:min(420px,calc(100% - 40px));padding:30px;border-radius:24px;background:#fff;border:1px solid rgba(0,0,0,.08);box-shadow:0 18px 50px rgba(30,35,40,.10);text-align:center"><div style="font-size:13px;font-weight:900;letter-spacing:.12em;color:#4285f4">WAKODO HUB</div><h1 style="margin:12px 0 8px;font-size:24px">請洽管理員</h1><p style="margin:0;color:#74777b;font-size:14px;line-height:1.7">${message}</p></main></body>`;
+  }
+
+  async function __hubFunctionError(error, fallback="權限驗證失敗") {
+    try {
+      if (error?.context && typeof error.context.json === "function") {
+        const body = await error.context.json();
+        if (body?.error) return body.error;
+      }
+    } catch {}
+    return error?.message || fallback;
+  }
+
+  async function __initHubPageAccess() {
+    if (window.top === window.self || !__HUB_TICKET) { __showHubOnly(); return false; }
+    const { data:{ session } } = await supabase.auth.getSession();
+    if (!session) { __showHubOnly("登入狀態無效，請回到 WAKODO HUB 重新登入。"); return false; }
+    const { data, error } = await supabase.functions.invoke("hub-access", { body:{ action:"me" } });
+    if (error || data?.error || !data?.member || data.member.status !== "active") {
+      __showHubOnly(data?.error || await __hubFunctionError(error)); return false;
+    }
+    const p=data.member;
+    const allowed = p.role === "owner" || p[{index:"can_view_index",performance:"can_view_performance",marketing:"can_view_marketing",social:"can_view_social"}[__HUB_PAGE]] === true;
+    if (!allowed) { __showHubOnly("您的帳號沒有此頁面的查看權限。"); return false; }
+    __hubProfile = p;
+    return true;
+  }
+
+  async function __hubExec(query) {
+    const { data, error } = await supabase.functions.invoke("hub-data", { body:{ page:__HUB_PAGE, ticket:__HUB_TICKET, query } });
+    if (error) return { data:null, error:{ message:await __hubFunctionError(error,"資料存取失敗") } };
+    if (data?.error && data?.ok !== false) return { data:null, error:{ message:data.error } };
+    return { data:data?.data ?? null, error:data?.error ?? null };
+  }
+
+  function __hubFrom(table) {
+    const q={table,method:"select",columns:"*",filters:[],orders:[]};
+    const b={
+      select(columns="*"){ if(q.method==="select") q.columns=columns; else q.returning=columns; return b; },
+      insert(payload){ q.method="insert"; q.payload=payload; return b; },
+      update(payload){ q.method="update"; q.payload=payload; return b; },
+      upsert(payload,opts={}){ q.method="upsert"; q.payload=payload; q.onConflict=opts?.onConflict || null; return b; },
+      delete(){ q.method="delete"; return b; },
+      eq(column,value){ q.filters.push({op:"eq",column,value}); return b; },
+      neq(column,value){ q.filters.push({op:"neq",column,value}); return b; },
+      ilike(column,value){ q.filters.push({op:"ilike",column,value}); return b; },
+      is(column,value){ q.filters.push({op:"is",column,value}); return b; },
+      order(column,opts={}){ q.orders.push({column,ascending:opts?.ascending!==false}); return b; },
+      range(from,to){ q.range=[from,to]; return b; },
+      limit(value){ q.limit=value; return b; },
+      single(){ q.single="single"; return b; },
+      maybeSingle(){ q.single="maybeSingle"; return b; },
+      then(resolve,reject){ return __hubExec(q).then(resolve,reject); },
+      catch(reject){ return __hubExec(q).catch(reject); }
+    };
+    return b;
+  }
+  const hubDb={from:__hubFrom};
 
     const ST = {
       isAdmin:false,
@@ -404,7 +461,7 @@
 
     const $ = (id) => document.getElementById(id);
     const dom = {
-      loader:$('pageLoader'), loaderText:$('loaderText'), lock:$('lockScreen'), pass:$('accessPassword'), enter:$('btnEnter'),
+      loader:$('pageLoader'), loaderText:$('loaderText'),
       adminStatus:$('adminStatus'),
       dataStatus:$('dataStatus'), recentList:$('recentList'), historyList:$('historyList'), bars:$('fourWeekBars'),
       entryModal:$('entryModal'), form:$('performanceForm'), editId:$('editId'), inputDate:$('inputDate'), baseline:$('autoBaseline'),
@@ -429,22 +486,10 @@
     function setLoading(on,text='正在載入業績資料…'){ if(!dom.loader)return; if(dom.loaderText)dom.loaderText.textContent=text; dom.loader.classList.toggle('show',!!on); }
     function revealPage(){ if(ST.pageLoaded)return; ST.pageLoaded=true; requestAnimationFrame(()=>document.body.classList.add('data-ready')); }
 
-    function setFrontAccess(){ localStorage.setItem(FRONT_KEY,JSON.stringify({expire:Date.now()+FRONT_TTL})); }
-    function checkFrontAccess(){ try{const raw=localStorage.getItem(FRONT_KEY); if(!raw)return false; const obj=JSON.parse(raw); if(!obj?.expire||Date.now()>obj.expire)return false; setFrontAccess(); return true;}catch{return false;} }
-    function showAppOrLock(){ if(checkFrontAccess()){dom.lock.classList.remove('show');initApp();}else{dom.lock.classList.add('show');setTimeout(()=>dom.pass.focus(),50);} }
-    function unlock(){ if(dom.pass.value.trim()!==FRONT_PASS){ Swal.fire({icon:'error',title:'密碼錯誤',text:'請輸入正確密碼'}); return; } setFrontAccess(); dom.lock.classList.remove('show'); initApp(); }
-
     async function fetchVisitsData(){
-      const rows=[]; let page=0; const size=1000;
-      while(true){
-        const res=await supabase.from('visits').select('form_date,store_branch,is_new_customer,amount').order('form_date',{ascending:true}).range(page*size,(page+1)*size-1);
-        if(res.error) throw res.error;
-        if(!res.data?.length) break;
-        rows.push(...res.data);
-        if(res.data.length<size) break;
-        page++;
-      }
-      return rows;
+      const res=await hubDb.from('visits').select('form_date,store_branch,is_new_customer,amount').order('form_date',{ascending:true});
+      if(res.error) throw res.error;
+      return res.data||[];
     }
 
     function buildAutoWeekMap(minWeekStart=null){
@@ -456,10 +501,10 @@
         if(!map.has(key)) map.set(key,{week_start_date:key,week_end_date:toISO(r.end),linan_new:0,linan_returning:0,nanke_new:0,nanke_returning:0,linan_amount:0,nanke_amount:0,linan_visits:0,nanke_visits:0,source_type:'auto'});
         const row=map.get(key); const amount=Number(v.amount||0); const isNew=v.is_new_customer!==false;
         if(v.store_branch==='臨安店'){
-          row.linan_amount+=amount; row.linan_visits++;
+          row.linan_amount+=amount; row.linan_visits+=Number(v.__count||1);
           if(isNew) row.linan_new+=amount; else row.linan_returning+=amount;
         } else if(v.store_branch==='南科店'){
-          row.nanke_amount+=amount; row.nanke_visits++;
+          row.nanke_amount+=amount; row.nanke_visits+=Number(v.__count||1);
           if(isNew) row.nanke_new+=amount; else row.nanke_returning+=amount;
         }
       });
@@ -468,7 +513,7 @@
 
     function getVisitCounts(startIso,endIso){
       let linan=0,nanke=0;
-      ST.visits.forEach(v=>{ if(v.form_date>=startIso&&v.form_date<=endIso){ if(v.store_branch==='臨安店')linan++; else if(v.store_branch==='南科店')nanke++; }});
+      ST.visits.forEach(v=>{ if(v.form_date>=startIso&&v.form_date<=endIso){ if(v.store_branch==='臨安店')linan+=Number(v.__count||1); else if(v.store_branch==='南科店')nanke+=Number(v.__count||1); }});
       return {linan,nanke};
     }
 
@@ -509,7 +554,7 @@
       const start=parseISO(startIso); const end=toISO(addDays(start,6));
       const rows=Array.from({length:7},(_,i)=>{const d=addDays(start,i);return {date:toISO(d),label:`${['一','二','三','四','五','六','日'][i]} ${d.getMonth()+1}/${d.getDate()}`,newAmount:0,returningAmount:0,visits:0};});
       const byDate=new Map(rows.map(r=>[r.date,r]));
-      ST.visits.forEach(v=>{ if(!v.form_date||v.form_date<startIso||v.form_date>end||v.store_branch!==store)return; const day=byDate.get(v.form_date); if(!day)return; day.visits++; const amount=Number(v.amount||0); if(v.is_new_customer!==false)day.newAmount+=amount; else day.returningAmount+=amount; });
+      ST.visits.forEach(v=>{ if(!v.form_date||v.form_date<startIso||v.form_date>end||v.store_branch!==store)return; const day=byDate.get(v.form_date); if(!day)return; day.visits+=Number(v.__count||1); const amount=Number(v.amount||0); if(v.is_new_customer!==false)day.newAmount+=amount; else day.returningAmount+=amount; });
       return rows;
     }
     function destroyChartMap(map){ map.forEach(chart=>{try{chart?.destroy?.();}catch{}}); map.clear(); }
@@ -543,9 +588,9 @@
       dom.dataStatus.textContent='載入中…'; setLoading(true,'正在整理完整週業績…');
       try{
         const [salesRes,visits,corrRes]=await Promise.all([
-          supabase.from('sales_performance').select('*').order('year',{ascending:true}).order('month',{ascending:true}).order('week_start_date',{ascending:true}),
+          hubDb.from('sales_performance').select('*').order('year',{ascending:true}).order('month',{ascending:true}).order('week_start_date',{ascending:true}),
           fetchVisitsData(),
-          supabase.from('monthly_corrections').select('*')
+          hubDb.from('monthly_corrections').select('*')
         ]);
         if(salesRes.error) throw salesRes.error;
         ST.sales=salesRes.data||[]; ST.visits=visits||[]; ST.corrections={};
@@ -679,7 +724,7 @@
     async function saveCorrection(year,month,store,value){
       if(!ST.isAdmin)return; const key=`${year}_${month}`; const field=store==='linan'?'linan_correction':'nanke_correction';
       const payload={year:Number(year),month:Number(month),[field]:value===''?null:Number(value),updated_at:new Date().toISOString()};
-      const res=await supabase.from('monthly_corrections').upsert(payload,{onConflict:'year,month'}).select().single();
+      const res=await hubDb.from('monthly_corrections').upsert(payload,{onConflict:'year,month'}).select().single();
       if(res.error){Swal.fire({icon:'error',title:'修正數字儲存失敗',text:res.error.message});return;} ST.corrections[key]=res.data; renderHistory();
     }
 
@@ -689,14 +734,7 @@
     }
 
     async function checkAdminSession(){
-      ST.isAdmin=false;
-      try{
-        const {data:{user}}=await supabase.auth.getUser();
-        if(user){
-          const {data:member,error}=await supabase.from('hub_members').select('role,status').eq('user_id',user.id).maybeSingle();
-          ST.isAdmin=!error && member?.status==='active' && member?.role==='owner';
-        }
-      }catch(err){ console.warn('Hub Owner 權限確認失敗',err); }
+      ST.isAdmin = __hubProfile?.role === 'owner' && __hubProfile?.status === 'active';
       updateAdminUI();
       return ST.isAdmin;
     }
@@ -715,26 +753,25 @@
     async function handleDelete(){
       const id=dom.editId.value.trim(); if(!id)return;
       const result=await Swal.fire({icon:'warning',title:'移除手動覆寫？',text:'移除後，這一週將重新顯示客源表單自動加總資料；原始客源表單不會被刪除。',showCancelButton:true,confirmButtonText:'移除覆寫',cancelButtonText:'取消',confirmButtonColor:'#b45e5e'});
-      if(!result.isConfirmed)return; const {error}=await supabase.from('sales_performance').delete().eq('id',id); if(error){Swal.fire({icon:'error',title:'移除失敗',text:error.message});return;} closeModal(); await refreshData(); Swal.fire({icon:'success',title:'已恢復自動彙總',timer:1000,showConfirmButton:false});
+      if(!result.isConfirmed)return; const {error}=await hubDb.from('sales_performance').delete().eq('id',id); if(error){Swal.fire({icon:'error',title:'移除失敗',text:error.message});return;} closeModal(); await refreshData(); Swal.fire({icon:'success',title:'已恢復自動彙總',timer:1000,showConfirmButton:false});
     }
 
     async function handleSubmit(e){
       e.preventDefault(); if(!ST.isAdmin)return; const date=dom.inputDate.value; if(!date)return; const r=weekRange(date),start=toISO(r.start),end=toISO(r.end),major=getMajorMonth(start);
       let lNew=Number(dom.lNew.value||0),lRet=Number(dom.lRet.value||0),nNew=Number(dom.nNew.value||0),nRet=Number(dom.nRet.value||0);
       const snap=ST.editSnapshot; const linanChanged=!snap||snap.start!==start||lNew!==Number(snap.linan_new||0)||lRet!==Number(snap.linan_returning||0); const nankeChanged=!snap||snap.start!==start||nNew!==Number(snap.nanke_new||0)||nRet!==Number(snap.nanke_returning||0);
-      const currentRes=await supabase.from('sales_performance').select('*').eq('period_type','weekly').eq('week_start_date',start).order('updated_at',{ascending:false}).limit(1);
+      const currentRes=await hubDb.from('sales_performance').select('*').eq('period_type','weekly').eq('week_start_date',start).order('updated_at',{ascending:false}).limit(1);
       if(currentRes.error){Swal.fire({icon:'error',title:'儲存失敗',text:currentRes.error.message});return;} const current=currentRes.data?.[0]||null;
       if(current&&!linanChanged){lNew=Number(current.linan_new||0);lRet=Number(current.linan_returning||0);}
       if(current&&!nankeChanged){nNew=Number(current.nanke_new||0);nRet=Number(current.nanke_returning||0);}
       const payload={period_type:'weekly',year:major.year,month:major.month,week_start_date:start,week_end_date:end,linan_new:lNew,linan_returning:lRet,linan_amount:lNew+lRet,nanke_new:nNew,nanke_returning:nRet,nanke_amount:nNew+nRet,note:dom.note.value.trim()||null,updated_at:new Date().toISOString()};
       const id=current?.id||dom.editId.value.trim()||''; let res;
-      if(id) res=await supabase.from('sales_performance').update(payload).eq('id',id); else res=await supabase.from('sales_performance').insert([payload]);
+      if(id) res=await hubDb.from('sales_performance').update(payload).eq('id',id); else res=await hubDb.from('sales_performance').insert([payload]);
       if(res.error){Swal.fire({icon:'error',title:'儲存失敗',text:res.error.message});return;} closeModal(); await refreshData(); Swal.fire({icon:'success',title:'手動資料已儲存',timer:950,showConfirmButton:false});
     }
 
     async function initApp(){ setLoading(true,'正在連線業績資料…'); await checkAdminSession(); await refreshData(); }
 
-    dom.enter.addEventListener('click',unlock); dom.pass.addEventListener('keydown',e=>{if(e.key==='Enter')unlock();});
     dom.btnAdd.addEventListener('click',()=>openModal(null)); dom.btnCloseEntry.addEventListener('click',closeModal); dom.entryModal.addEventListener('click',e=>{if(e.target===dom.entryModal)closeModal();}); dom.btnDelete.addEventListener('click',handleDelete); dom.form.addEventListener('submit',handleSubmit);
     [dom.lNew,dom.lRet,dom.nNew,dom.nRet].forEach(el=>el.addEventListener('input',updateModalTotals));
     dom.inputDate.addEventListener('change',()=>{const r=showWeekRange(dom.inputDate.value);const start=toISO(r.start);const existing=ST.manualWeekMap.get(start)||null;dom.editId.value=existing?.id||'';dom.btnDelete.classList.toggle('hidden',!existing);const auto=updateBaseline(start);const base=existing||auto;fillInputs(base);ST.editSnapshot={start,linan_new:Number(base.linan_new||0),linan_returning:Number(base.linan_returning||0),nanke_new:Number(base.nanke_new||0),nanke_returning:Number(base.nanke_returning||0)};dom.note.value=existing?.note||'';$('modalTitle').textContent=existing?'編輯手動覆寫':'確認／調整週業績';});
@@ -744,9 +781,7 @@
     ['toggleLinanSales','toggleNankeSales','toggleVisits'].forEach(id=>$(id).addEventListener('change',renderChart));
     window.addEventListener('resize',()=>requestAnimationFrame(updateRecentScrollState));
 
-    window.addEventListener('message',e=>{if(e.origin===location.origin&&e.data?.type==='wakodo-hub-auth-refresh')checkAdminSession();});
-
-    showAppOrLock();
+    (async()=>{ if(await __initHubPageAccess()) await initApp(); })();
   </script>
 </body>
 </html>

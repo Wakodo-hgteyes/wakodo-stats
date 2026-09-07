@@ -42,21 +42,7 @@
   </div>
 
   <!-- 密碼驗證畫面 -->
-  <div id="lockScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-white/95 backdrop-blur-xl">
-    <div class="glass-panel p-8 max-w-sm w-full mx-4 text-center border border-white/60 shadow-2xl">
-      <div class="w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-4">
-        <i class="fas fa-lock text-[#EA580C] text-2xl"></i>
-      </div>
-      <h2 class="text-xl font-bold mb-1 text-slate-800">請輸入驗證密碼</h2>
-      <p class="text-xs text-slate-400 mb-6 font-semibold">🔒 密碼請詢問阿旺</p>
-      
-      <!-- 原生安全性密碼輸入框（帶呼吸燈） -->
-      <input type="password" id="accessPassword" class="cyber-input w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 mb-4 text-slate-800 text-center tracking-widest text-sm transition-all" placeholder="輸入解密密碼" autocomplete="current-password" />
-      <button id="btnEnter" class="w-full bg-gradient-to-r from-[#EA580C] to-[#F97316] text-white font-semibold py-3 px-4 rounded-xl transition shadow-lg shadow-orange-500/20 active:scale-95">驗證進入</button>
-    </div>
-  </div>
-
-  <!-- 導覽列 -->
+<!-- 導覽列 -->
   <nav class="bg-white/60 backdrop-blur-md border-b border-slate-100 sticky top-0 z-40">
     <div class="max-w-6xl mx-auto px-4 sm:px-6">
       <div class="flex items-center justify-between h-16">
@@ -186,9 +172,75 @@
     const SUPABASE_KEY = "sb_publishable_RoO2nFORoi-VzRgWt75wWQ_OnHAbl9Y";
     const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    const FRONT_PASS = "wakodo1000";
-    const FRONT_KEY  = "wakodo_mkt_access_v3";
-    const FRONT_TTL  = 7 * 24 * 60 * 60 * 1000;
+
+  const __HUB_PAGE = "marketing";
+  const __HUB_TICKET = (() => {
+    const raw = String(location.hash || "");
+    const m = raw.match(/^#hub=([^&]+)$/);
+    if (!m) return "";
+    try { return decodeURIComponent(m[1]); } catch { return ""; }
+  })();
+  let __hubProfile = null;
+
+  function __showHubOnly(message="此頁面僅能由 WAKODO HUB 授權開啟。") {
+    document.documentElement.innerHTML = `<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>WAKODO HUB｜權限驗證</title></head><body style="margin:0;min-height:100vh;display:grid;place-items:center;background:#f4f5f6;color:#252525;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans TC',sans-serif"><main style="width:min(420px,calc(100% - 40px));padding:30px;border-radius:24px;background:#fff;border:1px solid rgba(0,0,0,.08);box-shadow:0 18px 50px rgba(30,35,40,.10);text-align:center"><div style="font-size:13px;font-weight:900;letter-spacing:.12em;color:#4285f4">WAKODO HUB</div><h1 style="margin:12px 0 8px;font-size:24px">請洽管理員</h1><p style="margin:0;color:#74777b;font-size:14px;line-height:1.7">${message}</p></main></body>`;
+  }
+
+  async function __hubFunctionError(error, fallback="權限驗證失敗") {
+    try {
+      if (error?.context && typeof error.context.json === "function") {
+        const body = await error.context.json();
+        if (body?.error) return body.error;
+      }
+    } catch {}
+    return error?.message || fallback;
+  }
+
+  async function __initHubPageAccess() {
+    if (window.top === window.self || !__HUB_TICKET) { __showHubOnly(); return false; }
+    const { data:{ session } } = await supabase.auth.getSession();
+    if (!session) { __showHubOnly("登入狀態無效，請回到 WAKODO HUB 重新登入。"); return false; }
+    const { data, error } = await supabase.functions.invoke("hub-access", { body:{ action:"me" } });
+    if (error || data?.error || !data?.member || data.member.status !== "active") {
+      __showHubOnly(data?.error || await __hubFunctionError(error)); return false;
+    }
+    const p=data.member;
+    const allowed = p.role === "owner" || p[{index:"can_view_index",performance:"can_view_performance",marketing:"can_view_marketing",social:"can_view_social"}[__HUB_PAGE]] === true;
+    if (!allowed) { __showHubOnly("您的帳號沒有此頁面的查看權限。"); return false; }
+    __hubProfile = p;
+    return true;
+  }
+
+  async function __hubExec(query) {
+    const { data, error } = await supabase.functions.invoke("hub-data", { body:{ page:__HUB_PAGE, ticket:__HUB_TICKET, query } });
+    if (error) return { data:null, error:{ message:await __hubFunctionError(error,"資料存取失敗") } };
+    if (data?.error && data?.ok !== false) return { data:null, error:{ message:data.error } };
+    return { data:data?.data ?? null, error:data?.error ?? null };
+  }
+
+  function __hubFrom(table) {
+    const q={table,method:"select",columns:"*",filters:[],orders:[]};
+    const b={
+      select(columns="*"){ if(q.method==="select") q.columns=columns; else q.returning=columns; return b; },
+      insert(payload){ q.method="insert"; q.payload=payload; return b; },
+      update(payload){ q.method="update"; q.payload=payload; return b; },
+      upsert(payload,opts={}){ q.method="upsert"; q.payload=payload; q.onConflict=opts?.onConflict || null; return b; },
+      delete(){ q.method="delete"; return b; },
+      eq(column,value){ q.filters.push({op:"eq",column,value}); return b; },
+      neq(column,value){ q.filters.push({op:"neq",column,value}); return b; },
+      ilike(column,value){ q.filters.push({op:"ilike",column,value}); return b; },
+      is(column,value){ q.filters.push({op:"is",column,value}); return b; },
+      order(column,opts={}){ q.orders.push({column,ascending:opts?.ascending!==false}); return b; },
+      range(from,to){ q.range=[from,to]; return b; },
+      limit(value){ q.limit=value; return b; },
+      single(){ q.single="single"; return b; },
+      maybeSingle(){ q.single="maybeSingle"; return b; },
+      then(resolve,reject){ return __hubExec(q).then(resolve,reject); },
+      catch(reject){ return __hubExec(q).catch(reject); }
+    };
+    return b;
+  }
+  const hubDb={from:__hubFrom};
 
     // ─── 1. 全域狀態變數宣告 ───
     let _sessionUnlocked = false; 
@@ -202,8 +254,6 @@
 
     // ─── 2. DOM 節點物件 ───
     const dom = {
-      lockScreen: document.getElementById("lockScreen"),
-      accessPassword: document.getElementById("accessPassword"),
       btnEnter: document.getElementById("btnEnter"),
       btnToggleMode: document.getElementById("btnToggleMode"),
       btnShowLogs: document.getElementById("btnShowLogs"),
@@ -295,65 +345,11 @@
       return 0.72;
     }
 
-    // ─── 5. 密碼驗證邏輯 ───
-    function setAccess() { 
-      _sessionUnlocked = true;
-      try { 
-        localStorage.setItem(FRONT_KEY, JSON.stringify({ expire: Date.now() + FRONT_TTL })); 
-      } catch (e) {
-        console.warn("LocalStorage 寫入受阻，已啟用記憶體會話驗證");
-      }
-    }
-    
-    function checkAccess() {
-      if (_sessionUnlocked) return true;
-      try {
-        const raw = localStorage.getItem(FRONT_KEY);
-        if (!raw) return false;
-        const obj = JSON.parse(raw);
-        if (!obj?.expire || Date.now() > obj.expire) return false;
-        _sessionUnlocked = true;
-        return true;
-      } catch (e) { 
-        return false; 
-      }
-    }
-
-    // 啟動檢測
-    if (checkAccess()) {
-      dom.lockScreen.classList.add("hidden");
-      initApp();
-    } else {
-      dom.lockScreen.classList.remove("hidden");
-      dom.accessPassword.focus();
-    }
-
-    dom.btnEnter.addEventListener("click", doUnlock);
-    dom.accessPassword.addEventListener("keydown", (e) => { if (e.key === "Enter") doUnlock(); });
-
-    function doUnlock() {
-      const val = dom.accessPassword.value.trim();
-      if (val !== FRONT_PASS) {
-        Swal.fire({ icon: "error", title: "驗證失敗", text: "密碼金鑰不符合！", background: "#FFFFFF", color: "#1F1F1F" });
-        return;
-      }
-      setAccess();
-      dom.lockScreen.classList.add("hidden");
-      initApp();
-    }
-
-    async function checkHubOwner(){
-      isHubOwner = false;
-      try{
-        const { data:{ user } } = await supabase.auth.getUser();
-        if(user){
-          const { data:member, error } = await supabase.from("hub_members").select("role,status").eq("user_id",user.id).maybeSingle();
-          isHubOwner = !error && member?.status === "active" && member?.role === "owner";
-        }
-      }catch(err){ console.warn("Hub Owner 權限確認失敗", err); }
-      if(!isHubOwner) isEditMode = false;
-      dom.btnToggleMode.classList.toggle("hidden", !isHubOwner);
-      renderAll();
+    // ─── 5. HUB 權限驗證由後端處理 ───
+async function checkHubOwner(){
+      isHubOwner = __hubProfile?.role === "owner" && __hubProfile?.status === "active";
+      isEditMode = isHubOwner;
+      updateEditUI();
       return isHubOwner;
     }
 
@@ -374,9 +370,6 @@
       }
     }
 
-    window.addEventListener("message", e => {
-      if(e.origin === location.origin && e.data?.type === "wakodo-hub-auth-refresh") checkHubOwner();
-    });
 
     // ===== 7. DOM 事件綁定 =====
     function bindEvents() {
@@ -407,8 +400,8 @@
     async function refreshData() {
       try {
         const [salesRes, mktRes] = await Promise.all([
-          supabase.from("sales_performance").select("*").eq("period_type", "weekly"),
-          supabase.from("marketing_expenses").select("*")
+          hubDb.from("sales_performance").select("*").eq("period_type", "weekly"),
+          hubDb.from("marketing_expenses").select("*")
         ]);
 
         if (salesRes.error) throw salesRes.error;
@@ -727,11 +720,11 @@
 
         let res;
         if (id) {
-          res = await supabase.from("marketing_expenses").update(payload).eq("id", id);
+          res = await hubDb.from("marketing_expenses").update(payload).eq("id", id);
           if (res.error) throw res.error;
           await writeLog("修改", `修改 ${year}/${month}月 支出: $${amount} (臨安 ${Math.round(ratio*100)}%), 備註: ${description}`);
         } else {
-          res = await supabase.from("marketing_expenses").insert([payload]);
+          res = await hubDb.from("marketing_expenses").insert([payload]);
           if (res.error) throw res.error;
           await writeLog("新增", `新增 ${year}/${month}月 支出: $${amount} (臨安 ${Math.round(ratio*100)}%), 備註: ${description}`);
         }
@@ -757,7 +750,7 @@
 
       if (confirm.isConfirmed) {
         try {
-          const res = await supabase.from("marketing_expenses").delete().eq("id", id);
+          const res = await hubDb.from("marketing_expenses").delete().eq("id", id);
           if (res.error) throw res.error;
           await writeLog("刪除", `刪除支出: $${amount} (${desc})`);
           Swal.fire({ icon: "success", title: "已刪除", timer: 800, showConfirmButton: false, background: "#FFFFFF", color: "#1F1F1F" });
@@ -771,7 +764,7 @@
 
     async function writeLog(action, details) {
       if(!isHubOwner) return;
-      try { await supabase.from("marketing_logs").insert([{ action, details }]); } 
+      try { await hubDb.from("marketing_logs").insert([{ action, details }]); } 
       catch (err) { console.error("日誌寫入失敗:", err); }
     }
 
@@ -779,7 +772,7 @@
       dom.logsModal.classList.remove("hidden");
       dom.logsContainer.innerHTML = `<div class="text-xs text-slate-500 py-4"><i class="fas fa-spinner fa-spin mr-1"></i> 讀取紀錄中...</div>`;
       try {
-        const { data, error } = await supabase.from("marketing_logs").select("*").order("created_at", { ascending: false }).limit(40);
+        const { data, error } = await hubDb.from("marketing_logs").select("*").order("created_at", { ascending: false }).limit(40);
         if (error) throw error;
 
         if(!data || data.length === 0) {
@@ -811,6 +804,8 @@
     }
 
     function closeLogsModal() { dom.logsModal.classList.add("hidden"); }
+
+    (async()=>{ if(await __initHubPageAccess()) await initApp(); })();
   </script>
 </body>
 </html>

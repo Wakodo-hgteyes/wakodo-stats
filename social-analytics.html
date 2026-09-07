@@ -1997,6 +1997,79 @@ body > :not(.ambient-stage):not(.modal-overlay):not(.lightbox-overlay):not(.toas
 
 <script>
 let sb = null;
+let hubDb = null;
+let __hubProfile = null;
+let __HUB_TICKET = null;
+
+  const __HUB_PAGE = "social";
+  __HUB_TICKET = (() => {
+    const raw = String(location.hash || "");
+    const m = raw.match(/^#hub=([^&]+)$/);
+    if (!m) return "";
+    try { return decodeURIComponent(m[1]); } catch { return ""; }
+  })();
+
+
+  function __showHubOnly(message="此頁面僅能由 WAKODO HUB 授權開啟。") {
+    document.documentElement.innerHTML = `<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>WAKODO HUB｜權限驗證</title></head><body style="margin:0;min-height:100vh;display:grid;place-items:center;background:#f4f5f6;color:#252525;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans TC',sans-serif"><main style="width:min(420px,calc(100% - 40px));padding:30px;border-radius:24px;background:#fff;border:1px solid rgba(0,0,0,.08);box-shadow:0 18px 50px rgba(30,35,40,.10);text-align:center"><div style="font-size:13px;font-weight:900;letter-spacing:.12em;color:#4285f4">WAKODO HUB</div><h1 style="margin:12px 0 8px;font-size:24px">請洽管理員</h1><p style="margin:0;color:#74777b;font-size:14px;line-height:1.7">${message}</p></main></body>`;
+  }
+
+  async function __hubFunctionError(error, fallback="權限驗證失敗") {
+    try {
+      if (error?.context && typeof error.context.json === "function") {
+        const body = await error.context.json();
+        if (body?.error) return body.error;
+      }
+    } catch {}
+    return error?.message || fallback;
+  }
+
+  async function __initHubPageAccess() {
+    if (window.top === window.self || !__HUB_TICKET) { __showHubOnly(); return false; }
+    const { data:{ session } } = await sb.auth.getSession();
+    if (!session) { __showHubOnly("登入狀態無效，請回到 WAKODO HUB 重新登入。"); return false; }
+    const { data, error } = await sb.functions.invoke("hub-access", { body:{ action:"me" } });
+    if (error || data?.error || !data?.member || data.member.status !== "active") {
+      __showHubOnly(data?.error || await __hubFunctionError(error)); return false;
+    }
+    const p=data.member;
+    const allowed = p.role === "owner" || p[{index:"can_view_index",performance:"can_view_performance",marketing:"can_view_marketing",social:"can_view_social"}[__HUB_PAGE]] === true;
+    if (!allowed) { __showHubOnly("您的帳號沒有此頁面的查看權限。"); return false; }
+    __hubProfile = p;
+    return true;
+  }
+
+  async function __hubExec(query) {
+    const { data, error } = await sb.functions.invoke("hub-data", { body:{ page:__HUB_PAGE, ticket:__HUB_TICKET, query } });
+    if (error) return { data:null, error:{ message:await __hubFunctionError(error,"資料存取失敗") } };
+    if (data?.error && data?.ok !== false) return { data:null, error:{ message:data.error } };
+    return { data:data?.data ?? null, error:data?.error ?? null };
+  }
+
+  function __hubFrom(table) {
+    const q={table,method:"select",columns:"*",filters:[],orders:[]};
+    const b={
+      select(columns="*"){ if(q.method==="select") q.columns=columns; else q.returning=columns; return b; },
+      insert(payload){ q.method="insert"; q.payload=payload; return b; },
+      update(payload){ q.method="update"; q.payload=payload; return b; },
+      upsert(payload,opts={}){ q.method="upsert"; q.payload=payload; q.onConflict=opts?.onConflict || null; return b; },
+      delete(){ q.method="delete"; return b; },
+      eq(column,value){ q.filters.push({op:"eq",column,value}); return b; },
+      neq(column,value){ q.filters.push({op:"neq",column,value}); return b; },
+      ilike(column,value){ q.filters.push({op:"ilike",column,value}); return b; },
+      is(column,value){ q.filters.push({op:"is",column,value}); return b; },
+      order(column,opts={}){ q.orders.push({column,ascending:opts?.ascending!==false}); return b; },
+      range(from,to){ q.range=[from,to]; return b; },
+      limit(value){ q.limit=value; return b; },
+      single(){ q.single="single"; return b; },
+      maybeSingle(){ q.single="maybeSingle"; return b; },
+      then(resolve,reject){ return __hubExec(q).then(resolve,reject); },
+      catch(reject){ return __hubExec(q).catch(reject); }
+    };
+    return b;
+  }
+  hubDb={from:__hubFrom};
+
 let isHubOwner = false;
 let allTags = [];      // [{id, brand, model}]
 let allGroups = [];     // full joined data
@@ -2012,30 +2085,19 @@ let currentShotRemoved = false;
 let existingShotUrl = null;
 
 async function checkHubOwnerAccess(){
-  isHubOwner = false;
-  try{
-    const { data:{ user } } = await sb.auth.getUser();
-    if(user){
-      const { data:member, error } = await sb.from('hub_members').select('role,status').eq('user_id',user.id).maybeSingle();
-      isHubOwner = !error && member?.status === 'active' && member?.role === 'owner';
-    }
-  }catch(err){ console.warn('Hub Owner 權限確認失敗',err); }
+  isHubOwner = __hubProfile?.role === 'owner' && __hubProfile?.status === 'active';
   document.body.classList.toggle('hub-owner', isHubOwner);
-  renderGroups();
-  renderStories();
   return isHubOwner;
 }
 
 async function bootstrapSocial(){
   sb = window.supabase;
+  if(!(await __initHubPageAccess())) return;
   await checkHubOwnerAccess();
   await loadAll();
 }
 
 window.addEventListener("supabase-ready", bootstrapSocial);
-window.addEventListener("message", event => {
-  if(event.origin === location.origin && event.data?.type === "wakodo-hub-auth-refresh" && sb) checkHubOwnerAccess();
-});
 
 window.addEventListener('plotly-ready', () => {
   // Plotly 改為 defer 後若比資料晚到，補畫一次圖表；若早已載入則 renderStats() 本身會直接使用。
@@ -2059,7 +2121,7 @@ async function loadAll(){
 }
 
 async function loadTags(){
-  const { data, error } = await sb
+  const { data, error } = await hubDb
     .from('tags')
     .select('id, model, brand_id, brands ( id, name )');
   if(error){ console.error(error); return; }
@@ -2069,7 +2131,7 @@ async function loadTags(){
 }
 
 async function loadGroups(){
-  const { data, error } = await sb
+  const { data, error } = await hubDb
     .from('posts_group')
     .select(`
       id, post_type, note, created_at, tag_id, post_date,
@@ -3082,12 +3144,12 @@ async function saveGroup(){
 
   let groupId = currentGroupId;
   if(groupId){
-    const { error } = await sb.from('posts_group')
+    const { error } = await hubDb.from('posts_group')
       .update({ post_type: postType, tag_id: tagId, note, post_date: postDate })
       .eq('id', groupId);
     if(error){ console.error(error); showToast('更新失敗'); return; }
   } else {
-    const { data, error } = await sb.from('posts_group')
+    const { data, error } = await hubDb.from('posts_group')
       .insert({ post_type: postType, tag_id: tagId, note, post_date: postDate })
       .select().single();
     if(error){ console.error(error); showToast('新增失敗'); return; }
@@ -3103,9 +3165,9 @@ async function saveGroup(){
     if(!url) continue;
 
     if(existingId){
-      await sb.from('platform_posts').update({ post_url: url }).eq('id', existingId);
+      await hubDb.from('platform_posts').update({ post_url: url }).eq('id', existingId);
     } else {
-      await sb.from('platform_posts').insert({ group_id: groupId, platform, post_url: url });
+      await hubDb.from('platform_posts').insert({ group_id: groupId, platform, post_url: url });
     }
   }
 
@@ -3115,11 +3177,11 @@ async function saveGroup(){
 }
 
 async function upsertBrand(name){
-  const { data: existing } = await sb.from('brands')
+  const { data: existing } = await hubDb.from('brands')
     .select('id').ilike('name', name).maybeSingle();
   if(existing) return existing.id;
 
-  const { data, error } = await sb.from('brands').insert({ name }).select().single();
+  const { data, error } = await hubDb.from('brands').insert({ name }).select().single();
   if(error){ console.error(error); showToast('品牌建立失敗'); return null; }
   return data.id;
 }
@@ -3129,11 +3191,11 @@ async function upsertTag(brand, model){
   if(!brandId) return null;
 
   // 同品牌底下找有沒有一樣的型號（忽略大小寫，避免重複建立）
-  const { data: existing } = await sb.from('tags')
+  const { data: existing } = await hubDb.from('tags')
     .select('id').eq('brand_id', brandId).ilike('model', model).maybeSingle();
   if(existing) return existing.id;
 
-  const { data, error } = await sb.from('tags').insert({ brand_id: brandId, model }).select().single();
+  const { data, error } = await hubDb.from('tags').insert({ brand_id: brandId, model }).select().single();
   if(error){ console.error(error); showToast('標籤建立失敗'); return null; }
   await loadTags();
   return data.id;
@@ -3148,7 +3210,7 @@ async function deleteGroup(){
     .flatMap(pp => pp.inquiries || [])
     .map(iq => iq.screenshot_url)
     .filter(Boolean);
-  const { error } = await sb.from('posts_group').delete().eq('id', currentGroupId);
+  const { error } = await hubDb.from('posts_group').delete().eq('id', currentGroupId);
   if(error){ console.error(error); showToast('刪除失敗'); return; }
   const storageCleaned = await removeStorageUrls(screenshotUrls, 'post-screenshots');
   showToast(storageCleaned ? '已刪除' : '資料已刪除，但部分截圖清理失敗');
@@ -3181,24 +3243,24 @@ async function saveTagEdit(){
   // 1. 品牌是全域的：直接改 brands 表本身，所有引用這個品牌的標籤自動一起變。
   //    如果改完的名稱跟「另一個」已存在的品牌撞名（忽略大小寫），視為同一個品牌，自動合併。
   let brandId = t.brand_id;
-  const { data: dupBrand } = await sb.from('brands')
+  const { data: dupBrand } = await hubDb.from('brands')
     .select('id').ilike('name', brand).neq('id', t.brand_id).maybeSingle();
   if(dupBrand){
-    await sb.from('tags').update({ brand_id: dupBrand.id }).eq('brand_id', t.brand_id);
-    await sb.from('brands').delete().eq('id', t.brand_id);
+    await hubDb.from('tags').update({ brand_id: dupBrand.id }).eq('brand_id', t.brand_id);
+    await hubDb.from('brands').delete().eq('id', t.brand_id);
     brandId = dupBrand.id;
   } else {
-    await sb.from('brands').update({ name: brand }).eq('id', t.brand_id);
+    await hubDb.from('brands').update({ name: brand }).eq('id', t.brand_id);
   }
 
   // 2. 型號僅限該品牌底下：如果改完的型號跟同品牌下「另一個」型號撞名，合併並轉移關聯貼文
-  const { data: dupModel } = await sb.from('tags')
+  const { data: dupModel } = await hubDb.from('tags')
     .select('id').eq('brand_id', brandId).ilike('model', model).neq('id', editingTagId).maybeSingle();
   if(dupModel){
-    await sb.from('posts_group').update({ tag_id: dupModel.id }).eq('tag_id', editingTagId);
-    await sb.from('tags').delete().eq('id', editingTagId);
+    await hubDb.from('posts_group').update({ tag_id: dupModel.id }).eq('tag_id', editingTagId);
+    await hubDb.from('tags').delete().eq('id', editingTagId);
   } else {
-    const { error } = await sb.from('tags').update({ model, brand_id: brandId }).eq('id', editingTagId);
+    const { error } = await hubDb.from('tags').update({ model, brand_id: brandId }).eq('id', editingTagId);
     if(error){ console.error(error); showToast('更新失敗'); return; }
   }
 
@@ -3274,7 +3336,7 @@ async function saveInquiry(){
   let saveError = null;
 
   if(currentInquiryId){
-    const { error } = await sb.from('inquiries').update(payload).eq('id', currentInquiryId);
+    const { error } = await hubDb.from('inquiries').update(payload).eq('id', currentInquiryId);
     saveError = error;
   } else {
     const insertPayload = currentInquiryParentType === 'story'
@@ -3284,7 +3346,7 @@ async function saveInquiry(){
           ...payload
         }
       : { platform_post_id: currentPlatformPostId, ...payload };
-    const { error } = await sb.from('inquiries').insert(insertPayload);
+    const { error } = await hubDb.from('inquiries').insert(insertPayload);
     saveError = error;
   }
 
@@ -3484,7 +3546,7 @@ async function deleteInquiry(){
   if(!currentInquiryId) return;
   if(!confirm('確定刪除這筆詢問記錄？')) return;
   const inquiry = allInquiriesById[currentInquiryId];
-  const { error } = await sb.from('inquiries').delete().eq('id', currentInquiryId);
+  const { error } = await hubDb.from('inquiries').delete().eq('id', currentInquiryId);
   if(error){ console.error(error); showToast('刪除失敗'); return; }
   const storageCleaned = await removeStorageUrls([inquiry?.screenshot_url], 'post-screenshots');
   showToast(storageCleaned ? '已刪除' : '資料已刪除，但截圖清理失敗');
@@ -3558,7 +3620,7 @@ function normalizeStoryGroups(groups){
 }
 
 async function loadStories(){
-  const { data, error } = await sb
+  const { data, error } = await hubDb
     .from('story_groups')
     .select(`
       id, tag_id, note, story_date, created_at,
@@ -3756,7 +3818,7 @@ async function saveStoryEntry(){
     const se = allStoryEntries.find(x => x.id === currentStoryEntryId);
     if(!se){ if(uploadedNewUrl) await removeStorageUrls([uploadedNewUrl], 'story-images'); showToast('找不到這筆限時動態'); return; }
 
-    const { error: groupError } = await sb.from('story_groups')
+    const { error: groupError } = await hubDb.from('story_groups')
       .update({ tag_id:tagId, note })
       .eq('id', se.story_group_id);
     if(groupError){
@@ -3767,7 +3829,7 @@ async function saveStoryEntry(){
     }
 
     if(imageUrl !== oldImageUrl){
-      const { error: imageError } = await sb.from('story_images')
+      const { error: imageError } = await hubDb.from('story_images')
         .update({ image_url:imageUrl })
         .eq('id', currentStoryEntryId);
       if(imageError){
@@ -3778,7 +3840,7 @@ async function saveStoryEntry(){
       }
     }
   } else {
-    const { data: group, error: groupError } = await sb.from('story_groups')
+    const { data: group, error: groupError } = await hubDb.from('story_groups')
       .insert({ tag_id:tagId, note })
       .select('id')
       .single();
@@ -3789,11 +3851,11 @@ async function saveStoryEntry(){
       return;
     }
 
-    const { error: imageError } = await sb.from('story_images')
+    const { error: imageError } = await hubDb.from('story_images')
       .insert({ story_group_id:group.id, image_url:imageUrl, sort_order:0 });
     if(imageError){
       console.error(imageError);
-      await sb.from('story_groups').delete().eq('id', group.id);
+      await hubDb.from('story_groups').delete().eq('id', group.id);
       if(uploadedNewUrl) await removeStorageUrls([uploadedNewUrl], 'story-images');
       showToast('圖片新增失敗');
       return;
@@ -3819,10 +3881,10 @@ async function deleteStoryEntry(){
 
   let error = null;
   if(se.group_image_count <= 1){
-    const res = await sb.from('story_groups').delete().eq('id', se.story_group_id);
+    const res = await hubDb.from('story_groups').delete().eq('id', se.story_group_id);
     error = res.error;
   } else {
-    const res = await sb.from('story_images').delete().eq('id', currentStoryEntryId);
+    const res = await hubDb.from('story_images').delete().eq('id', currentStoryEntryId);
     error = res.error;
   }
   if(error){ console.error(error); showToast('刪除失敗'); return; }
