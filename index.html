@@ -968,7 +968,7 @@
     }
 
   const CFG = Object.freeze({
-    VERSION: "14.5.2",
+    VERSION: "14.5.3",
     PAGE_SIZE: 1000,
 
     SOURCES: ["Google 搜尋","Google Map","Facebook 廣告","Instagram 廣告","Threads",
@@ -1127,7 +1127,8 @@
   }
 
   function paidState(v){
-    return v?.has_purchased===true || Number(v?.amount)>0;
+    if (typeof v?.has_purchased === "boolean") return v.has_purchased;
+    return Number(v?.amount) > 0;
   }
 
   function sameVisitConditions(a,b){
@@ -1165,7 +1166,7 @@
 
   function rebuildDateRisks(){
     ST.dateRisks=new Map();
-    const canSensitive=__hubProfile?.role==="owner" || __hubProfile?.can_view_index_sensitive===true;
+    const canSensitive=canViewIndexSensitive();
     if(!canSensitive)return;
     const byDate=new Map();
     ST.raw.forEach(v=>{
@@ -1310,10 +1311,40 @@
     disableAdminUI(); return false;
   }
 
-  function maskName(name){
+  function canViewIndexSensitive(){
+    return __hubProfile?.role === "owner" || __hubProfile?.can_view_index_sensitive === true;
+  }
+
+  const NON_PERSON_NAME_MARKERS = [
+    "未留","現場","調整","路過","過路","情侶","夫妻","一家","家人","朋友","同行",
+    "零售","看看","電話","諮詢","住戶","維修","匿名","未知","不知","小朋友","兒童","路人","客"
+  ];
+  const COMPOUND_SURNAMES = ["歐陽","司馬","上官","諸葛","夏侯","皇甫","尉遲","公孫","慕容","司徒","司空","令狐","宇文","長孫"];
+
+  function maskName(name, gender){
     name = s(name).trim();
     if (!name) return "未留資料";
-    return name; // 直接回傳真實姓名，不做任何遮罩
+    if (canViewIndexSensitive()) return name;
+    // 已經是稱謂、或明顯不是一般中文姓名的紀錄，保持原樣。
+    if (/(先生|小姐|女士|太太|夫人|老師|醫師|醫生)$/.test(name)) return name;
+    if (!/^[\u3400-\u9FFF]{2,4}$/.test(name)) return name;
+    if (NON_PERSON_NAME_MARKERS.some(k => name.includes(k))) return name;
+    if (gender !== "男" && gender !== "女") return name;
+    const compound = COMPOUND_SURNAMES.find(x => name.startsWith(x));
+    const surname = compound || name.slice(0,1);
+    return surname + (gender === "男" ? "先生" : "小姐");
+  }
+
+  function purchaseText(v){
+    if (!paidState(v)) return "未消費";
+    if (!canViewIndexSensitive()) return "有消費";
+    return Number(v?.amount) > 0 ? "NT$" + fmtTwd(v.amount) : "有消費";
+  }
+
+  function purchaseTag(v){
+    return paidState(v)
+      ? `<span class="tag tag-paid">${purchaseText(v)}</span>`
+      : '<span class="tag tag-none">未消費</span>';
   }
 
   window.toggleSection = (key) => {
@@ -1519,8 +1550,8 @@
     if (f.age && v.age_range !== f.age) return false;
     if (f.cust === "new" && !v.is_new_customer) return false;
     if (f.cust === "old" && v.is_new_customer) return false;
-    if (f.pay === "paid" && !(Number(v.amount) > 0)) return false;
-    if (f.pay === "unpaid" && Number(v.amount) > 0) return false;
+    if (f.pay === "paid" && !paidState(v)) return false;
+    if (f.pay === "unpaid" && paidState(v)) return false;
     if (f.service && v.is_customer_service !== true) return false;
     
     // 關鍵字單選過濾邏輯
@@ -1863,7 +1894,7 @@
     if(!$("mobileIndexSummary")) return;
     const q=s($("qSearch")?.value).trim(); const rows=ST.filtered||[];
     $("mobileIndexTotal").textContent=fmtTwd(rows.length);
-    const paid=rows.filter(v=>Number(v.amount)>0).length, newer=rows.filter(v=>v.is_new_customer===true).length;
+    const paid=rows.filter(v=>paidState(v)).length, newer=rows.filter(v=>v.is_new_customer===true).length;
     $("mobileIndexScope").textContent=`${ST.store} · 新客 ${rows.length?Math.round(newer/rows.length*100):0}% · 有消費 ${rows.length?Math.round(paid/rows.length*100):0}%`;
     qa("#mobileIndexStoreSeg button").forEach(b=>b.classList.toggle("active",b.dataset.store===ST.store));
     const period=$("mobileIndexPeriod"); if(period&&period.value!==mobileIndexPeriodMode) period.value=mobileIndexPeriodMode;
@@ -1878,7 +1909,7 @@
     const dashboard=$("mobileIndexDashboard"), results=$("mobileIndexSearchResults"), search=$("mobileIndexSearch"); if(search&&search.value!==q) search.value=q;
     if(q){
       dashboard.style.display='none'; results.classList.add('show'); $("mobileSearchCount").textContent=`${rows.length} 筆`;
-      $("mobileSearchList").innerHTML=rows.slice(0,20).map(v=>`<div class="mobile-search-row" onclick="showDetail('${v.id}')"><div><div class="mobile-search-name">${escapeHtml(maskName(v.customer_name)||'匿名顧客')}</div><div class="mobile-search-meta">${escapeHtml(s(v.form_date).slice(0,10))} · ${escapeHtml(s(v.store_branch)||'-')} · ${v.is_new_customer?'新客':'老客'}${v.amount!=null?` · ${Number(v.amount)>0?'NT$'+fmtTwd(v.amount):'未消費'}`:''}</div></div><span class="mobile-search-arrow">›</span></div>`).join('') || '<div class="mobile-summary-sub">沒有符合搜尋條件的資料</div>';
+      $("mobileSearchList").innerHTML=rows.slice(0,20).map(v=>`<div class="mobile-search-row" onclick="showDetail('${v.id}')"><div><div class="mobile-search-name">${escapeHtml(maskName(v.customer_name,v.gender)||'匿名顧客')}</div><div class="mobile-search-meta">${escapeHtml(s(v.form_date).slice(0,10))} · ${escapeHtml(s(v.store_branch)||'-')} · ${v.is_new_customer?'新客':'老客'} · ${escapeHtml(purchaseText(v))}</div></div><span class="mobile-search-arrow">›</span></div>`).join('') || '<div class="mobile-summary-sub">沒有符合搜尋條件的資料</div>';
     }else{ dashboard.style.display='grid'; results.classList.remove('show'); }
   }
 
@@ -2405,15 +2436,15 @@
       $("btnLoadMore") && ($("btnLoadMore").style.display = "none"); return;
     }
     tb.innerHTML = rows.map((v, i) => {
-      const paid = Number(v.amount) > 0;
+      const paid = paidState(v);
       const cust = v.is_new_customer ? '<span class="tag tag-new">新客</span>' : '<span class="tag tag-old">老客</span>';
-      const pay = paid ? `<span class="tag tag-paid">NT$${fmtTwd(v.amount)}</span>` : '<span class="tag tag-none">未消費</span>';
+      const pay = purchaseTag(v);
       const purposes = arr(v.visit_purposes).map(p=>`<span class="tag tag-purpose">${p}</span>`).join("");
       const serviceTag = v.is_customer_service === true ? '<span class="tag tag-service">客服</span>' : '';
       return `<tr onclick="showDetail('${v.id}')" onmouseenter="showPreview(event,'${v.id}')" onmouseleave="hidePreview()" class="flight-row-enter" style="animation-delay: ${i * 30}ms;">
         <td class="mono">${s(v.form_date).slice(0,10)}</td>
         <td><span class="tag ${v.store_branch==='臨安店'?'tag-store-a':'tag-store-b'}">${s(v.store_branch)}</span></td>
-        <td>${maskName(v.customer_name)}${dateRiskBadge(v)}${serviceTag}</td>
+        <td>${maskName(v.customer_name,v.gender)}${dateRiskBadge(v)}${serviceTag}</td>
         <td>${cust}</td><td>${pay}</td>
         <td class="mono hint">${s(v.gender)||'-'} / ${s(v.age_range)||'-'}</td>
         <td><div class="jwrap">${journeyBadges(v.source_tags)||'<span class="hint">-</span>'}</div></td>
@@ -2473,7 +2504,7 @@
     try {
       let all = [], from = 0;
       while (true){
-        const visitSource = (__hubProfile?.role === "owner" || __hubProfile?.can_view_index_sensitive === true) ? "visits" : "hub_index_visits_safe";
+        const visitSource = canViewIndexSensitive() ? "visits" : "hub_index_visits_safe";
         const { data, error } = await hubDb.from(visitSource).select("*").order("form_date", { ascending:false }).range(from, from + CFG.PAGE_SIZE - 1);
         if (error) throw error;
         if (!data || !data.length) break;
@@ -2651,7 +2682,7 @@
     const v = ST.raw.find(x => String(x.id) === String(id));
     if (!v) return;
     ST.currentDetailId = id;
-    const paid = Number(v.amount) > 0;
+    const paid = paidState(v);
     
     const tags = cleanTags(v.source_tags);
     let journeyHtml = "";
@@ -2678,7 +2709,7 @@
 
     $("detailContent").innerHTML = `
       <div style="margin-bottom: 24px;">
-        <h2 style="font-size: 28px; font-weight: 900; margin-bottom: 8px; color: var(--text-primary);">${maskName(v.customer_name)}</h2>
+        <h2 style="font-size: 28px; font-weight: 900; margin-bottom: 8px; color: var(--text-primary);">${maskName(v.customer_name,v.gender)}</h2>
         <div style="display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--text-secondary); font-weight: 700;">
           <span class="tag ${v.store_branch==='臨安店'?'tag-store-a':'tag-store-b'}">${s(v.store_branch)}</span>
           ${v.is_customer_service === true ? '<span class="tag tag-service">客服</span>' : ''}
@@ -2688,7 +2719,7 @@
 
       <div style="background: rgba(0,0,0,0.02); border-radius: 16px; padding: 20px; margin-bottom: 16px; border: 1px solid rgba(0,0,0,0.05);">
         <div style="font-size: 12px; color: var(--text-hint); font-weight: 800; margin-bottom: 6px;">身分 / 消費</div>
-        <div style="font-size: 18px; font-weight: 900; color: var(--text-primary);">${v.is_new_customer ? "新客" : "老客"} / ${paid ? "NT$"+fmtTwd(v.amount) : "無消費"}</div>
+        <div style="font-size: 18px; font-weight: 900; color: var(--text-primary);">${v.is_new_customer ? "新客" : "老客"} / ${purchaseText(v)}</div>
       </div>
 
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
