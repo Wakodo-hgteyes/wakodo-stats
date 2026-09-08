@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>和光堂行銷開支計算</title>
-  <!-- build: 2026-09-07-1924 -->
+  <!-- build: 2026-09-07-1949 -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2032%2032%27%3E%3Crect%20x%3D%270%27%20y%3D%270%27%20width%3D%2732%27%20height%3D%2732%27%20rx%3D%277%27%20fill%3D%27%23EA580C%27/%3E%3Cpath%20d%3D%27M7%2024.5H25%27%20stroke%3D%27%23FFFFFF%27%20stroke-width%3D%272%27%20stroke-linecap%3D%27round%27/%3E%3Cpath%20d%3D%27M8%2022%20L13%2017%20L17%2019%20L23%2011%27%20fill%3D%27none%27%20stroke%3D%27%23FFFFFF%27%20stroke-width%3D%272.4%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27/%3E%3C/svg%3E">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -55,9 +55,81 @@
     @media (prefers-reduced-motion: reduce) {
       .monthly-body-shell, .month-chevron { transition-duration: 1ms !important; }
     }
+
+    /* ===== Mobile Summary Mode ===== */
+    #mobileMarketingSummary{display:none}
+    .mobile-desktop-toggle{display:none}
+    @media (max-width:760px){
+      html:not(.force-desktop-mode) body{padding-bottom:34px;background:#f7f8fa}
+      html:not(.force-desktop-mode) body>nav,
+      html:not(.force-desktop-mode) body>main{display:none!important}
+      html:not(.force-desktop-mode) #mobileMarketingSummary{display:block;padding:18px 14px 38px;max-width:620px;margin:0 auto}
+      html:not(.force-desktop-mode) .mobile-desktop-toggle{display:inline-flex;position:fixed;right:12px;bottom:14px;z-index:45;align-items:center;gap:6px;padding:9px 12px;border:1px solid #e2e8f0;border-radius:999px;background:rgba(255,255,255,.94);box-shadow:0 8px 24px rgba(15,23,42,.12);color:#475569;font-size:12px;font-weight:800;backdrop-filter:blur(12px)}
+      .mkt-mobile-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
+      .mkt-mobile-kicker{font-size:11px;font-weight:900;letter-spacing:.12em;color:#ea580c}
+      .mkt-mobile-title{font-size:25px;line-height:1.15;font-weight:950;color:#111827;margin-top:4px}
+      .mkt-mobile-month{border:1px solid #e2e8f0;background:#fff;border-radius:12px;padding:9px 10px;font-size:13px;font-weight:850;color:#334155;outline:none;max-width:132px}
+      .mkt-mobile-card{background:rgba(255,255,255,.94);border:1px solid #e7e9ee;border-radius:19px;box-shadow:0 8px 24px rgba(15,23,42,.055);padding:16px;margin-top:12px}
+      .mkt-mobile-hero{background:linear-gradient(145deg,#fff7ed,#fff);border-color:#fed7aa}
+      .mkt-mobile-label{font-size:13px;font-weight:850;color:#64748b}
+      .mkt-mobile-total{font-size:34px;line-height:1.1;font-weight:950;color:#0f172a;letter-spacing:-1px;margin-top:4px}
+      .mkt-mobile-sub{font-size:13px;line-height:1.55;color:#64748b;font-weight:700;margin-top:7px}
+      .mkt-mobile-section-title{font-size:17px;font-weight:950;color:#0f172a}
+      .mkt-mobile-section-note{font-size:12px;color:#64748b;font-weight:700;margin-top:3px;line-height:1.5}
+      .mkt-mobile-expense{padding:14px 0;border-bottom:1px solid #edf0f3}.mkt-mobile-expense:last-child{border-bottom:0}
+      .mkt-mobile-expense-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+      .mkt-mobile-expense-desc{font-size:14px;font-weight:850;color:#334155;min-width:0;overflow-wrap:anywhere}
+      .mkt-mobile-expense-amount{font-size:18px;font-weight:950;color:#0f172a;white-space:nowrap}
+      .mkt-mobile-splitbar{height:8px;border-radius:999px;overflow:hidden;background:#e2e8f0;display:flex;margin:10px 0 8px}
+      .mkt-mobile-split-l{background:#f97316;height:100%}.mkt-mobile-split-n{background:#3b82f6;height:100%}
+      .mkt-mobile-split-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px;font-weight:850}
+      .mkt-mobile-split-meta strong{display:block;font-size:15px;margin-top:2px}
+      .mkt-mobile-l{color:#c2410c}.mkt-mobile-n{color:#1d4ed8}
+      .mkt-mobile-total-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;padding-top:13px;border-top:2px solid #e2e8f0}
+      .mkt-mobile-total-box{padding:12px;border-radius:14px;background:#f8fafc}
+      .mkt-mobile-total-box span{font-size:12px;font-weight:800;color:#64748b}.mkt-mobile-total-box strong{display:block;font-size:18px;font-weight:950;margin-top:3px}
+      .mkt-mobile-week{padding:14px;border:1px solid #e5e7eb;border-radius:16px;background:#fff;margin-top:10px}
+      .mkt-mobile-week-head{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px;font-weight:900;color:#475569}
+      .mkt-mobile-store-result{display:grid;grid-template-columns:1fr auto;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #eef0f2}.mkt-mobile-store-result:last-child{border-bottom:0;padding-bottom:0}
+      .mkt-mobile-store-result:first-of-type{padding-top:14px}
+      .mkt-mobile-store-name{font-size:14px;font-weight:900;color:#334155}.mkt-mobile-store-meta{font-size:12px;color:#64748b;font-weight:750;margin-top:3px}
+      .mkt-mobile-multiple{font-size:22px;font-weight:950;color:#047857;white-space:nowrap}.mkt-mobile-multiple.loss{color:#be123c}
+      .mkt-mobile-trend-row{display:grid;grid-template-columns:68px 1fr auto;gap:9px;align-items:center;padding:9px 0;border-bottom:1px solid #eef0f2}.mkt-mobile-trend-row:last-child{border-bottom:0}
+      .mkt-mobile-trend-date{font-size:12px;font-weight:850;color:#64748b}.mkt-mobile-trend-bars{display:grid;gap:5px}.mkt-mobile-trend-line{height:7px;border-radius:999px;background:#eef2f7;overflow:hidden}.mkt-mobile-trend-fill{height:100%;border-radius:999px}.mkt-mobile-trend-values{font-size:12px;font-weight:900;color:#334155;text-align:right;line-height:1.45;white-space:nowrap}
+    }
+    html.force-desktop-mode .mobile-desktop-toggle{display:inline-flex;position:fixed;right:14px;bottom:14px;z-index:60;align-items:center;gap:6px;padding:9px 12px;border:1px solid #e2e8f0;border-radius:999px;background:rgba(255,255,255,.95);box-shadow:0 8px 24px rgba(15,23,42,.12);color:#475569;font-size:12px;font-weight:800}
   </style>
 </head>
 <body class="min-h-screen pb-12 relative">
+
+  <section id="mobileMarketingSummary" aria-label="手機版行銷摘要">
+    <div class="mkt-mobile-head">
+      <div><div class="mkt-mobile-kicker">WAKODO / MARKETING</div><div class="mkt-mobile-title">行銷開支摘要</div></div>
+      <select id="mobileMktMonth" class="mkt-mobile-month" aria-label="選擇月份"></select>
+    </div>
+    <div class="mkt-mobile-card mkt-mobile-hero">
+      <div class="mkt-mobile-label">本月行銷總支出</div>
+      <div id="mobileMktTotal" class="mkt-mobile-total">--</div>
+      <div id="mobileMktDaily" class="mkt-mobile-sub">每日平均 --</div>
+    </div>
+    <div class="mkt-mobile-card">
+      <div class="mkt-mobile-section-title">支出明細</div>
+      <div class="mkt-mobile-section-note">每筆直接看兩店實際分攤，不重複顯示相同摘要。</div>
+      <div id="mobileMktExpenses"></div>
+      <div id="mobileMktAllocTotals"></div>
+    </div>
+    <div class="mkt-mobile-card">
+      <div class="mkt-mobile-section-title">最新週投入效果</div>
+      <div class="mkt-mobile-section-note">業績 ÷ 當週行銷分攤；「賺 X 倍」用於快速判讀投入效率，非實際淨利。</div>
+      <div id="mobileMktLatestWeek"></div>
+    </div>
+    <div class="mkt-mobile-card">
+      <div class="mkt-mobile-section-title">最近四週效益</div>
+      <div class="mkt-mobile-section-note">用相同口徑快速看臨安、南科投入倍數的變化。</div>
+      <div id="mobileMktTrend"></div>
+    </div>
+  </section>
+  <button id="mobileDesktopToggle" class="mobile-desktop-toggle" type="button" onclick="toggleDesktopInterface()"><i class="fas fa-desktop"></i><span>切換電腦版介面</span></button>
 
   <div class="bg-gradient-fluid">
     <div class="blob w-[500px] h-[500px] bg-orange-100 top-[-10%] left-[-15%] animate-pulse"></div>
@@ -277,6 +349,7 @@
     window.deleteExpense     = deleteExpense;
     window.openLogsModal     = openLogsModal;
     window.closeLogsModal    = closeLogsModal;
+    window.toggleDesktopInterface = toggleDesktopInterface;
 
     // 初始化年份選單
     const thisYear = new Date().getFullYear();
@@ -356,6 +429,66 @@
       return isHubOwner;
     }
 
+    // ===== Mobile Summary helpers =====
+    function isMobileMarketingSummary(){
+      return window.matchMedia("(max-width:760px)").matches && !document.documentElement.classList.contains("force-desktop-mode");
+    }
+    function toggleDesktopInterface(){
+      const root=document.documentElement,meta=document.querySelector('meta[name="viewport"]'),toDesktop=!root.classList.contains("force-desktop-mode");
+      root.classList.toggle("force-desktop-mode",toDesktop);
+      if(meta)meta.setAttribute("content",toDesktop?"width=1180":"width=device-width, initial-scale=1.0");
+      const btn=document.getElementById("mobileDesktopToggle");if(btn)btn.querySelector("span").textContent=toDesktop?"返回手機版介面":"切換電腦版介面";
+      setTimeout(()=>{renderAll();window.dispatchEvent(new Event("resize"));},90);
+    }
+    function escMobile(v){
+      return String(v ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+    }
+    function marketingMultiple(revenue, alloc){
+      if(!alloc) return { text:'--', value:0, loss:false };
+      const value = Number(revenue||0) / Number(alloc||1);
+      return { text:`${Number(revenue||0) >= Number(alloc||0) ? '賺' : '賠'} ${value.toFixed(1)} 倍`, value, loss:Number(revenue||0) < Number(alloc||0) };
+    }
+    function globalRecentWeeks(limit=4){
+      return [...allSales].filter(r=>r.week_start_date).sort((a,b)=>parseISODateLocal(b.week_start_date)-parseISODateLocal(a.week_start_date)).slice(0,limit);
+    }
+    function renderMobileMarketing(){
+      if(!isMobileMarketingSummary()) return;
+      const monthSel=document.getElementById('mobileMktMonth');
+      if(!monthSel) return;
+      const wanted=currentFocusMonth && allMonthKeys.includes(currentFocusMonth) ? currentFocusMonth : (allMonthKeys[0]||'');
+      monthSel.innerHTML=allMonthKeys.map(k=>{const [y,m]=k.split('-');return `<option value="${k}" ${k===wanted?'selected':''}>${y}/${Number(m)}</option>`}).join('');
+      if(!currentFocusMonth || !allMonthKeys.includes(currentFocusMonth)) currentFocusMonth=wanted;
+      const mData=currentFocusMonth ? buildMonthlyData(currentFocusMonth) : null;
+      const total=document.getElementById('mobileMktTotal'), daily=document.getElementById('mobileMktDaily');
+      const expensesWrap=document.getElementById('mobileMktExpenses'), allocWrap=document.getElementById('mobileMktAllocTotals');
+      const latestWrap=document.getElementById('mobileMktLatestWeek'), trendWrap=document.getElementById('mobileMktTrend');
+      if(!mData){
+        total.textContent='--';daily.textContent='目前沒有資料';expensesWrap.innerHTML='<div class="mkt-mobile-sub">尚無支出資料。</div>';allocWrap.innerHTML='';latestWrap.innerHTML='<div class="mkt-mobile-sub">尚無週業績資料。</div>';trendWrap.innerHTML='';return;
+      }
+      total.textContent=fmtTwd(mData.totalExpense);
+      daily.textContent=`${mData.year} 年 ${mData.month} 月 · 每日平均 ${fmtTwd(mData.dailyExpense)}`;
+      if(!mData.expenses.length) expensesWrap.innerHTML='<div class="mkt-mobile-sub">本月尚未輸入支出。</div>';
+      else expensesWrap.innerHTML=mData.expenses.map(exp=>{
+        const ratio=exp.linan_ratio!=null?Number(exp.linan_ratio):.72;
+        const l=Number(exp.amount||0)*ratio,n=Number(exp.amount||0)*(1-ratio);
+        return `<div class="mkt-mobile-expense"><div class="mkt-mobile-expense-top"><div class="mkt-mobile-expense-desc">${escMobile(exp.description||'無備註')}</div><div class="mkt-mobile-expense-amount">${fmtTwd(exp.amount)}</div></div><div class="mkt-mobile-splitbar"><span class="mkt-mobile-split-l" style="width:${Math.max(0,Math.min(100,ratio*100))}%"></span><span class="mkt-mobile-split-n" style="width:${Math.max(0,Math.min(100,(1-ratio)*100))}%"></span></div><div class="mkt-mobile-split-meta"><div class="mkt-mobile-l">臨安 ${Math.round(ratio*100)}%<strong>${fmtTwd(l)}</strong></div><div class="mkt-mobile-n">南科 ${Math.round((1-ratio)*100)}%<strong>${fmtTwd(n)}</strong></div></div></div>`;
+      }).join('');
+      const lp=mData.totalExpense?mData.totalLinanExpense/mData.totalExpense*100:0,np=mData.totalExpense?mData.totalNankeExpense/mData.totalExpense*100:0;
+      allocWrap.innerHTML=`<div class="mkt-mobile-total-row"><div class="mkt-mobile-total-box mkt-mobile-l"><span>臨安本月 ${lp.toFixed(1)}%</span><strong>${fmtTwd(mData.totalLinanExpense)}</strong></div><div class="mkt-mobile-total-box mkt-mobile-n"><span>南科本月 ${np.toFixed(1)}%</span><strong>${fmtTwd(mData.totalNankeExpense)}</strong></div></div>`;
+      const latest=mData.weeks[0];
+      if(!latest) latestWrap.innerHTML='<div class="mkt-mobile-sub">此月份沒有週業績資料。</div>';
+      else {
+        const st=parseISODateLocal(latest.week_start_date), en=addDays(st,6), lAlloc=mData.dailyLinanExpense*7, nAlloc=mData.dailyNankeExpense*7;
+        const lm=marketingMultiple(latest.linan_amount,lAlloc),nm=marketingMultiple(latest.nanke_amount,nAlloc);
+        latestWrap.innerHTML=`<div class="mkt-mobile-week"><div class="mkt-mobile-week-head"><span>${st.getMonth()+1}/${st.getDate()}–${en.getMonth()+1}/${en.getDate()}</span><span>最新</span></div><div class="mkt-mobile-store-result"><div><div class="mkt-mobile-store-name mkt-mobile-l">臨安店</div><div class="mkt-mobile-store-meta">業績 ${fmtTwd(latest.linan_amount)} · 投入 ${fmtTwd(lAlloc)}</div></div><div class="mkt-mobile-multiple ${lm.loss?'loss':''}">${lm.text}</div></div><div class="mkt-mobile-store-result"><div><div class="mkt-mobile-store-name mkt-mobile-n">南科店</div><div class="mkt-mobile-store-meta">業績 ${fmtTwd(latest.nanke_amount)} · 投入 ${fmtTwd(nAlloc)}</div></div><div class="mkt-mobile-multiple ${nm.loss?'loss':''}">${nm.text}</div></div></div>`;
+      }
+      const recent=globalRecentWeeks(4);
+      if(!recent.length){trendWrap.innerHTML='<div class="mkt-mobile-sub">尚無可比較週資料。</div>';return;}
+      const computed=recent.map(row=>{const major=getMajorMonth(row.week_start_date), md=buildMonthlyData(major.key), la=md.dailyLinanExpense*7,na=md.dailyNankeExpense*7;return {row,lm:marketingMultiple(row.linan_amount,la),nm:marketingMultiple(row.nanke_amount,na)};});
+      const max=Math.max(1,...computed.flatMap(x=>[x.lm.value,x.nm.value]));
+      trendWrap.innerHTML=computed.map(({row,lm,nm})=>{const st=parseISODateLocal(row.week_start_date);return `<div class="mkt-mobile-trend-row"><div class="mkt-mobile-trend-date">${st.getMonth()+1}/${st.getDate()}</div><div class="mkt-mobile-trend-bars"><div class="mkt-mobile-trend-line"><div class="mkt-mobile-trend-fill" style="width:${Math.min(100,lm.value/max*100)}%;background:#f97316"></div></div><div class="mkt-mobile-trend-line"><div class="mkt-mobile-trend-fill" style="width:${Math.min(100,nm.value/max*100)}%;background:#3b82f6"></div></div></div><div class="mkt-mobile-trend-values"><span class="mkt-mobile-l">臨 ${lm.value?lm.value.toFixed(1)+'×':'--'}</span><br><span class="mkt-mobile-n">南 ${nm.value?nm.value.toFixed(1)+'×':'--'}</span></div></div>`}).join('');
+    }
+
     // ===== 6. 系統啟動進入點 =====
     async function initApp() {
       try {
@@ -413,6 +546,8 @@
       dom.inputMonth.addEventListener("change", handleDateChangeToInherit);
       
       dom.expenseForm.addEventListener("submit", handleExpenseSubmit);
+      const mobileMonth=document.getElementById("mobileMktMonth");
+      if(mobileMonth) mobileMonth.addEventListener("change", e=>{ currentFocusMonth=e.target.value; renderMobileMarketing(); });
     }
 
     // ===== 8. 銷售與行銷數據同步撈取 =====
@@ -491,6 +626,10 @@
     // ===== 10. 畫面渲染與核心看板更新 =====
     function renderAll() {
       try {
+        if(isMobileMarketingSummary()){
+          renderMobileMarketing();
+          return;
+        }
         dom.monthlyContainer.innerHTML = "";
         if(allMonthKeys.length === 0) {
           dom.monthlyContainer.innerHTML = `<div class="text-center py-12 text-slate-400 text-sm">目前無任何數據紀錄。</div>`;

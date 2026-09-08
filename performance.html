@@ -226,10 +226,47 @@
     @media(max-width:1000px){.hero-body{grid-template-columns:1fr}.mini-chart-grid{grid-template-columns:1fr 1fr}.recent-row{grid-template-columns:135px 1fr repeat(4,minmax(96px,.75fr)) 76px}.insight-grid{grid-template-columns:1fr}.month-head{grid-template-columns:130px 1fr 1fr 36px}.month-head .month-ret{display:none}.week-line{grid-template-columns:135px 78px repeat(3,minmax(88px,1fr))}.week-line .hide-md{display:none}}
     @media(max-width:700px){.shell{width:min(100% - 20px,1220px)}.topbar-inner{height:auto;min-height:66px;padding:10px 0;align-items:flex-start}.brand-sub{display:none}.nav-actions .btn span{display:none}main{padding-top:20px}h1{font-size:28px}.hero{padding:18px}.hero-total{font-size:36px}.hero-source-note{text-align:left}.hero-actions{justify-content:flex-start}.hero-body{grid-template-columns:1fr}.mini-chart-grid{grid-template-columns:1fr}.cust-grid{grid-template-columns:1fr 1fr}.store-chart-wrap{height:205px}.recent-row{grid-template-columns:1fr 1fr;gap:8px}.recent-row>div:nth-child(1),.recent-row>div:nth-child(2){grid-column:auto}.recent-action{grid-column:2;justify-self:end}.recent-detail-inner{padding:14px}.recent-detail-meta{align-items:flex-start}.bar-row{grid-template-columns:70px 1fr 65px}.month-head{grid-template-columns:1fr 1fr 30px}.month-head .month-nanke,.month-head .month-ret{display:none}.week-line{grid-template-columns:1fr 72px 1fr}.week-line .hide-sm,.week-line .hide-md{display:none}.grid-2{grid-template-columns:1fr}.section-card,.mini-card{padding:16px}.chart-wrap{height:290px}}
     @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+  
+
+    /* ===== Mobile Summary Mode ===== */
+    .mobile-performance,.mobile-interface-toggle{display:none}
+    .mobile-interface-toggle{position:fixed;right:12px;bottom:12px;z-index:95;border:1px solid rgba(0,0,0,.10);background:rgba(255,255,255,.96);color:#555;border-radius:999px;padding:8px 11px;font-size:11px;font-weight:900;box-shadow:0 8px 24px rgba(0,0,0,.10)}
+    .mperf-card{background:rgba(255,255,255,.92);border:1px solid rgba(255,255,255,.98);border-radius:18px;box-shadow:0 9px 26px rgba(63,54,43,.07);padding:16px}
+    .mperf-kicker{font-size:11px;color:var(--hint);font-weight:900;letter-spacing:.08em}
+    .mperf-title{font-size:23px;font-weight:950;letter-spacing:-.4px;margin-top:4px}
+    .mperf-period{font-size:12px;color:var(--muted);font-weight:850;margin-top:5px}
+    .mperf-total{font-size:38px;line-height:1.05;font-weight:950;letter-spacing:-1.4px;margin-top:10px}
+    .mperf-growth{font-size:13px;font-weight:900;margin-top:7px}
+    .mperf-store-seg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:#eceae6;border-radius:13px;padding:4px;margin-top:14px}
+    .mperf-store-seg button{border:0;background:transparent;border-radius:10px;min-height:38px;font-size:13px;font-weight:900;color:var(--muted)}
+    .mperf-store-seg button.active{background:#fff;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.07)}
+    .mperf-metrics{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}
+    .mperf-metric{background:#f8f7f4;border:1px solid #ece8e1;border-radius:14px;padding:12px}
+    .mperf-metric-label{font-size:11px;color:var(--muted);font-weight:850}
+    .mperf-metric-value{font-size:18px;font-weight:950;margin-top:4px}
+    .mperf-block-title{font-size:15px;font-weight:950;margin-bottom:10px}
+    .mperf-chart{height:270px;position:relative}
+    .mperf-trend{display:grid;gap:10px}
+    .mperf-trend-row{display:grid;grid-template-columns:72px 1fr auto;gap:9px;align-items:center}
+    .mperf-trend-label{font-size:12px;color:var(--muted);font-weight:850}
+    .mperf-trend-track{height:8px;border-radius:999px;background:#efede9;overflow:hidden}
+    .mperf-trend-fill{height:100%;border-radius:999px;background:var(--linan)}
+    .mperf-trend-value{font-size:12px;font-weight:950}
+    html.force-desktop-mode .mobile-interface-toggle{display:flex}
+    @media(max-width:760px){
+      html:not(.force-desktop-mode) .mobile-performance,html:not(.force-desktop-mode) .mobile-interface-toggle{display:block}
+      html:not(.force-desktop-mode) .topbar,html:not(.force-desktop-mode) main>.page-head,html:not(.force-desktop-mode) main>.hero,html:not(.force-desktop-mode) main>.section{display:none!important}
+      html:not(.force-desktop-mode) .shell{width:calc(100% - 20px)} html:not(.force-desktop-mode) main{padding-top:10px}
+      html:not(.force-desktop-mode) .mobile-performance{display:grid;gap:10px;padding-bottom:50px}
+      html:not(.force-desktop-mode) body{padding-bottom:12px}
+    }
+    html.force-desktop-mode .mobile-performance{display:none!important}
+
   </style>
 </head>
 <body>
   <div id="pageLoader" class="page-loader" aria-live="polite"><div class="loader-card"><span class="loader-ring"></span><span id="loaderText">正在載入業績資料…</span></div></div>
+  <button type="button" class="mobile-interface-toggle" onclick="toggleDesktopInterface()">切換電腦版介面</button>
 
   <header class="topbar">
     <div class="shell topbar-inner">
@@ -245,6 +282,18 @@
   </header>
 
   <main class="shell">
+    <div id="mobilePerformance" class="mobile-performance">
+      <div class="mperf-card">
+        <div class="mperf-kicker">WAKODO / PERFORMANCE</div><div class="mperf-title">最新完整週</div>
+        <div id="mobilePerfPeriod" class="mperf-period">--</div>
+        <div id="mobilePerfTotal" class="mperf-total">--</div>
+        <div id="mobilePerfGrowth" class="mperf-growth">--</div>
+        <div id="mobilePerfStoreSeg" class="mperf-store-seg"><button data-store="all" onclick="setMobilePerfStore('all')">全部</button><button data-store="linan" onclick="setMobilePerfStore('linan')">臨安</button><button data-store="nanke" onclick="setMobilePerfStore('nanke')">南科</button></div>
+        <div class="mperf-metrics"><div class="mperf-metric"><div class="mperf-metric-label">新客業績</div><div id="mobilePerfNew" class="mperf-metric-value">--</div></div><div class="mperf-metric"><div class="mperf-metric-label">舊客業績</div><div id="mobilePerfRet" class="mperf-metric-value">--</div></div><div class="mperf-metric"><div class="mperf-metric-label">來客數</div><div id="mobilePerfVisits" class="mperf-metric-value">--</div></div><div class="mperf-metric"><div class="mperf-metric-label">資料來源</div><div id="mobilePerfSource" class="mperf-metric-value" style="font-size:13px">--</div></div></div>
+      </div>
+      <div class="mperf-card"><div class="mperf-block-title">當週每日變化</div><div class="mperf-period">新客／舊客業績與來客數，以單一大圖快速閱讀</div><div class="mperf-chart"><canvas id="mobilePerfChart"></canvas></div></div>
+      <div class="mperf-card"><div class="mperf-block-title">最近四週</div><div id="mobilePerfTrend" class="mperf-trend"></div></div>
+    </div>
     <div class="page-head">
       <div>
         <div class="eyebrow">WAKODO / PERFORMANCE</div>
@@ -424,7 +473,7 @@
       isAdmin:false,
       sales:[], visits:[], corrections:{},
       effectiveWeeks:[], summaryWeeks:[], autoWeekMap:new Map(), manualWeekMap:new Map(),
-      chart:null, heroCharts:new Map(), recentCharts:new Map(), chartView:"weekly", chartRange:"12",
+      chart:null, heroCharts:new Map(), recentCharts:new Map(), chartView:"weekly", chartRange:"12", mobileStore:"all", mobileChart:null,
       expanded:new Set(), expandedRecent:new Set(), pageLoaded:false, editSnapshot:null
     };
 
@@ -563,6 +612,33 @@
       map.set(key,chart);
     }
 
+
+    function isMobilePerformanceSummary(){ return !document.documentElement.classList.contains('force-desktop-mode') && window.matchMedia('(max-width:760px)').matches; }
+    window.toggleDesktopInterface=()=>{
+      const root=document.documentElement,meta=document.querySelector('meta[name="viewport"]'),toDesktop=!root.classList.contains('force-desktop-mode');
+      root.classList.toggle('force-desktop-mode',toDesktop);
+      if(meta)meta.setAttribute('content',toDesktop?'width=1180':'width=device-width, initial-scale=1.0');
+      const btn=document.querySelector('.mobile-interface-toggle');if(btn)btn.textContent=toDesktop?'返回手機版介面':'切換電腦版介面';
+      setTimeout(()=>{renderAll();window.dispatchEvent(new Event('resize'));},90);
+    };
+    window.setMobilePerfStore=(store)=>{ST.mobileStore=['all','linan','nanke'].includes(store)?store:'all';renderMobilePerformance();};
+    function mobilePerfAmount(row,store){ if(!row)return 0; return store==='linan'?Number(row.linan_amount||0):store==='nanke'?Number(row.nanke_amount||0):totalOf(row); }
+    function mobilePerfNew(row,store){ if(!row)return 0; return store==='linan'?Number(row.linan_new||0):store==='nanke'?Number(row.nanke_new||0):newOf(row); }
+    function mobilePerfRet(row,store){ if(!row)return 0; return store==='linan'?Number(row.linan_returning||0):store==='nanke'?Number(row.nanke_returning||0):retOf(row); }
+    function mobilePerfVisits(row,store){ if(!row)return 0; return store==='linan'?Number(row.linan_visits||0):store==='nanke'?Number(row.nanke_visits||0):Number(row.linan_visits||0)+Number(row.nanke_visits||0); }
+    function mobileDailySeries(startIso,store){ if(store==='linan')return dailySeriesForWeek(startIso,'臨安店'); if(store==='nanke')return dailySeriesForWeek(startIso,'南科店'); const a=dailySeriesForWeek(startIso,'臨安店'),b=dailySeriesForWeek(startIso,'南科店'); return a.map((r,i)=>({...r,newAmount:r.newAmount+b[i].newAmount,returningAmount:r.returningAmount+b[i].returningAmount,visits:r.visits+b[i].visits})); }
+    function renderMobilePerfChart(row){
+      const canvas=$('mobilePerfChart'); if(!canvas||typeof Chart==='undefined'||!row)return; if(ST.mobileChart){try{ST.mobileChart.destroy()}catch{} ST.mobileChart=null;} const rows=mobileDailySeries(row.week_start_date,ST.mobileStore); const lineColor=ST.mobileStore==='nanke'?'#6f9b83':'#4f7ea7';
+      ST.mobileChart=new Chart(canvas.getContext('2d'),{type:'bar',data:{labels:rows.map(r=>r.label),datasets:[{type:'bar',label:'新客',data:rows.map(r=>r.newAmount),backgroundColor:'rgba(201,138,61,.82)',borderRadius:4,categoryPercentage:.72,barPercentage:.82,yAxisID:'y'},{type:'bar',label:'舊客',data:rows.map(r=>r.returningAmount),backgroundColor:'rgba(98,95,91,.68)',borderRadius:4,categoryPercentage:.72,barPercentage:.82,yAxisID:'y'},{type:'line',label:'來客',data:rows.map(r=>r.visits),borderColor:lineColor,backgroundColor:lineColor,borderWidth:2.2,tension:.28,pointRadius:2.5,yAxisID:'y2'}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:10,font:{size:10}}}},scales:{x:{grid:{display:false},ticks:{font:{size:9}}},y:{beginAtZero:true,grid:{color:'rgba(100,91,80,.07)'},ticks:{font:{size:9},callback:v=>v>=10000?`${Math.round(v/10000)}萬`:v}},y2:{beginAtZero:true,position:'right',grid:{drawOnChartArea:false},ticks:{font:{size:9},precision:0}}}}});
+    }
+    function renderMobilePerformance(){
+      if(!isMobilePerformanceSummary())return; const latest=ST.summaryWeeks[0],prev=ST.summaryWeeks[1]; if(!latest){$('mobilePerfTotal').textContent='--';return;} const store=ST.mobileStore;
+      $('mobilePerfPeriod').textContent=weekLabelLong(latest.week_start_date); $('mobilePerfTotal').textContent=fmtTwd(mobilePerfAmount(latest,store)); const prevVal=mobilePerfAmount(prev,store),cur=mobilePerfAmount(latest,store); const g=prevVal?((cur-prevVal)/prevVal*100):null; const ge=$('mobilePerfGrowth'); ge.textContent=g==null?'無上週比較':`${g>=0?'▲':'▼'} ${Math.abs(g).toFixed(1)}% 較上週`; ge.style.color=g==null?'var(--muted)':g>=0?'var(--good)':'var(--bad)';
+      $('mobilePerfNew').textContent=fmtTwd(mobilePerfNew(latest,store)); $('mobilePerfRet').textContent=fmtTwd(mobilePerfRet(latest,store)); $('mobilePerfVisits').textContent=`${mobilePerfVisits(latest,store)} 人`; $('mobilePerfSource').textContent=latest.source_type==='manual'?'手動覆寫':'表單自動彙總';
+      document.querySelectorAll('#mobilePerfStoreSeg button').forEach(b=>b.classList.toggle('active',b.dataset.store===store)); renderMobilePerfChart(latest);
+      const rows=ST.summaryWeeks.slice(0,4),max=Math.max(1,...rows.map(r=>mobilePerfAmount(r,store))); $('mobilePerfTrend').innerHTML=rows.map(r=>`<div class="mperf-trend-row"><span class="mperf-trend-label">${weekLabel(r.week_start_date)}</span><div class="mperf-trend-track"><div class="mperf-trend-fill" style="width:${(mobilePerfAmount(r,store)/max*100).toFixed(1)}%"></div></div><span class="mperf-trend-value">${fmtCompact(mobilePerfAmount(r,store))}</span></div>`).join('');
+    }
+
     async function refreshData(){
       dom.dataStatus.textContent='載入中…'; setLoading(true,'正在整理完整週業績…');
       try{
@@ -583,7 +659,7 @@
       finally{ setLoading(false); }
     }
 
-    function renderAll(){ renderHero(); renderHeroMixCharts(); renderBars(); renderShare(); renderChart(); updateAdminUI(); }
+    function renderAll(){ if(isMobilePerformanceSummary()){ renderMobilePerformance(); updateAdminUI(); return; } renderHero(); renderHeroMixCharts(); renderBars(); renderShare(); renderChart(); updateAdminUI(); }
 
     function renderHero(){
       const latest=ST.summaryWeeks[0]; const prev=ST.summaryWeeks[1];
@@ -709,6 +785,7 @@
 
     function updateAdminUI(){
       dom.adminStatus.classList.toggle('hidden',!ST.isAdmin); dom.btnAdd.classList.toggle('hidden',!ST.isAdmin); $('heroActions').classList.toggle('hidden',!ST.isAdmin||!ST.summaryWeeks.length);
+      if(isMobilePerformanceSummary()) return;
       renderRecent(); renderHistory();
     }
 
@@ -758,7 +835,7 @@
     $('viewSeg').querySelectorAll('button').forEach(btn=>btn.addEventListener('click',()=>{ST.chartView=btn.dataset.view;$('viewSeg').querySelectorAll('button').forEach(b=>b.classList.toggle('active',b===btn));renderChart();}));
     $('rangeSeg').querySelectorAll('button').forEach(btn=>btn.addEventListener('click',()=>{ST.chartRange=btn.dataset.range;$('rangeSeg').querySelectorAll('button').forEach(b=>b.classList.toggle('active',b===btn));renderChart();}));
     ['toggleLinanSales','toggleNankeSales','toggleVisits'].forEach(id=>$(id).addEventListener('change',renderChart));
-    window.addEventListener('resize',()=>requestAnimationFrame(updateRecentScrollState));
+    window.addEventListener('resize',()=>requestAnimationFrame(()=>{updateRecentScrollState();if(isMobilePerformanceSummary())renderMobilePerformance();}));
 
     (async()=>{ if(await __initHubPageAccess()) await initApp(); })();
   </script>

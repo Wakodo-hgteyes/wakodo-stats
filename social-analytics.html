@@ -1575,9 +1575,55 @@ body > :not(.ambient-stage):not(.modal-overlay):not(.lightbox-overlay):not(.toas
   }
 }
 
+
+/* ===== Mobile Summary Mode / executive read ===== */
+#mobileSocialSummary{display:none}
+.mobile-desktop-toggle{display:none}
+@media(max-width:760px){
+  html:not(.force-desktop-mode) body{padding:18px 14px 42px;background:#f4f5f6!important;min-height:100vh}
+  html:not(.force-desktop-mode) .ambient-stage,
+  html:not(.force-desktop-mode) body>h1,
+  html:not(.force-desktop-mode) body>.sub,
+  html:not(.force-desktop-mode) body>.stats-wrap,
+  html:not(.force-desktop-mode) body>.filter-bar,
+  html:not(.force-desktop-mode) body>.toolbar,
+  html:not(.force-desktop-mode) body>#groupList,
+  html:not(.force-desktop-mode) body>#emptyState,
+  html:not(.force-desktop-mode) body>.section-divider,
+  html:not(.force-desktop-mode) body>.story-block{display:none!important}
+  html:not(.force-desktop-mode) #mobileSocialSummary{display:block;max-width:620px;margin:0 auto}
+  html:not(.force-desktop-mode) .mobile-desktop-toggle{display:inline-flex;position:fixed;right:12px;bottom:14px;z-index:280;align-items:center;gap:6px;padding:9px 12px;border:1px solid rgba(103,91,78,.16);border-radius:999px;background:rgba(255,255,255,.95);box-shadow:0 8px 24px rgba(40,35,30,.14);color:#62594f;font-size:12px;font-weight:800;backdrop-filter:blur(12px)}
+  .soc-mobile-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:13px}
+  .soc-mobile-kicker{font-size:11px;font-weight:900;letter-spacing:.12em;color:#a9784e}.soc-mobile-title{font-size:25px;font-weight:950;line-height:1.15;color:#292724;margin-top:4px}
+  .soc-mobile-card{background:rgba(255,255,255,.94);border:1px solid rgba(98,85,72,.10);border-radius:19px;box-shadow:0 8px 25px rgba(65,57,49,.07);padding:16px;margin-top:12px}
+  .soc-mobile-hero{background:linear-gradient(145deg,#fffaf5,#fff)}
+  .soc-mobile-label{font-size:13px;font-weight:850;color:#77716a}.soc-mobile-total{font-size:38px;line-height:1;font-weight:950;color:#765238;margin-top:6px}.soc-mobile-caption{font-size:12px;color:#77716a;font-weight:700;margin-top:7px;line-height:1.5}
+  .soc-mobile-format{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}.soc-mobile-format div{padding:11px 8px;border-radius:13px;background:#f7f5f2;text-align:center}.soc-mobile-format span{display:block;font-size:11px;color:#77716a;font-weight:800}.soc-mobile-format strong{display:block;font-size:18px;color:#292724;font-weight:950;margin-top:3px}
+  .soc-mobile-filter{display:grid;grid-template-columns:1fr;gap:9px}.soc-mobile-select,.soc-mobile-search{width:100%;height:44px;border:1px solid rgba(103,91,78,.14);border-radius:13px;background:#fff;padding:0 12px;font-size:14px;font-weight:800;color:#3f3a35;outline:none}.soc-mobile-filter-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.soc-mobile-chip{height:42px;border:1px solid rgba(103,91,78,.14);border-radius:12px;background:#fff;color:#6b6053;font-size:13px;font-weight:850}.soc-mobile-chip.active{background:#765238;color:#fff;border-color:#765238}
+  .soc-mobile-section-title{font-size:17px;font-weight:950;color:#292724}.soc-mobile-section-note{font-size:12px;color:#77716a;font-weight:700;margin-top:3px;line-height:1.5}
+  .soc-mobile-rank{margin-top:8px}.soc-mobile-row{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:10px;align-items:center;padding:11px 4px;border-bottom:1px solid rgba(103,91,78,.09);cursor:pointer}.soc-mobile-row:last-child{border-bottom:0}.soc-mobile-index{width:28px;height:28px;border-radius:9px;background:#f0e8e0;color:#765238;font-size:11px;font-weight:950;display:grid;place-items:center}.soc-mobile-main{min-width:0}.soc-mobile-name{font-size:14px;font-weight:900;color:#3a3530;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.soc-mobile-sub{font-size:12px;color:#77716a;font-weight:700;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.soc-mobile-value{font-size:14px;font-weight:950;color:#765238;white-space:nowrap}
+  .soc-mobile-search-results{display:none;margin-top:12px}.soc-mobile-search-results.active{display:block}.soc-mobile-empty{padding:20px 4px;text-align:center;font-size:13px;color:#8d867e;font-weight:750}
+}
+html.force-desktop-mode .mobile-desktop-toggle{display:inline-flex;position:fixed;right:14px;bottom:14px;z-index:350;align-items:center;gap:6px;padding:9px 12px;border:1px solid rgba(103,91,78,.16);border-radius:999px;background:rgba(255,255,255,.95);box-shadow:0 8px 24px rgba(40,35,30,.14);color:#62594f;font-size:12px;font-weight:800}
 </style>
 </head>
 <body>
+<section id="mobileSocialSummary" aria-label="手機版社群成效摘要">
+  <div class="soc-mobile-head"><div><div class="soc-mobile-kicker">WAKODO / SOCIAL</div><div class="soc-mobile-title">社群成效摘要</div></div></div>
+  <div class="soc-mobile-card soc-mobile-hero">
+    <div class="soc-mobile-label">目前範圍詢問總數</div><div id="mobileSocialTotal" class="soc-mobile-total">0</div><div id="mobileSocialCaption" class="soc-mobile-caption">全部內容與限動</div>
+    <div class="soc-mobile-format"><div><span>圖文</span><strong id="mobileSocialGraphic">0</strong></div><div><span>短影片</span><strong id="mobileSocialVideo">0</strong></div><div><span>限動</span><strong id="mobileSocialStory">0</strong></div></div>
+  </div>
+  <div class="soc-mobile-card">
+    <div class="soc-mobile-section-title">快速篩選</div><div class="soc-mobile-section-note">手機只保留最常用條件；完整篩選與管理請切換電腦版。</div>
+    <div class="soc-mobile-filter" style="margin-top:10px"><select id="mobileSocialBrand" class="soc-mobile-select"><option value="">全部品牌</option></select><input id="mobileSocialSearch" class="soc-mobile-search" type="search" placeholder="搜尋品牌、型號、備註…" /><div class="soc-mobile-filter-row"><button id="mobileSocialInquiryOnly" class="soc-mobile-chip" type="button">只看有詢問</button><button class="soc-mobile-chip" type="button" onclick="resetMobileSocialFilters()">清除篩選</button></div></div>
+    <div id="mobileSocialSearchResults" class="soc-mobile-search-results"></div>
+  </div>
+  <div class="soc-mobile-card"><div class="soc-mobile-section-title">內容詢問 TOP 5</div><div class="soc-mobile-section-note">先看哪些內容真正帶來詢問。</div><div id="mobileSocialTopContent" class="soc-mobile-rank"></div></div>
+  <div class="soc-mobile-card"><div class="soc-mobile-section-title">品牌／型號詢問 TOP 5</div><div class="soc-mobile-section-note">把桌機流向圖濃縮成手機可快速判讀的排行。</div><div id="mobileSocialBrandModel" class="soc-mobile-rank"></div></div>
+  <div class="soc-mobile-card"><div class="soc-mobile-section-title">最近詢問</div><div class="soc-mobile-section-note">最近 5 筆訊號，點擊可查看對應內容。</div><div id="mobileSocialLatest" class="soc-mobile-rank"></div></div>
+</section>
+<button id="mobileDesktopToggle" class="mobile-desktop-toggle" type="button" onclick="toggleDesktopInterface()">▣ <span>切換電腦版介面</span></button>
 <div class="ambient-stage" aria-hidden="true">
   <div class="ambient-mineral"></div>
   <div class="ambient-pearl"></div>
@@ -2034,6 +2080,75 @@ let __HUB_TICKET = null;
       return true;
     }
 
+function isMobileSocialSummary(){
+  return window.matchMedia('(max-width:760px)').matches && !document.documentElement.classList.contains('force-desktop-mode');
+}
+function toggleDesktopInterface(){
+  const root=document.documentElement,meta=document.querySelector('meta[name="viewport"]'),toDesktop=!root.classList.contains('force-desktop-mode');
+  root.classList.toggle('force-desktop-mode',toDesktop);
+  if(meta)meta.setAttribute('content',toDesktop?'width=1180':'width=device-width, initial-scale=1.0');
+  const btn=document.getElementById('mobileDesktopToggle');if(btn)btn.querySelector('span').textContent=toDesktop?'返回手機版介面':'切換電腦版介面';
+  setTimeout(()=>{renderGroups();renderStories();window.dispatchEvent(new Event('resize'));},90);
+}
+window.toggleDesktopInterface=toggleDesktopInterface;
+function mobileSocialLabelForEntry(entry){ return entry.label || '未命名內容'; }
+function mobileSocialClickForEntry(entry){ return entry.kind==='group' ? `openGroupDetail('${entry.id}')` : `openStoryDetail('${entry.id}')`; }
+function mobileBrandModelLabel(entry){
+  if(entry.kind==='group'){
+    const g=allGroups.find(x=>x.id===entry.id);
+    if(g?.tags) return [g.tags.brand,g.tags.model].filter(Boolean).join(' / ') || entry.label;
+  }
+  return entry.label || '未命名限動';
+}
+function populateMobileSocialBrand(){
+  const sel=document.getElementById('mobileSocialBrand'); if(!sel) return;
+  const brands=[...new Set(allGroups.map(g=>g.tags?.brand).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'zh-Hant'));
+  const current=filterState.brand;
+  sel.innerHTML='<option value="">全部品牌</option>'+brands.map(b=>`<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join('');
+  sel.value=brands.includes(current)?current:'';
+}
+function resetMobileSocialFilters(){
+  filterState.brand='';filterState.model='';filterState.postType='';filterState.platform='';filterState.hasInquiry=false;filterState.search='';filterState.dateTarget='post';filterState.dateStart='';filterState.dateEnd='';
+  const b=document.getElementById('mobileSocialBrand'),q=document.getElementById('mobileSocialSearch'),iq=document.getElementById('mobileSocialInquiryOnly');
+  if(b)b.value='';if(q)q.value='';if(iq)iq.classList.remove('active');
+  const db=document.getElementById('filterBrand'),dm=document.getElementById('filterModel'),dt=document.getElementById('filterType'),dp=document.getElementById('filterPlatform'),dh=document.getElementById('filterHasInquiry'),ds=document.getElementById('filterSearch'),dst=document.getElementById('filterDateStart'),den=document.getElementById('filterDateEnd');
+  if(db)db.value='';if(dm)dm.value='';if(dt)dt.value='';if(dp)dp.value='';if(dh)dh.checked=false;if(ds)ds.value='';if(dst)dst.value='';if(den)den.value='';
+  renderGroups();
+}
+window.resetMobileSocialFilters=resetMobileSocialFilters;
+function renderMobileSocialStats(entries, activeEntries, formatTotals, totalInquiries){
+  if(!isMobileSocialSummary()) return;
+  populateMobileSocialBrand();
+  const total=document.getElementById('mobileSocialTotal'); if(total)total.textContent=totalInquiries;
+  const cap=document.getElementById('mobileSocialCaption'); if(cap)cap.textContent=hasActiveStatsFilter()?'已套用目前篩選':'全部內容與限動';
+  const g=document.getElementById('mobileSocialGraphic'),v=document.getElementById('mobileSocialVideo'),st=document.getElementById('mobileSocialStory');
+  if(g)g.textContent=formatTotals['圖文'];if(v)v.textContent=formatTotals['短影片'];if(st)st.textContent=formatTotals['限動'];
+  const top=[...activeEntries].sort((a,b)=>b.total-a.total||(b.latest||b.sortDate).localeCompare(a.latest||a.sortDate)).slice(0,5);
+  const topEl=document.getElementById('mobileSocialTopContent');
+  if(topEl) topEl.innerHTML=top.length?top.map((e,i)=>`<div class="soc-mobile-row" onclick="${mobileSocialClickForEntry(e)}"><span class="soc-mobile-index">${i+1}</span><div class="soc-mobile-main"><div class="soc-mobile-name">${escapeHtml(mobileSocialLabelForEntry(e))}</div><div class="soc-mobile-sub">${escapeHtml([e.format,e.note].filter(Boolean).join(' · ')||'內容')}</div></div><span class="soc-mobile-value">${e.total} 次</span></div>`).join(''):'<div class="soc-mobile-empty">目前沒有詢問記錄</div>';
+  const bm=new Map();
+  activeEntries.forEach(e=>{const label=mobileBrandModelLabel(e);bm.set(label,(bm.get(label)||0)+e.total)});
+  const bmTop=[...bm.entries()].sort((a,b)=>b[1]-a[1]).slice(0,5),bmEl=document.getElementById('mobileSocialBrandModel');
+  if(bmEl)bmEl.innerHTML=bmTop.length?bmTop.map(([label,c],i)=>`<div class="soc-mobile-row"><span class="soc-mobile-index">${i+1}</span><div class="soc-mobile-main"><div class="soc-mobile-name">${escapeHtml(label)}</div></div><span class="soc-mobile-value">${c} 次</span></div>`).join(''):'<div class="soc-mobile-empty">目前沒有品牌／型號詢問</div>';
+  const latest=activeEntries.flatMap(entry=>(entry.inquiries||[]).map(iq=>({...iq,parentKind:entry.kind,parentId:entry.id,parentLabel:entry.label,format:entry.format}))).sort((a,b)=>(b.inquiry_date||'').localeCompare(a.inquiry_date||'')).slice(0,5),latestEl=document.getElementById('mobileSocialLatest');
+  if(latestEl)latestEl.innerHTML=latest.length?latest.map((item,i)=>{const click=item.parentKind==='group'?`openGroupDetail('${item.parentId}')`:`openStoryDetail('${item.parentId}')`;return `<div class="soc-mobile-row" onclick="${click}"><span class="soc-mobile-index">${i+1}</span><div class="soc-mobile-main"><div class="soc-mobile-name">${escapeHtml(item.parentLabel)}</div><div class="soc-mobile-sub">${escapeHtml([item.inquiry_date?.replaceAll('-','/')||'未填日期',item.inquiry_type||'詢問',item.note||''].filter(Boolean).join(' · '))}</div></div><span class="soc-mobile-value">›</span></div>`}).join(''):'<div class="soc-mobile-empty">目前沒有最近詢問</div>';
+  renderMobileSocialSearchResults(entries);
+}
+function renderMobileSocialSearchResults(entries){
+  if(!isMobileSocialSummary())return;
+  const wrap=document.getElementById('mobileSocialSearchResults');if(!wrap)return;
+  const q=(filterState.search||'').trim();
+  if(!q){wrap.classList.remove('active');wrap.innerHTML='';return;}
+  wrap.classList.add('active');
+  const rows=(entries||buildContentStats()).slice(0,20);
+  wrap.innerHTML=`<div class="soc-mobile-section-title" style="font-size:15px;margin-top:4px">搜尋結果 ${rows.length} 筆</div>`+(rows.length?rows.map((e,i)=>`<div class="soc-mobile-row" onclick="${mobileSocialClickForEntry(e)}"><span class="soc-mobile-index">${i+1}</span><div class="soc-mobile-main"><div class="soc-mobile-name">${escapeHtml(e.label)}</div><div class="soc-mobile-sub">${escapeHtml([e.format,e.note].filter(Boolean).join(' · ')||'內容')}</div></div><span class="soc-mobile-value">${e.total||0} 次</span></div>`).join(''):'<div class="soc-mobile-empty">找不到符合內容</div>');
+}
+function setupMobileSocialControls(){
+  const brand=document.getElementById('mobileSocialBrand');if(brand&&!brand.dataset.bound){brand.dataset.bound='1';brand.addEventListener('change',e=>{filterState.brand=e.target.value;filterState.model='';renderGroups()})}
+  const search=document.getElementById('mobileSocialSearch');if(search&&!search.dataset.bound){search.dataset.bound='1';let t=0;search.addEventListener('input',e=>{filterState.search=e.target.value;const ds=document.getElementById('filterSearch');if(ds)ds.value=e.target.value;clearTimeout(t);t=setTimeout(renderGroups,160)})}
+  const inquiry=document.getElementById('mobileSocialInquiryOnly');if(inquiry&&!inquiry.dataset.bound){inquiry.dataset.bound='1';inquiry.addEventListener('click',()=>{filterState.hasInquiry=!filterState.hasInquiry;inquiry.classList.toggle('active',filterState.hasInquiry);const dh=document.getElementById('filterHasInquiry');if(dh)dh.checked=filterState.hasInquiry;renderGroups()})}
+}
+
 let isHubOwner = false;
 let allTags = [];      // [{id, brand, model}]
 let allGroups = [];     // full joined data
@@ -2058,6 +2173,7 @@ async function bootstrapSocial(){
   sb = window.supabase;
   if(!(await __initHubPageAccess())) return;
   await checkHubOwnerAccess();
+  setupMobileSocialControls();
   await loadAll();
 }
 
@@ -2200,6 +2316,7 @@ function populateTagFilterOptions(){
     usedBrands.map(b => `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join('');
   sel.value = usedBrands.includes(currentVal) ? currentVal : '';
   populateModelFilterOptions();
+  populateMobileSocialBrand();
 }
 
 /* 型號下拉：只列出目前選定品牌底下的型號；沒選品牌時列出全部型號 */
@@ -2349,6 +2466,11 @@ function renderStats(){
   document.getElementById('statTotalCaption').textContent = hasActiveStatsFilter() ? '依目前篩選結果' : '全部內容與限動';
   document.getElementById('statScopeText').textContent = hasActiveStatsFilter() ? '已套用目前篩選' : '全部資料範圍';
 
+  if(isMobileSocialSummary()){
+    const chart=document.getElementById('rankChart');if(chart&&window.Plotly){try{Plotly.purge(chart)}catch{}}
+    renderMobileSocialStats(entries,activeEntries,formatTotals,totalInquiries);
+    return;
+  }
   renderBrandShare();
   renderTopContent(activeEntries);
   renderLatestInquiries(activeEntries);
@@ -2681,6 +2803,13 @@ function renderGroups(){
   wrap.innerHTML = '';
 
   const groups = filteredGroups();
+
+  if(isMobileSocialSummary()){
+    if(tileObserver) tileObserver.disconnect();
+    empty.style.display='none';
+    renderStats();
+    return;
+  }
 
   if(allGroups.length === 0){
     empty.style.display = 'block';
@@ -3640,6 +3769,14 @@ function renderStories(){
   const highlightWrap = document.getElementById('storyHighlightGroups');
   const highlightEmpty = document.getElementById('storyHighlightEmpty');
   if(!dailyList) return;
+  if(isMobileSocialSummary()){
+    dailyList.innerHTML='';
+    if(dailyEmpty) dailyEmpty.style.display='none';
+    if(highlightWrap) highlightWrap.innerHTML='';
+    if(highlightEmpty) highlightEmpty.style.display='none';
+    renderStats();
+    return;
+  }
 
   const daily = allStoryEntries.filter(se => se.category !== '精選');
   dailyList.innerHTML = daily.map(se => buildStoryTileHtml(se)).join('');

@@ -395,6 +395,66 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 1px solid rgba(0,0,0,0.05);
     }
 
+  
+
+    /* ===== Mobile Summary Mode ===== */
+    .mobile-index-summary,.mobile-interface-toggle{display:none}
+    .mobile-interface-toggle{position:fixed;right:12px;bottom:12px;z-index:140;border:1px solid rgba(0,0,0,.10);background:rgba(255,255,255,.94);color:#50545a;border-radius:999px;padding:8px 11px;font-size:11px;font-weight:900;box-shadow:0 8px 24px rgba(0,0,0,.10);backdrop-filter:blur(14px)}
+    .mobile-summary-card{background:rgba(255,255,255,.92);border:1px solid rgba(0,0,0,.06);border-radius:18px;box-shadow:0 8px 24px rgba(38,43,49,.06);padding:16px}
+    .mobile-summary-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+    .mobile-summary-kicker{font-size:11px;font-weight:900;color:var(--text-hint);letter-spacing:.08em}
+    .mobile-summary-title{font-size:23px;line-height:1.15;font-weight:950;margin-top:4px}
+    .mobile-summary-total{font-size:34px;font-weight:950;letter-spacing:-1px}
+    .mobile-summary-sub{font-size:12px;color:var(--text-secondary);font-weight:750;margin-top:4px}
+    .mobile-store-seg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:#eef1f4;border-radius:13px;padding:4px}
+    .mobile-store-seg button,.mobile-filter-seg button{border:0;background:transparent;border-radius:10px;min-height:38px;font-size:13px;font-weight:900;color:#687078}
+    .mobile-store-seg button.active,.mobile-filter-seg button.active{background:#fff;color:var(--primary);box-shadow:0 2px 8px rgba(0,0,0,.07)}
+    .mobile-index-controls{display:grid;gap:10px;margin-top:14px}
+    .mobile-index-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
+    .mobile-index-select,.mobile-index-search{width:100%;min-height:44px;border:1px solid rgba(0,0,0,.08);border-radius:13px;background:#fff;padding:0 12px;font-size:14px;font-weight:800;color:var(--text-primary);outline:none}
+    .mobile-filter-btn{min-height:44px;border:1px solid rgba(0,0,0,.08);border-radius:13px;background:#fff;padding:0 14px;font-size:13px;font-weight:900;color:var(--text-primary)}
+    .mobile-filter-drawer{display:none;margin-top:10px;padding:13px;background:#f7f8fa;border:1px solid rgba(0,0,0,.05);border-radius:15px}
+    .mobile-filter-drawer.open{display:grid;gap:12px}
+    .mobile-filter-label{font-size:11px;color:var(--text-secondary);font-weight:900;margin-bottom:6px}
+    .mobile-filter-seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;background:#e9edf1;border-radius:12px;padding:4px}
+    .mobile-filter-seg.service{grid-template-columns:1fr 1fr}
+    .mobile-summary-grid{display:grid;gap:12px;margin-top:12px}
+    .mobile-block-title{font-size:15px;font-weight:950;margin-bottom:11px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+    .mobile-rank-list{display:grid;gap:9px}
+    .mobile-rank-row{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:9px;align-items:center}
+    .mobile-rank-num{width:24px;height:24px;border-radius:8px;background:#eef2f6;display:grid;place-items:center;font-size:11px;font-weight:950;color:#687078}
+    .mobile-rank-main{min-width:0}
+    .mobile-rank-label{font-size:13px;font-weight:850;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .mobile-rank-track{height:6px;border-radius:999px;background:#eef0f2;margin-top:5px;overflow:hidden}
+    .mobile-rank-fill{height:100%;border-radius:999px;background:var(--primary)}
+    .mobile-rank-value{font-size:13px;font-weight:950;color:var(--text-primary)}
+    .mobile-profile-grid{display:grid;grid-template-columns:1fr;gap:10px}
+    .mobile-profile-row{display:grid;grid-template-columns:minmax(82px,auto) 1fr 48px;gap:9px;align-items:center;font-size:12px}
+    .mobile-profile-row strong{font-size:12px}
+    .mobile-profile-track{height:9px;border-radius:999px;background:#eef0f2;overflow:hidden}
+    .mobile-profile-fill{height:100%;border-radius:999px}
+    .mobile-search-results{display:none}
+    .mobile-search-results.show{display:block}
+    .mobile-search-row{padding:12px 0;border-bottom:1px solid rgba(0,0,0,.06);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;cursor:pointer}
+    .mobile-search-row:last-child{border-bottom:0}
+    .mobile-search-name{font-size:14px;font-weight:950}
+    .mobile-search-meta{margin-top:4px;font-size:11px;color:var(--text-secondary);font-weight:750}
+    .mobile-search-arrow{align-self:center;color:var(--text-hint);font-size:18px}
+    html.force-desktop-mode .mobile-interface-toggle{display:flex}
+    @media(max-width:760px){
+      html:not(.force-desktop-mode) body{padding-bottom:62px}
+      html:not(.force-desktop-mode) .mobile-interface-toggle{display:flex}
+      html:not(.force-desktop-mode) .mobile-index-summary{display:block}
+      html:not(.force-desktop-mode) .index-desktop-head,html:not(.force-desktop-mode) .sticky-bar,html:not(.force-desktop-mode) .grid-kpi,html:not(.force-desktop-mode) .container.stack>.card{display:none!important}
+      html:not(.force-desktop-mode) #adminPanel{display:none!important}
+      .container{padding:10px 10px 18px;max-width:none}
+      .stack>*+*{margin-top:12px}
+      .bg-blob{animation:none!important;opacity:.42}
+      .mobile-summary-card{padding:15px}
+      .mobile-summary-grid{gap:10px}
+    }
+    html.force-desktop-mode .mobile-index-summary{display:none!important}
+
   </style>
 </head>
 <body>
@@ -426,7 +486,7 @@
 
     <div class="container stack">
       <!-- 頂部標題列 -->
-      <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:16px;">
+      <div class="index-desktop-head" style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:16px;">
         <div style="display:flex;align-items:center;gap:16px;">
           <span class="glow-dot" style="width: 12px; height: 12px;"></span>
           <h1 class="h1" style="font-size: 32px;">和光堂戰情室</h1>
@@ -516,6 +576,44 @@
           <div id="activeFilters" style="margin-top: 12px;"></div>
         </div>
       </div>
+
+      <!-- 手機摘要模式：只呈現核心判讀；完整工作台可單次切換電腦版 -->
+      <section id="mobileIndexSummary" class="mobile-index-summary">
+        <div class="mobile-summary-card">
+          <div class="mobile-summary-head">
+            <div><div class="mobile-summary-kicker">WAKODO / CUSTOMER</div><div class="mobile-summary-title">客源快速總覽</div><div id="mobileIndexScope" class="mobile-summary-sub">目前篩選</div></div>
+            <div style="text-align:right"><div id="mobileIndexTotal" class="mobile-summary-total">--</div><div class="mobile-summary-sub">位來客</div></div>
+          </div>
+          <div class="mobile-index-controls">
+            <div class="mobile-store-seg" id="mobileIndexStoreSeg">
+              <button type="button" data-store="全部" onclick="setStore('全部')">全部</button>
+              <button type="button" data-store="臨安店" onclick="setStore('臨安店')">臨安</button>
+              <button type="button" data-store="南科店" onclick="setStore('南科店')">南科</button>
+            </div>
+            <div class="mobile-index-row">
+              <select id="mobileIndexPeriod" class="mobile-index-select" onchange="setMobileIndexPeriod(this.value)">
+                <option value="all">全部期間</option><option value="month">本月</option><option value="30d">近 30 天</option><option value="week">本週</option>
+              </select>
+              <button type="button" class="mobile-filter-btn" onclick="toggleMobileIndexFilters()">篩選</button>
+            </div>
+            <input id="mobileIndexSearch" class="mobile-index-search" type="search" placeholder="搜尋姓名、備註、客源…" autocomplete="off" />
+          </div>
+          <div id="mobileIndexFilterDrawer" class="mobile-filter-drawer">
+            <div><div class="mobile-filter-label">新／老客</div><div class="mobile-filter-seg" id="mobileCustSeg"><button data-val="all" onclick="setMobileIndexFilter('cust','all')">全部</button><button data-val="new" onclick="setMobileIndexFilter('cust','new')">新客</button><button data-val="old" onclick="setMobileIndexFilter('cust','old')">老客</button></div></div>
+            <div><div class="mobile-filter-label">消費</div><div class="mobile-filter-seg" id="mobilePaySeg"><button data-val="all" onclick="setMobileIndexFilter('pay','all')">全部</button><button data-val="paid" onclick="setMobileIndexFilter('pay','paid')">有消費</button><button data-val="unpaid" onclick="setMobileIndexFilter('pay','unpaid')">未消費</button></div></div>
+            <div><div class="mobile-filter-label">客服來源</div><div class="mobile-filter-seg service" id="mobileServiceSeg"><button data-val="all" onclick="setMobileIndexFilter('service','all')">全部</button><button data-val="service" onclick="setMobileIndexFilter('service','service')">客服</button></div></div>
+          </div>
+        </div>
+        <div id="mobileIndexDashboard" class="mobile-summary-grid">
+          <div class="mobile-summary-card"><div class="mobile-block-title"><span>顧客來源 TOP 5</span><span class="mobile-summary-sub">目前篩選</span></div><div id="mobileSourceTop" class="mobile-rank-list"></div></div>
+          <div class="mobile-summary-card"><div class="mobile-block-title"><span>Google 搜尋 TOP 5</span><span class="mobile-summary-sub">實際搜尋詞</span></div><div id="mobileKeywordTop" class="mobile-rank-list"></div></div>
+          <div class="mobile-summary-card"><div class="mobile-block-title"><span>來店目的</span></div><div id="mobilePurposeProfile" class="mobile-profile-grid"></div></div>
+          <div class="mobile-summary-card"><div class="mobile-block-title"><span>性別</span></div><div id="mobileGenderProfile" class="mobile-profile-grid"></div></div>
+          <div class="mobile-summary-card"><div class="mobile-block-title"><span>年齡</span></div><div id="mobileAgeProfile" class="mobile-profile-grid"></div></div>
+        </div>
+        <div id="mobileIndexSearchResults" class="mobile-summary-card mobile-search-results" style="margin-top:12px"><div class="mobile-block-title"><span>搜尋結果</span><span id="mobileSearchCount" class="mobile-summary-sub"></span></div><div id="mobileSearchList"></div></div>
+      </section>
+      <button type="button" class="mobile-interface-toggle" onclick="toggleDesktopInterface()"><span id="mobileDesktopToggleText">切換電腦版介面</span></button>
 
       <!-- KPI 卡片 -->
       <div class="grid grid-kpi">
@@ -1306,6 +1404,7 @@
   };
 
   window.clearFilter = () => {
+    mobileIndexPeriodMode = "all";
     ST.filter = { source:[], purpose:[], gender:null, age:null, cust:null, pay:null, service:null, keyword:null };
     ST.store = "全部";
     syncStoreUI();
@@ -1722,6 +1821,67 @@
   }
 
 
+
+  let mobileIndexPeriodMode = "all";
+  let mobileIndexSearchTimer = null;
+  function isMobileIndexSummary(){ return !document.documentElement.classList.contains("force-desktop-mode") && window.matchMedia("(max-width:760px)").matches; }
+  window.toggleDesktopInterface = () => {
+    const root=document.documentElement, meta=document.querySelector('meta[name="viewport"]');
+    const toDesktop=!root.classList.contains("force-desktop-mode");
+    root.classList.toggle("force-desktop-mode",toDesktop);
+    if(meta) meta.setAttribute("content",toDesktop?"width=1180":"width=device-width, initial-scale=1.0");
+    const text=$("mobileDesktopToggleText"); if(text) text.textContent=toDesktop?"返回手機版介面":"切換電腦版介面";
+    setTimeout(()=>{ applyFilter(); window.dispatchEvent(new Event("resize")); },90);
+  };
+  window.toggleMobileIndexFilters = () => { $("mobileIndexFilterDrawer")?.classList.toggle("open"); };
+  window.setMobileIndexFilter = (dim,val) => {
+    if(dim==="cust") ST.filter.cust = val==="new"?"new":val==="old"?"old":null;
+    if(dim==="pay") ST.filter.pay = val==="paid"?"paid":val==="unpaid"?"unpaid":null;
+    if(dim==="service") ST.filter.service = val==="service"?true:null;
+    applyFilter();
+  };
+  window.setMobileIndexPeriod = (mode) => {
+    mobileIndexPeriodMode = mode || "all";
+    if(!ST.datePicker){ applyFilter(); return; }
+    $("selYear") && ($("selYear").value=""); $("selMonth") && ($("selMonth").value="");
+    const now=new Date(); now.setHours(0,0,0,0);
+    if(mode==="month"){ const a=new Date(now.getFullYear(),now.getMonth(),1), b=new Date(now.getFullYear(),now.getMonth()+1,0); ST.datePicker.setDate([a,b],false); }
+    else if(mode==="30d"){ const a=new Date(now); a.setDate(a.getDate()-29); ST.datePicker.setDate([a,now],false); }
+    else if(mode==="week"){ const a=new Date(now); a.setDate(a.getDate()-((a.getDay()+6)%7)); ST.datePicker.setDate([a,now],false); }
+    else ST.datePicker.clear();
+    applyFilter();
+  };
+  function mobileBarsHtml(rows,total,colorFn){
+    const max=Math.max(1,...rows.map(r=>Number(r[1]||0)));
+    return rows.map(([label,count],i)=>{ const pct=total?count/total*100:0; const color=colorFn?colorFn(label,i):CFG.PURPOSE_COLORS[i%CFG.PURPOSE_COLORS.length]; return `<div class="mobile-profile-row"><strong>${escapeHtml(label)}</strong><div class="mobile-profile-track"><div class="mobile-profile-fill" style="width:${pct.toFixed(1)}%;background:${color}"></div></div><span style="text-align:right;font-weight:900">${pct.toFixed(pct>=10?0:1)}%</span></div>`; }).join("") || '<div class="mobile-summary-sub">目前沒有資料</div>';
+  }
+  function mobileRankHtml(rows){
+    const max=Math.max(1,...rows.map(r=>Number(r[1]||0)));
+    return rows.map(([label,count],i)=>`<div class="mobile-rank-row"><span class="mobile-rank-num">${i+1}</span><div class="mobile-rank-main"><div class="mobile-rank-label">${escapeHtml(label)}</div><div class="mobile-rank-track"><div class="mobile-rank-fill" style="width:${(count/max*100).toFixed(1)}%"></div></div></div><span class="mobile-rank-value">${fmtTwd(count)}</span></div>`).join("") || '<div class="mobile-summary-sub">目前沒有資料</div>';
+  }
+  function renderMobileIndexSummary(){
+    if(!$("mobileIndexSummary")) return;
+    const q=s($("qSearch")?.value).trim(); const rows=ST.filtered||[];
+    $("mobileIndexTotal").textContent=fmtTwd(rows.length);
+    const paid=rows.filter(v=>Number(v.amount)>0).length, newer=rows.filter(v=>v.is_new_customer===true).length;
+    $("mobileIndexScope").textContent=`${ST.store} · 新客 ${rows.length?Math.round(newer/rows.length*100):0}% · 有消費 ${rows.length?Math.round(paid/rows.length*100):0}%`;
+    qa("#mobileIndexStoreSeg button").forEach(b=>b.classList.toggle("active",b.dataset.store===ST.store));
+    const period=$("mobileIndexPeriod"); if(period&&period.value!==mobileIndexPeriodMode) period.value=mobileIndexPeriodMode;
+    const setSeg=(id,val)=>qa(`#${id} button`).forEach(b=>b.classList.toggle("active",b.dataset.val===val));
+    setSeg("mobileCustSeg",ST.filter.cust||"all"); setSeg("mobilePaySeg",ST.filter.pay||"all"); setSeg("mobileServiceSeg",ST.filter.service?"service":"all");
+    const src=getSourceTagPool(rows).filter(([label])=>!['老客回購','老客-未購'].includes(label)).slice(0,5); $("mobileSourceTop").innerHTML=mobileRankHtml(src);
+    const kw=new Map(); rows.forEach(v=>{ const parts=[...new Set(splitSearchKeywords(v.search_keywords).map(x=>s(x).trim()).filter(Boolean))]; parts.forEach(k=>kw.set(k,(kw.get(k)||0)+1)); });
+    const kwRows=[...kw.entries()].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],'zh-Hant')).slice(0,5); $("mobileKeywordTop").innerHTML=mobileRankHtml(kwRows);
+    const purpose=tally(rows,v=>arr(v.visit_purposes)).slice(0,5); const purposeTotal=purpose.reduce((a,[,n])=>a+n,0); $("mobilePurposeProfile").innerHTML=mobileBarsHtml(purpose,purposeTotal);
+    const gender=tally(rows,v=>s(v.gender)||'未填'); $("mobileGenderProfile").innerHTML=mobileBarsHtml(gender,rows.length,(l)=>l==='男'?'#4285F4':l==='女'?'#EA4335':'#A8A39B');
+    const age=CFG.AGES.map(label=>[label,rows.filter(v=>v.age_range===label).length]).filter(([,n])=>n>0); $("mobileAgeProfile").innerHTML=mobileBarsHtml(age,rows.length);
+    const dashboard=$("mobileIndexDashboard"), results=$("mobileIndexSearchResults"), search=$("mobileIndexSearch"); if(search&&search.value!==q) search.value=q;
+    if(q){
+      dashboard.style.display='none'; results.classList.add('show'); $("mobileSearchCount").textContent=`${rows.length} 筆`;
+      $("mobileSearchList").innerHTML=rows.slice(0,20).map(v=>`<div class="mobile-search-row" onclick="showDetail('${v.id}')"><div><div class="mobile-search-name">${escapeHtml(maskName(v.customer_name)||'匿名顧客')}</div><div class="mobile-search-meta">${escapeHtml(s(v.form_date).slice(0,10))} · ${escapeHtml(s(v.store_branch)||'-')} · ${v.is_new_customer?'新客':'老客'}${v.amount!=null?` · ${Number(v.amount)>0?'NT$'+fmtTwd(v.amount):'未消費'}`:''}</div></div><span class="mobile-search-arrow">›</span></div>`).join('') || '<div class="mobile-summary-sub">沒有符合搜尋條件的資料</div>';
+    }else{ dashboard.style.display='grid'; results.classList.remove('show'); }
+  }
+
   function applyFilter(){
     ST.limit = 20;
     const baseFiltered = ST.raw.filter(v => visitMatchesBase(v) && dateMatches(v));
@@ -1743,8 +1903,12 @@
     
     syncStoreUI();
     updateFilterBadges();
-    updateAllCharts();
-    renderTable();
+    if(isMobileIndexSummary()){
+      renderMobileIndexSummary();
+    }else{
+      updateAllCharts();
+      renderTable();
+    }
   }
 
   function tally(list, keyFn){
@@ -2718,6 +2882,7 @@ ${v.search_keywords ? `
     initAddModal();
     await syncHubAdminAccess();
     const q = $("qSearch"); if (q) q.addEventListener("input", () => { $("btnClearSearch") && $("btnClearSearch").classList.toggle("hidden", !q.value); });
+    const mq=$("mobileIndexSearch"); if(mq) mq.addEventListener("input",()=>{ clearTimeout(mobileIndexSearchTimer); mobileIndexSearchTimer=setTimeout(()=>{ if(q) q.value=mq.value; applyFilter(); },180); });
     await fetchAllData();
   }
 
