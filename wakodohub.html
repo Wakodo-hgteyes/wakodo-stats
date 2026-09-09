@@ -146,11 +146,13 @@
       box-shadow:none;
     }
     .tab:hover{color:#35393d}
+    .tab:active{transform:translateY(1px) scale(.975);transition-duration:.08s}
     .tab.active{
       background:transparent;box-shadow:none;
       transform:translateY(-1.5px) scale(1.055);
       text-shadow:0 1px 0 rgba(255,255,255,.95),0 4px 12px rgba(66,133,244,.14);
     }
+    .tab.active:active{transform:translateY(0) scale(1.01)}
     .tab-dot{width:7px;height:7px;border-radius:50%;flex:0 0 7px;opacity:.66;transition:transform .28s ease,opacity .22s ease,box-shadow .22s ease}
     .tab.active .tab-dot{opacity:1;transform:scale(1.28);box-shadow:0 0 0 3px rgba(255,255,255,.64)}
     .tab[data-view="customer"] .tab-dot{background:var(--blue)}
@@ -184,8 +186,8 @@
       min-height:0;position:relative;margin:12px 14px 14px;border-radius:24px;overflow:hidden;
       background:#fff;border:1px solid rgba(255,255,255,.95);box-shadow:var(--shadow);
     }
-    .view{position:absolute;inset:0;background:#fff;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .16s ease}
-    .view.active{opacity:1;visibility:visible;pointer-events:auto}
+    .view{position:absolute;inset:0;z-index:1;background:#fff;opacity:0;visibility:hidden;pointer-events:none;transform:translateY(6px) scale(.997);will-change:opacity,transform;transition:opacity .18s ease,transform .24s cubic-bezier(.22,.78,.24,1),visibility 0s linear .22s}
+    .view.active{z-index:2;opacity:1;visibility:visible;pointer-events:auto;transform:translateY(0) scale(1);transition-delay:0s}
     .view iframe{display:block;width:100%;height:100%;border:0;background:#fff}
     .loading{
       position:absolute;inset:0;z-index:4;display:grid;place-items:center;background:#fff;color:var(--muted);
@@ -194,6 +196,10 @@
     .loading-inner{text-align:center}
     .spinner{width:30px;height:30px;margin:0 auto 12px;border:3px solid #e9eaec;border-top-color:var(--blue);border-radius:50%;animation:spin .75s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
+    @media (prefers-reduced-motion: reduce){
+      .tab,.tab-slider,.tab-dot,.view{transition:none!important}
+      .view{transform:none!important}
+    }
 
     .toast{
       position:fixed;left:50%;top:22px;bottom:auto;z-index:7000;transform:translate(-50%,-16px);
@@ -367,17 +373,34 @@
       #hubApp{grid-template-rows:68px minmax(0,1fr)}
       .topbar{grid-template-columns:auto minmax(0,1fr) auto}
       .topbar .tabs{
-        position:fixed;left:8px;right:8px;bottom:calc(8px + max(0px, env(safe-area-inset-bottom)));z-index:95;
-        display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3px;padding:5px;overflow:visible;
-        background:rgba(245,246,248,.94);border:1px solid rgba(255,255,255,.96);
+        position:fixed;left:8px;right:8px;bottom:calc(7px + max(0px, env(safe-area-inset-bottom)));z-index:95;
+        display:flex!important;flex-wrap:nowrap!important;align-items:stretch;justify-content:stretch;gap:4px;
+        height:60px;min-height:60px;padding:5px;overflow:hidden;
+        background:rgba(245,246,248,.94);border:1px solid rgba(255,255,255,.96);border-radius:18px;
         box-shadow:0 12px 34px rgba(31,35,41,.16),inset 0 1px 0 rgba(255,255,255,.9);
-        backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+        backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+        isolation:isolate;
       }
-      .topbar .tab{width:100%;min-width:0;justify-content:center;padding:9px 4px;font-size:12px}
-      .topbar .tab-slider{top:5px;height:calc(100% - 10px)}
-      .desktop-label{display:none}
-      .mobile-label{display:inline}
-      .workspace{margin:8px 8px calc(78px + max(0px, env(safe-area-inset-bottom)));border-radius:18px}
+      .topbar .tabs::before{animation:none;inset:-2px;border-radius:20px;box-shadow:0 0 18px rgba(66,133,244,.10)}
+      .topbar .tab{
+        flex:1 1 0;width:0;min-width:0;max-width:none;min-height:48px;height:48px;
+        justify-content:center;align-items:center;padding:0 2px;margin:0;border-radius:13px;font-size:12px;line-height:1;
+        overflow:hidden;transform:none;box-shadow:none;
+      }
+      .topbar .tab:hover{transform:none}
+      .topbar .tab:active{transform:translateY(1px) scale(.98)}
+      .topbar .tab.active{
+        background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(255,255,255,.88));
+        border:1px solid rgba(255,255,255,.98);
+        box-shadow:0 5px 14px rgba(37,43,51,.13),inset 0 1px 0 rgba(255,255,255,1);
+        transform:translateY(-1px) scale(1);text-shadow:none;
+      }
+      .topbar .tab.active:active{transform:translateY(0) scale(.985)}
+      .topbar .tab-slider{display:none!important;width:0!important;left:0!important}
+      .topbar .tab-label{display:block;min-width:0;max-width:100%;overflow:hidden;text-overflow:clip;white-space:nowrap;text-align:center}
+      .desktop-label{display:none!important}
+      .mobile-label{display:block!important}
+      .workspace{margin:8px 8px calc(82px + max(0px, env(safe-area-inset-bottom)));border-radius:18px}
       .action-btn.reload{display:grid!important}
       .action-btn.open-new{display:none!important}
       .actions{grid-column:3;justify-self:end}
@@ -455,8 +478,8 @@
         <div class="tab-slider" aria-hidden="true"></div>
         <button class="tab active" type="button" data-view="customer"><span class="tab-dot"></span><span class="tab-label desktop-label">客源分析</span><span class="tab-label mobile-label">客源</span></button>
         <button class="tab" type="button" data-view="performance"><span class="tab-dot"></span><span class="tab-label desktop-label">業績分析</span><span class="tab-label mobile-label">業績</span></button>
-        <button class="tab" type="button" data-view="marketing"><span class="tab-dot"></span><span class="tab-label desktop-label">行銷開支分析</span><span class="tab-label mobile-label">行銷</span></button>
         <button class="tab" type="button" data-view="adtracking"><span class="tab-dot"></span><span class="tab-label desktop-label">廣告客追蹤</span><span class="tab-label mobile-label">廣告</span></button>
+        <button class="tab" type="button" data-view="marketing"><span class="tab-dot"></span><span class="tab-label desktop-label">行銷開支分析</span><span class="tab-label mobile-label">行銷</span></button>
         <button class="tab" type="button" data-view="social"><span class="tab-dot"></span><span class="tab-label desktop-label">社群發文成效分析</span><span class="tab-label mobile-label">社群</span></button>
       </nav>
 
@@ -486,13 +509,13 @@
         <div class="loading"><div class="loading-inner"><div class="spinner"></div>正在載入業績分析…</div></div>
         <iframe title="業績分析"></iframe>
       </section>
-      <section class="view" data-view-panel="marketing">
-        <div class="loading"><div class="loading-inner"><div class="spinner"></div>正在載入行銷開支分析…</div></div>
-        <iframe title="行銷開支分析"></iframe>
-      </section>
       <section class="view" data-view-panel="adtracking">
         <div class="loading"><div class="loading-inner"><div class="spinner"></div>正在載入廣告客追蹤…</div></div>
         <iframe title="廣告客追蹤"></iframe>
+      </section>
+      <section class="view" data-view-panel="marketing">
+        <div class="loading"><div class="loading-inner"><div class="spinner"></div>正在載入行銷開支分析…</div></div>
+        <iframe title="行銷開支分析"></iframe>
       </section>
       <section class="view" data-view-panel="social">
         <div class="loading"><div class="loading-inner"><div class="spinner"></div>正在載入社群發文成效分析…</div></div>
@@ -541,7 +564,7 @@
         </div>
         <div id="passwordMessage" class="form-message"></div>
         <div class="form-actions"><button id="changePasswordBtn" class="primary-small" type="button">更新密碼</button></div>
-        <div class="version-line">WAKODO HUB v2.1.0</div>
+        <div class="version-line">WAKODO HUB v2.2.0</div>
       </div>
     </div>
   </div>
@@ -580,10 +603,10 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const HUB=Object.freeze({
-      VERSION:"2.1.0",SUPABASE_URL:"https://mdjnidbwqedzobjbhocd.supabase.co",SUPABASE_KEY:"sb_publishable_RoO2nFORoi-VzRgWt75wWQ_OnHAbl9Y",
+      VERSION:"2.2.1",SUPABASE_URL:"https://mdjnidbwqedzobjbhocd.supabase.co",SUPABASE_KEY:"sb_publishable_RoO2nFORoi-VzRgWt75wWQ_OnHAbl9Y",
       LOGIN_AT_KEY:"wakodo_hub_login_at_v2",MAX_LOGIN_AGE:30*24*60*60*1000,STORE_RADIUS_M:150,STORE_COORDS_KEY:"wakodo_hub_store_coords_v1",
       STORES:{linan:{label:"臨安店",address:"台南市中西區臨安路一段100號"},nanke:{label:"南科店",address:"台南市新市區龍目井路165號"}},
-      PAGES:{customer:{label:"客源分析",src:"index.html",permission:"can_view_index",ticketPage:"index"},performance:{label:"業績分析",src:"performance.html",permission:"can_view_performance",ticketPage:"performance"},marketing:{label:"行銷開支分析",src:"marketing.html",permission:"can_view_marketing",ticketPage:"marketing"},adtracking:{label:"廣告客追蹤",src:"ad-tracking.html",permission:"can_view_ad_tracking",ticketPage:"ad_tracking"},social:{label:"社群發文成效分析",src:"social-analytics.html",permission:"can_view_social",ticketPage:"social"}}
+      PAGES:{customer:{label:"客源分析",src:"index.html",permission:"can_view_index",ticketPage:"index"},performance:{label:"業績分析",src:"performance.html",permission:"can_view_performance",ticketPage:"performance"},adtracking:{label:"廣告客追蹤",src:"ad-tracking.html",permission:"can_view_ad_tracking",ticketPage:"ad_tracking"},marketing:{label:"行銷開支分析",src:"marketing.html",permission:"can_view_marketing",ticketPage:"marketing"},social:{label:"社群發文成效分析",src:"social-analytics.html",permission:"can_view_social",ticketPage:"social"}}
     });
     const sb=window.supabase.createClient(HUB.SUPABASE_URL,HUB.SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
     const state={active:"customer",loaded:new Set(),profile:null,members:[],codes:[]};
@@ -609,7 +632,7 @@
     function showPanel(name){for(const id of ["loginPanel","registerPanel","pendingPanel"])$(id).classList.toggle("hidden",id!==name);}
     function showLoginGate(message=""){$("hubApp").classList.add("hidden");$("hubGate").style.display="flex";showPanel("loginPanel");$("authTitle").textContent="登入 WAKODO HUB";$("authDesc").textContent="使用您的登入帳號與個人密碼登入。WAKODO HUB 是所有功能頁的唯一授權入口。";setGateError(message);}
     async function openRegister(code=""){$("hubApp").classList.add("hidden");$("hubGate").style.display="flex";showPanel("registerPanel");$("authTitle").textContent="建立 WAKODO HUB 帳號";$("authDesc").textContent="邀請碼可直接取得預設權限；未填邀請碼則送出審核申請。";$("accessCode").value=code||"";$("codeBadge").classList.add("hidden");$("registerName").value="";renderNameCheck($("registerNameCheck"),"");setRegisterError("");if(code)await validateCode();}
-    async function validateCode(){const code=$("accessCode").value.trim();if(!code){$("codeBadge").classList.add("hidden");return true;}const {data,error}=await sb.functions.invoke("hub-register",{body:{action:"validate_code",access_code:code}});if(error||data?.error){$("codeBadge").classList.add("hidden");setRegisterError(data?.error||await functionError(error,"邀請碼無效"));return false;}const p=data.code?.permissions||{};const labels=[];if(p.index)labels.push("客源");if(p.performance)labels.push("業績");if(p.marketing)labels.push("行銷");if(p.ad_tracking)labels.push("廣告追蹤");if(p.social)labels.push("社群");if(p.index_sensitive)labels.push("完整姓名/單筆金額");$("codeBadge").textContent=`邀請碼有效${data.code?.label?" · "+data.code.label:""}｜${labels.join("、")||"無頁面權限"}`;$("codeBadge").classList.remove("hidden");setRegisterError("");return true;}
+    async function validateCode(){const code=$("accessCode").value.trim();if(!code){$("codeBadge").classList.add("hidden");return true;}const {data,error}=await sb.functions.invoke("hub-register",{body:{action:"validate_code",access_code:code}});if(error||data?.error){$("codeBadge").classList.add("hidden");setRegisterError(data?.error||await functionError(error,"邀請碼無效"));return false;}const p=data.code?.permissions||{};const labels=[];if(p.index)labels.push("客源");if(p.performance)labels.push("業績");if(p.ad_tracking)labels.push("廣告追蹤");if(p.marketing)labels.push("行銷");if(p.social)labels.push("社群");if(p.index_sensitive)labels.push("完整姓名 / Index單筆金額");$("codeBadge").textContent=`邀請碼有效${data.code?.label?" · "+data.code.label:""}｜${labels.join("、")||"無頁面權限"}`;$("codeBadge").classList.remove("hidden");setRegisterError("");return true;}
     async function register(){setRegisterError("");const name=cleanLoginName($("registerName").value),pwd=$("registerPassword").value,pwd2=$("registerPassword2").value,code=$("accessCode").value.trim();if(!name)return setRegisterError("請填寫登入帳號");if(pwd.length<8)return setRegisterError("密碼至少需要 8 個字元");if(pwd!==pwd2)return setRegisterError("兩次輸入的密碼不一致");try{const available=await publicNameAvailable(name);renderNameCheck($("registerNameCheck"),available?"available":"duplicate",available?"帳號名稱可以使用":"名稱重複不可用");if(!available)return setRegisterError("名稱重複不可用");}catch(e){return setRegisterError(e.message||"名稱檢查失敗");}if(code&&!(await validateCode()))return;const btn=$("registerSubmit");btn.disabled=true;btn.textContent="送出中…";try{const action=code?"register_code":"register_self";const {data,error}=await sb.functions.invoke("hub-register",{body:{action,access_code:code||undefined,login_name:name,password:pwd}});if(error||data?.error)throw new Error(data?.error||await functionError(error,"註冊失敗"));if(data.status==="pending"){showPanel("pendingPanel");$("authTitle").textContent="等待管理員審核";$("authDesc").textContent="申請已成功建立。";return;}await signInByLoginName(name,pwd);localStorage.setItem(HUB.LOGIN_AT_KEY,String(Date.now()));const profile=await loadMyProfile();if(!profile||profile.status!=="active")throw new Error("帳號尚未取得使用權限");await sb.rpc("hub_touch_my_session");history.replaceState(null,"",`${location.pathname}${location.search}#customer`);showHub(profile);requestCurrentLocation(false);}catch(e){setRegisterError(e.message||"註冊失敗");}finally{btn.disabled=false;btn.textContent="送出註冊";}}
     async function loadMyProfile(){const {data,error}=await sb.functions.invoke("hub-access",{body:{action:"me"}});if(error||data?.error)return null;state.profile=data.member||null;return state.profile;}
     async function login(){setGateError("");const loginName=cleanLoginName($("loginName").value),password=$("loginPassword").value;if(!loginName)return setGateError("請輸入登入帳號");if(!password)return setGateError("請輸入密碼");const btn=$("hubEnter");btn.disabled=true;btn.textContent="登入中…";try{await signInByLoginName(loginName,password);const profile=await loadMyProfile();if(!profile){await sb.auth.signOut();throw new Error("此帳號沒有 WAKODO HUB 使用權限");}if(profile.status==="pending"){await sb.auth.signOut();showPanel("pendingPanel");$("authTitle").textContent="等待管理員審核";$("authDesc").textContent="您的申請已送出，管理員核准後即可登入。";return;}if(profile.status!=="active"){await sb.auth.signOut();throw new Error(profile.status==="rejected"?"此帳號申請未獲核准":"此帳號目前已停用，請聯絡管理員");}localStorage.setItem(HUB.LOGIN_AT_KEY,String(Date.now()));await sb.rpc("hub_touch_my_session");showHub(profile);requestCurrentLocation(false);}catch(e){setGateError(e.message||"登入失敗");}finally{btn.disabled=false;btn.textContent="登入 WAKODO HUB";}}
@@ -619,7 +642,7 @@
     function showHub(profile){state.profile=profile;$("hubGate").style.display="none";$("hubApp").classList.remove("hidden");qa(".tab").forEach(btn=>btn.classList.toggle("hidden",!canPage(btn.dataset.view)));qa(".view").forEach(panel=>panel.classList.toggle("hidden",!canPage(panel.dataset.viewPanel)));$("openCurrent").classList.add("hidden");updateUserChrome();const allowed=permittedPages();if(!allowed.length){return showLoginGate("此帳號目前沒有任何頁面查看權限");}const raw=String(location.hash||"").replace(/^#/,"");const target=allowed.includes(raw)?raw:allowed[0];switchView(target,false);}
     async function issueTicket(name){const page=HUB.PAGES[name];const {data,error}=await sb.functions.invoke("hub-access",{body:{action:"ticket",page:page.ticketPage}});if(error||data?.error)throw new Error(data?.error||await functionError(error,"無法取得頁面通行證"));return data.ticket;}
     async function loadView(name,force=false){if(!canPage(name))return;if(state.loaded.has(name)&&!force)return;const panel=document.querySelector(`[data-view-panel="${name}"]`),frame=panel?.querySelector("iframe"),loading=panel?.querySelector(".loading"),reloadBtn=$("reloadCurrent");if(!frame)return;if(loading){loading.innerHTML='<div class="loading-inner"><div class="spinner"></div>正在載入…</div>';loading.style.display="grid";}if(force&&reloadBtn)reloadBtn.classList.add("is-loading");try{const ticket=await issueTicket(name);const base=HUB.PAGES[name].src;const src=force?`${base}${base.includes("?")?"&":"?"}hubReload=${Date.now()}`:base;frame.onload=()=>{if(loading)loading.style.display="none";if(reloadBtn)reloadBtn.classList.remove("is-loading");if(force)showToast(`${HUB.PAGES[name].label} 已重新載入最新版本`);};frame.src=`${src}#hub=${encodeURIComponent(ticket)}`;state.loaded.add(name);}catch(e){if(reloadBtn)reloadBtn.classList.remove("is-loading");if(loading){loading.innerHTML=`<div class="loading-inner">${esc(e.message||"沒有查看權限")}</div>`;}showToast(e.message||"無法開啟頁面");}}
-    function syncTabSlider(name=state.active){const tabs=document.querySelector(".tabs"),slider=document.querySelector(".tab-slider"),active=document.querySelector(`.tab[data-view="${name}"]:not(.hidden)`);if(!tabs||!slider||!active)return;slider.style.width=active.offsetWidth+"px";slider.style.left=active.offsetLeft+"px";}
+    function syncTabSlider(name=state.active){const tabs=document.querySelector(".tabs"),slider=document.querySelector(".tab-slider"),active=document.querySelector(`.tab[data-view="${name}"]:not(.hidden)`);if(!tabs||!slider||!active)return;if(window.matchMedia("(max-width:720px)").matches){slider.style.width="0px";slider.style.left="0px";return;}slider.style.width=active.offsetWidth+"px";slider.style.left=active.offsetLeft+"px";}
     async function switchView(name,updateHash=true){if(!canPage(name))name=permittedPages()[0];if(!name)return;state.active=name;qa(".tab").forEach(btn=>btn.classList.toggle("active",btn.dataset.view===name));qa(".view").forEach(panel=>panel.classList.toggle("active",panel.dataset.viewPanel===name));requestAnimationFrame(()=>syncTabSlider(name));await loadView(name);if(updateHash&&location.hash!==`#${name}`)history.replaceState(null,"",`${location.pathname}${location.search}#${name}`);document.title=`${HUB.PAGES[name].label}｜WAKODO HUB`;}
     async function logout(show=true){await sb.auth.signOut();localStorage.removeItem(HUB.LOGIN_AT_KEY);state.profile=null;state.loaded.forEach(name=>{const f=document.querySelector(`[data-view-panel="${name}"] iframe`);if(f)f.removeAttribute("src");});state.loaded.clear();$("loginName").value="";$("loginPassword").value="";history.replaceState(null,"",`${location.pathname}${location.search}`);showLoginGate();if(show)showToast("已登出 WAKODO HUB");}
     function openModal(id){const e=$(id);if(!e)return;clearTimeout(e._closeTimer);e.classList.remove("closing","hidden");}
@@ -635,7 +658,7 @@
     async function renameMe(){const input=$("myLoginName"),status=$("myLoginNameCheck"),msg=$("renameMessage"),btn=$("renameMeBtn"),name=cleanLoginName(input.value);msg.style.color="var(--red)";msg.textContent="";if(!name)return msg.textContent="請輸入登入帳號";btn.disabled=true;try{const {data,error}=await sb.functions.invoke("hub-access",{body:{action:"rename",login_name:name}});if(error||data?.error)throw new Error(data?.error||await functionError(error,"名稱修改失敗"));state.profile=data.member;input.value=state.profile.display_name;renderNameCheck(status,"available","帳號名稱可以使用");updateUserChrome();msg.style.color="#188038";msg.textContent="登入帳號已更新";showToast("登入帳號已更新");}catch(e){const m=e.message||"名稱修改失敗";renderNameCheck(status,m.includes("重複")?"duplicate":"",m.includes("重複")?"名稱重複不可用":"");msg.textContent=m;}finally{btn.disabled=false;}}
     async function changePassword(){const current=$("currentPassword").value,np=$("newPassword").value,np2=$("newPassword2").value,msg=$("passwordMessage");msg.style.color="var(--red)";msg.textContent="";if(!current)return msg.textContent="請輸入目前密碼";if(np.length<8)return msg.textContent="新密碼至少需要 8 個字元";if(np!==np2)return msg.textContent="兩次輸入的新密碼不一致";const btn=$("changePasswordBtn");btn.disabled=true;try{const {data:{user}}=await sb.auth.getUser();if(!user?.email)throw new Error("登入狀態無效，請重新登入");const {error:v}=await sb.auth.signInWithPassword({email:user.email,password:current});if(v)throw new Error("目前密碼不正確");const {error}=await sb.auth.updateUser({password:np});if(error)throw error;$("currentPassword").value=$("newPassword").value=$("newPassword2").value="";msg.style.color="#188038";msg.textContent="密碼已更新";showToast("密碼已更新");}catch(e){msg.textContent=e.message||"密碼更新失敗";}finally{btn.disabled=false;}}
     async function callAdmin(action,payload={}){const {data,error}=await sb.functions.invoke("hub-admin",{body:{action,...payload}});if(error)throw new Error(await functionError(error,"管理操作失敗"));if(data?.error)throw new Error(data.error);return data;}
-    const permDefs=[['can_view_index','客源'],['can_view_performance','業績'],['can_view_marketing','行銷'],['can_view_ad_tracking','廣告追蹤'],['can_view_social','社群'],['can_view_index_sensitive','完整姓名/單筆金額']];
+    const permDefs=[['can_view_index','客源'],['can_view_performance','業績'],['can_view_ad_tracking','廣告追蹤'],['can_view_marketing','行銷'],['can_view_social','社群'],['can_view_index_sensitive','完整姓名 / Index單筆金額']];
     function permHtml(obj,prefix,disabled=false){return permDefs.map(([k,label])=>`<label class="perm-check"><input type="checkbox" data-perm-owner="${prefix}" data-perm-key="${k}" ${obj?.[k]?'checked':''} ${disabled?'disabled':''}>${label}</label>`).join("");}
     function readPerms(prefix){const out={};permDefs.forEach(([k])=>{const e=document.querySelector(`[data-perm-owner="${prefix}"][data-perm-key="${k}"]`);out[k]=!!e?.checked;});return out;}
     async function loadAdminData(){if(state.profile?.role!=="owner")return;try{const [m,c]=await Promise.all([callAdmin("list_members"),callAdmin("list_access_codes")]);state.members=m.members||[];state.codes=c.codes||[];renderMembers();renderCodes();}catch(e){showToast(e.message||"管理資料載入失敗");}}
