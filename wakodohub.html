@@ -390,13 +390,32 @@
       .topbar .tab:hover{transform:none}
       .topbar .tab:active{transform:translateY(1px) scale(.98)}
       .topbar .tab.active{
-        background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(255,255,255,.88));
-        border:1px solid rgba(255,255,255,.98);
-        box-shadow:0 5px 14px rgba(37,43,51,.13),inset 0 1px 0 rgba(255,255,255,1);
-        transform:translateY(-1px) scale(1);text-shadow:none;
+        background:transparent;border:1px solid transparent;box-shadow:none;
+        transform:translateY(-1px) scale(1);
+        text-shadow:0 1px 0 rgba(255,255,255,.95),0 3px 10px rgba(66,133,244,.12);
       }
       .topbar .tab.active:active{transform:translateY(0) scale(.985)}
-      .topbar .tab-slider{display:none!important;width:0!important;left:0!important}
+      .topbar .tab-slider{
+        display:block!important;top:5px;height:48px;z-index:1;
+        border-radius:13px;
+        background:
+          linear-gradient(180deg,rgba(255,255,255,.78),rgba(255,255,255,.50)),
+          linear-gradient(135deg,rgba(255,255,255,.34),rgba(255,255,255,.08));
+        border:1px solid rgba(255,255,255,.86);
+        box-shadow:
+          0 8px 22px rgba(37,43,51,.14),
+          0 2px 6px rgba(37,43,51,.08),
+          inset 0 1px 0 rgba(255,255,255,.98),
+          inset 0 -1px 0 rgba(255,255,255,.34);
+        backdrop-filter:blur(18px) saturate(1.28);
+        -webkit-backdrop-filter:blur(18px) saturate(1.28);
+        transition:left .38s cubic-bezier(.22,.82,.24,1),width .38s cubic-bezier(.22,.82,.24,1);
+        will-change:left,width;
+      }
+      .topbar .tab-slider::after{
+        content:"";position:absolute;left:10%;right:10%;top:4px;height:1px;border-radius:999px;
+        background:linear-gradient(90deg,transparent,rgba(255,255,255,.95),transparent);opacity:.9;
+      }
       .topbar .tab-label{display:block;min-width:0;max-width:100%;overflow:hidden;text-overflow:clip;white-space:nowrap;text-align:center}
       .desktop-label{display:none!important}
       .mobile-label{display:block!important}
@@ -603,7 +622,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const HUB=Object.freeze({
-      VERSION:"2.2.1",SUPABASE_URL:"https://mdjnidbwqedzobjbhocd.supabase.co",SUPABASE_KEY:"sb_publishable_RoO2nFORoi-VzRgWt75wWQ_OnHAbl9Y",
+      VERSION:"2.2.2",SUPABASE_URL:"https://mdjnidbwqedzobjbhocd.supabase.co",SUPABASE_KEY:"sb_publishable_RoO2nFORoi-VzRgWt75wWQ_OnHAbl9Y",
       LOGIN_AT_KEY:"wakodo_hub_login_at_v2",MAX_LOGIN_AGE:30*24*60*60*1000,STORE_RADIUS_M:150,STORE_COORDS_KEY:"wakodo_hub_store_coords_v1",
       STORES:{linan:{label:"臨安店",address:"台南市中西區臨安路一段100號"},nanke:{label:"南科店",address:"台南市新市區龍目井路165號"}},
       PAGES:{customer:{label:"客源分析",src:"index.html",permission:"can_view_index",ticketPage:"index"},performance:{label:"業績分析",src:"performance.html",permission:"can_view_performance",ticketPage:"performance"},adtracking:{label:"廣告客追蹤",src:"ad-tracking.html",permission:"can_view_ad_tracking",ticketPage:"ad_tracking"},marketing:{label:"行銷開支分析",src:"marketing.html",permission:"can_view_marketing",ticketPage:"marketing"},social:{label:"社群發文成效分析",src:"social-analytics.html",permission:"can_view_social",ticketPage:"social"}}
@@ -642,7 +661,7 @@
     function showHub(profile){state.profile=profile;$("hubGate").style.display="none";$("hubApp").classList.remove("hidden");qa(".tab").forEach(btn=>btn.classList.toggle("hidden",!canPage(btn.dataset.view)));qa(".view").forEach(panel=>panel.classList.toggle("hidden",!canPage(panel.dataset.viewPanel)));$("openCurrent").classList.add("hidden");updateUserChrome();const allowed=permittedPages();if(!allowed.length){return showLoginGate("此帳號目前沒有任何頁面查看權限");}const raw=String(location.hash||"").replace(/^#/,"");const target=allowed.includes(raw)?raw:allowed[0];switchView(target,false);}
     async function issueTicket(name){const page=HUB.PAGES[name];const {data,error}=await sb.functions.invoke("hub-access",{body:{action:"ticket",page:page.ticketPage}});if(error||data?.error)throw new Error(data?.error||await functionError(error,"無法取得頁面通行證"));return data.ticket;}
     async function loadView(name,force=false){if(!canPage(name))return;if(state.loaded.has(name)&&!force)return;const panel=document.querySelector(`[data-view-panel="${name}"]`),frame=panel?.querySelector("iframe"),loading=panel?.querySelector(".loading"),reloadBtn=$("reloadCurrent");if(!frame)return;if(loading){loading.innerHTML='<div class="loading-inner"><div class="spinner"></div>正在載入…</div>';loading.style.display="grid";}if(force&&reloadBtn)reloadBtn.classList.add("is-loading");try{const ticket=await issueTicket(name);const base=HUB.PAGES[name].src;const src=force?`${base}${base.includes("?")?"&":"?"}hubReload=${Date.now()}`:base;frame.onload=()=>{if(loading)loading.style.display="none";if(reloadBtn)reloadBtn.classList.remove("is-loading");if(force)showToast(`${HUB.PAGES[name].label} 已重新載入最新版本`);};frame.src=`${src}#hub=${encodeURIComponent(ticket)}`;state.loaded.add(name);}catch(e){if(reloadBtn)reloadBtn.classList.remove("is-loading");if(loading){loading.innerHTML=`<div class="loading-inner">${esc(e.message||"沒有查看權限")}</div>`;}showToast(e.message||"無法開啟頁面");}}
-    function syncTabSlider(name=state.active){const tabs=document.querySelector(".tabs"),slider=document.querySelector(".tab-slider"),active=document.querySelector(`.tab[data-view="${name}"]:not(.hidden)`);if(!tabs||!slider||!active)return;if(window.matchMedia("(max-width:720px)").matches){slider.style.width="0px";slider.style.left="0px";return;}slider.style.width=active.offsetWidth+"px";slider.style.left=active.offsetLeft+"px";}
+    function syncTabSlider(name=state.active){const tabs=document.querySelector(".tabs"),slider=document.querySelector(".tab-slider"),active=document.querySelector(`.tab[data-view="${name}"]:not(.hidden)`);if(!tabs||!slider||!active)return;slider.style.width=active.offsetWidth+"px";slider.style.left=active.offsetLeft+"px";}
     async function switchView(name,updateHash=true){if(!canPage(name))name=permittedPages()[0];if(!name)return;state.active=name;qa(".tab").forEach(btn=>btn.classList.toggle("active",btn.dataset.view===name));qa(".view").forEach(panel=>panel.classList.toggle("active",panel.dataset.viewPanel===name));requestAnimationFrame(()=>syncTabSlider(name));await loadView(name);if(updateHash&&location.hash!==`#${name}`)history.replaceState(null,"",`${location.pathname}${location.search}#${name}`);document.title=`${HUB.PAGES[name].label}｜WAKODO HUB`;}
     async function logout(show=true){await sb.auth.signOut();localStorage.removeItem(HUB.LOGIN_AT_KEY);state.profile=null;state.loaded.forEach(name=>{const f=document.querySelector(`[data-view-panel="${name}"] iframe`);if(f)f.removeAttribute("src");});state.loaded.clear();$("loginName").value="";$("loginPassword").value="";history.replaceState(null,"",`${location.pathname}${location.search}`);showLoginGate();if(show)showToast("已登出 WAKODO HUB");}
     function openModal(id){const e=$(id);if(!e)return;clearTimeout(e._closeTimer);e.classList.remove("closing","hidden");}

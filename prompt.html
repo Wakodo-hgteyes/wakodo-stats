@@ -490,6 +490,10 @@
     let fullPromptText = "";
     let currentPreviewSections = [];
     const WORKSPACE_STATE_KEY = "wakoPromptWorkspaceStateV1";
+    const USAGE_SESSION_KEY = "wakoPromptUsageSessionV1";
+    const USAGE_DEDUPE_WINDOW_MS = 5000;
+    let lastUsageSignature = "";
+    let lastUsageLoggedAt = 0;
 
     window.showToast = function(message) {
         const toast = document.getElementById("toast");
@@ -635,8 +639,10 @@ The selected photographic style may change color, contrast, grain, exposure, hig
     }
 
     async function copyText(text, successMessage) {
+        let copied = false;
         try {
             await navigator.clipboard.writeText(text);
+            copied = true;
         } catch {
             const helper = document.createElement("textarea");
             helper.value = text;
@@ -644,15 +650,101 @@ The selected photographic style may change color, contrast, grain, exposure, hig
             helper.style.opacity = "0";
             document.body.appendChild(helper);
             helper.select();
-            document.execCommand("copy");
+            copied = document.execCommand("copy");
             helper.remove();
         }
-        window.showToast(successMessage);
+        if (copied) window.showToast(successMessage);
+        else window.showToast("複製失敗，請再試一次");
+        return copied;
     }
 
-    window.copyPrompt = function() {
+    function getUsageSessionId() {
+        try {
+            let sessionId = sessionStorage.getItem(USAGE_SESSION_KEY);
+            if (!sessionId) {
+                sessionId = window.crypto?.randomUUID?.() || `session-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+                sessionStorage.setItem(USAGE_SESSION_KEY, sessionId);
+            }
+            return sessionId;
+        } catch {
+            return `session-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        }
+    }
+
+    function buildUsagePayload() {
+        const ratio = document.getElementById("select-ratio")?.value || "4:5";
+        const eyewearDetailsPresent = Boolean(document.getElementById("input-eyewear")?.value.trim());
+
+        if (currentMode === "product") {
+            const layout = getSelectedItem("PRODUCT_LAYOUTS", "select-product-layouts");
+            const signature = ["product", ratio, layout?.id || ""].join("|");
+            return {
+                session_id: getUsageSessionId(),
+                mode: "product",
+                gender: null,
+                ratio,
+                product_layout_id: layout?.id || null,
+                product_layout_label: layout?.label || null,
+                selection_signature: signature,
+                prompt_length: fullPromptText.length,
+                eyewear_details_present: false
+            };
+        }
+
+        const appearance = getAppearanceForGender();
+        const outfit = getSelectedItem("OUTFITS", "select-outfits");
+        const scene = getSelectedItem("SCENES", "select-scenes");
+        const pose = getSelectedItem("POSES", "select-poses");
+        const style = getSelectedItem("STYLES", "select-styles");
+        const signature = [
+            "model", currentGender, ratio,
+            appearance?.id || "", outfit?.id || "", scene?.id || "",
+            pose?.id || "", style?.id || "", eyewearDetailsPresent ? "eyewear:1" : "eyewear:0"
+        ].join("|");
+
+        return {
+            session_id: getUsageSessionId(),
+            mode: "model",
+            gender: currentGender,
+            ratio,
+            appearance_id: appearance?.id || null,
+            appearance_label: appearance?.label || null,
+            outfit_id: outfit?.id || null,
+            outfit_label: outfit?.label || null,
+            scene_id: scene?.id || null,
+            scene_label: scene?.label || null,
+            pose_id: pose?.id || null,
+            pose_label: pose?.label || null,
+            style_id: style?.id || null,
+            style_label: style?.label || null,
+            selection_signature: signature,
+            prompt_length: fullPromptText.length,
+            eyewear_details_present: eyewearDetailsPresent
+        };
+    }
+
+    async function logFullPromptUsage() {
+        const payload = buildUsagePayload();
+        const now = Date.now();
+        if (payload.selection_signature === lastUsageSignature && now - lastUsageLoggedAt < USAGE_DEDUPE_WINDOW_MS) return;
+
+        const { error } = await supabase.rpc("log_wako_prompt_run", { p_payload: payload });
+        if (error) throw error;
+
+        lastUsageSignature = payload.selection_signature;
+        lastUsageLoggedAt = now;
+    }
+
+    window.copyPrompt = async function() {
         if (!fullPromptText) return;
-        copyText(fullPromptText, "完整 Prompt 已複製");
+        const copied = await copyText(fullPromptText, "完整 Prompt 已複製");
+        if (!copied) return;
+
+        try {
+            await logFullPromptUsage();
+        } catch (error) {
+            console.warn("Prompt 使用紀錄寫入失敗", error);
+        }
     };
 
     window.openManager = function() {
