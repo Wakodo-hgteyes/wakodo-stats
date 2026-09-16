@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2215.6%22%20fill%3D%22%23fff%22%2F%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23111%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2214.2%22%20stroke-width%3D%221.1%22%2F%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%2211.9%22%20stroke-width%3D%220.8%22%2F%3E%3Cg%20stroke-width%3D%220.85%22%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2211.0%22%20r%3D%224.4%22%2F%3E%3Ccircle%20cx%3D%2220.8%22%20cy%3D%2213.6%22%20r%3D%224.4%22%2F%3E%3Ccircle%20cx%3D%2219.6%22%20cy%3D%2219.1%22%20r%3D%224.4%22%2F%3E%3Ccircle%20cx%3D%2212.4%22%20cy%3D%2219.1%22%20r%3D%224.4%22%2F%3E%3Ccircle%20cx%3D%2211.2%22%20cy%3D%2213.6%22%20r%3D%224.4%22%2F%3E%3C%2Fg%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2215.2%22%20r%3D%222.2%22%20stroke-width%3D%220.7%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E" />
-  <title>和光堂戰情室 V14.5.2</title>
+  <title>和光堂戰情室 V14.5.4</title>
 
   <!-- ===== 外部套件（CDN）===== -->
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
@@ -801,7 +801,7 @@
 
     <!-- ===== Modal 區塊 ===== -->
     <!-- 新增/編輯 Modal -->
-    <div id="addModal" class="modal" onclick="if(event.target===this)closeAddModal()">
+    <div id="addModal" class="modal">
       <div class="modal-box">
         <button class="modal-close" onclick="closeAddModal()">×</button>
         <h2 class="h3" style="margin-bottom:24px; font-size: 24px;">📝 編輯顧客資料</h2>
@@ -861,13 +861,17 @@
     </div>
 
     <!-- 詳細 Modal -->
-    <div id="detailModal" class="modal" onclick="if(event.target===this)closeDetail()">
+    <div id="detailModal" class="modal">
       <div class="modal-box" style="padding: 32px;">
         <button class="modal-close" onclick="closeDetail()">×</button>
         <div id="detailContent"></div>
         
         <div id="requestEditSection" style="margin-top:24px;padding-top:24px;border-top:1px solid rgba(0,0,0,0.05);">
           <button onclick="openRequestEdit()" class="btn-danger-ghost" style="width:100%;justify-content:center;background:rgba(251,188,5,0.1);color:var(--yellow);border-color:rgba(251,188,5,.3);font-size:15px;padding:12px;">🙋‍♂️ 提出修改申請</button>
+        </div>
+        <div id="serviceEditSection" class="hidden" style="margin-top:24px;padding-top:24px;border-top:1px solid rgba(0,0,0,0.05);">
+          <button id="serviceEditBtn" onclick="toggleCurrentCustomerService()" class="btn btn-primary" style="width:100%;justify-content:center;background:var(--google-green);font-size:15px;padding:12px;">標記為客服來源</button>
+          <div class="hint" style="margin-top:8px;text-align:center;">此權限只能修改「是否為客服來源」，其他顧客資料仍為唯讀。</div>
         </div>
         <div id="detailActions" class="hidden" style="margin-top:24px;padding-top:24px;border-top:1px solid rgba(0,0,0,0.05);display:flex;gap:16px;">
           <button onclick="startEditCurrent()" class="btn btn-primary" style="flex:1;justify-content:center;background:var(--google-blue);font-size:15px;padding:12px;">編輯此筆</button>
@@ -877,7 +881,7 @@
     </div>
 
     <!-- 修改申請 Modal -->
-    <div id="requestEditModal" class="modal" style="z-index:105;" onclick="if(event.target===this)closeRequestEdit()">
+    <div id="requestEditModal" class="modal" style="z-index:105;">
       <div class="modal-box" style="max-width:400px;">
         <button class="modal-close" onclick="closeRequestEdit()">×</button>
         <h2 class="h3" style="font-size:20px;color:var(--yellow);margin-bottom:8px;">🙋‍♂️ 提出修改申請</h2>
@@ -888,7 +892,7 @@
     </div>
 
     <!-- 次級管理員帳號管理 Modal -->
-    <div id="accountModal" class="modal" style="z-index:110;" onclick="if(event.target===this)closeAccountModal()">
+    <div id="accountModal" class="modal" style="z-index:110;">
       <div class="modal-box" style="max-width: 500px;">
         <button class="modal-close" onclick="closeAccountModal()">×</button>
         <h2 class="h3" style="margin-bottom:20px;font-size:22px;">👥 次級管理員帳號管理</h2>
@@ -902,7 +906,7 @@
     </div>
 
     <!-- 匯出 Modal -->
-    <div id="exportModal" class="modal" onclick="if(event.target===this)closeExportModal()">
+    <div id="exportModal" class="modal">
       <div class="modal-box" style="max-width:440px;">
         <button class="modal-close" onclick="closeExportModal()">×</button>
         <h2 class="h3" style="margin-bottom:20px;font-size:22px;">📤 匯出設定</h2>
@@ -930,7 +934,7 @@
 
 
   const __HUB_PAGE = "index";
-    const __HUB_TICKET = (() => {
+    let __HUB_TICKET = (() => {
       const raw = String(location.hash || "");
       const m = raw.match(/^#hub=([^&]+)$/);
       if (!m) return "";
@@ -945,27 +949,43 @@
       document.documentElement.innerHTML = `<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>WAKODO HUB｜權限驗證</title></head><body style="margin:0;min-height:100vh;display:grid;place-items:center;background:#f4f5f6;color:#252525;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans TC',sans-serif"><main style="width:min(420px,calc(100% - 40px));padding:30px;border-radius:24px;background:#fff;border:1px solid rgba(0,0,0,.08);box-shadow:0 18px 50px rgba(30,35,40,.10);text-align:center"><div style="font-size:13px;font-weight:900;letter-spacing:.12em;color:#4285f4">WAKODO HUB</div><h1 style="margin:12px 0 8px;font-size:24px">請洽管理員</h1><p style="margin:0;color:#74777b;font-size:14px;line-height:1.7">${message}</p></main></body>`;
     }
   
-    async function __initHubPageAccess() {
-      if (window.top === window.self || !__HUB_TICKET) { __showHubOnly(); return false; }
+    async function __applyHubTicket(ticket, {showFailure=false}={}) {
+      if (!ticket) { if(showFailure) __showHubOnly(); return false; }
       const { data:{ session } } = await window.supabase.auth.getSession();
-      if (!session?.access_token) { __showHubOnly("登入狀態無效，請回到 WAKODO HUB 重新登入。"); return false; }
+      if (!session?.access_token) { if(showFailure) __showHubOnly("登入狀態無效，請回到 WAKODO HUB 重新登入。"); return false; }
       const createPageClient = window.__wakodoCreateClient;
-      if (typeof createPageClient !== "function") { __showHubOnly("頁面授權模組尚未就緒，請回到 WAKODO HUB 重新開啟。"); return false; }
-      hubDb = createPageClient(__HUB_SUPABASE_URL, __HUB_SUPABASE_KEY, {
+      if (typeof createPageClient !== "function") { if(showFailure) __showHubOnly("頁面授權模組尚未就緒，請回到 WAKODO HUB 重新開啟。"); return false; }
+      const nextDb = createPageClient(__HUB_SUPABASE_URL, __HUB_SUPABASE_KEY, {
         global: { headers: {
           Authorization: `Bearer ${session.access_token}`,
-          "x-hub-ticket": __HUB_TICKET,
+          "x-hub-ticket": ticket,
           "x-hub-page": __HUB_PAGE
         } },
         auth: { persistSession:false, autoRefreshToken:false, detectSessionInUrl:false }
       });
-      const { data, error } = await hubDb.rpc("hub_ticket_profile", { p_page:__HUB_PAGE });
+      const { data, error } = await nextDb.rpc("hub_ticket_profile", { p_page:__HUB_PAGE });
       if (error || !data?.ok || !data?.member || data.member.status !== "active") {
-        __showHubOnly(data?.error || error?.message || "HUB 通行證無效、已過期或沒有此頁權限"); return false;
+        if(showFailure) __showHubOnly(data?.error || error?.message || "HUB 通行證無效、已過期或沒有此頁權限");
+        return false;
       }
+      __HUB_TICKET = ticket;
+      hubDb = nextDb;
       __hubProfile = data.member;
       return true;
     }
+
+    async function __initHubPageAccess() {
+      if (window.top === window.self || !__HUB_TICKET) { __showHubOnly(); return false; }
+      return await __applyHubTicket(__HUB_TICKET, {showFailure:true});
+    }
+
+    window.addEventListener("message", async event => {
+      if (event.source !== window.parent || event.origin !== location.origin) return;
+      const msg = event.data || {};
+      if (msg.type !== "wakodo-hub-ticket-refresh" || msg.page !== __HUB_PAGE || typeof msg.ticket !== "string" || !msg.ticket) return;
+      try { await __applyHubTicket(msg.ticket, {showFailure:false}); }
+      catch (err) { console.warn("HUB 頁面授權自動續期失敗", err); }
+    });
 
   const CFG = Object.freeze({
     VERSION: "14.5.3",
@@ -1293,6 +1313,7 @@
     $("adminPanel").classList.add("hidden");
     $("adminToolsBtn") && $("adminToolsBtn").classList.add("hidden");
     $("detailActions") && $("detailActions").classList.add("hidden");
+    $("serviceEditSection") && $("serviceEditSection").classList.add("hidden");
     $("requestEditSection") && $("requestEditSection").classList.add("hidden");
     applyFilter();
   }
@@ -1313,6 +1334,10 @@
 
   function canViewIndexSensitive(){
     return __hubProfile?.role === "owner" || __hubProfile?.can_view_index_sensitive === true;
+  }
+
+  function canEditCustomerService(){
+    return __hubProfile?.role === "owner" || __hubProfile?.can_edit_index_customer_service === true;
   }
 
   const NON_PERSON_NAME_MARKERS = [
@@ -2526,6 +2551,23 @@
     sel.innerHTML = `<option value="">年份</option>` + years.map(y=>`<option value="${y}">${y}年</option>`).join("");
   }
 
+
+  function __modalUiState(root){
+    if(!root)return "";
+    const controls=Array.from(root.querySelectorAll('input,select,textarea')).filter(el=>!['button','submit','reset'].includes(el.type)).map((el,i)=>(el.type==='checkbox'||el.type==='radio')?`${i}:${el.checked?1:0}`:`${i}:${el.value}`);
+    const toggles=Array.from(root.querySelectorAll('.selected,.checked')).map((el,i)=>`${i}:${el.textContent.trim()}`);
+    return JSON.stringify([controls,toggles]);
+  }
+  function __markModalPristine(root){if(root){root.dataset.modalPristine=__modalUiState(root);root.dataset.modalDirty='0';}}
+  function __modalIsDirty(root){return !!root&&(root.dataset.modalDirty==='1'||(root.dataset.modalPristine!=null&&root.dataset.modalPristine!==__modalUiState(root)));}
+  function __bindSmartBackdrop(root,closeFn,{confirmDirty=true}={}){
+    if(!root||root.dataset.smartBackdropBound)return;root.dataset.smartBackdropBound='1';
+    root.addEventListener('input',()=>root.dataset.modalDirty='1');
+    root.addEventListener('change',()=>root.dataset.modalDirty='1');
+    root.addEventListener('pointerdown',e=>{root._backdropPointer={target:e.target,x:e.clientX,y:e.clientY};});
+    root.addEventListener('click',e=>{const p=root._backdropPointer;root._backdropPointer=null;if(e.target!==root||!p||p.target!==root)return;if(Math.hypot(e.clientX-p.x,e.clientY-p.y)>6)return;if(confirmDirty&&__modalIsDirty(root)&&!confirm('有未儲存的變更，確定關閉嗎？'))return;closeFn();});
+  }
+
   function initAddModal(){
     const ga = $("grpAge"); if (ga) ga.innerHTML = CFG.AGES.map(a => `<div class="radio-btn" onclick="selectRadio('grpAge','${a}',this)">${a}</div>`).join("");
     const gs = $("grpSource"); if (gs) gs.innerHTML = knownSources().map(src => `<div class="chk-btn" data-val="${src}" onclick="hEditSrc('${src.replace(/'/g,"\\'")}',this)">${src}</div>`).join("");
@@ -2534,7 +2576,7 @@
     syncEditJourneyRule();
   }
 
-  window.openAddModal = () => { if (!ST.isAdmin) return; if (!ST.editingId) initAddModal(); $("addModal").classList.add("show"); };
+  window.openAddModal = () => { if (!ST.isAdmin) return; if (!ST.editingId) initAddModal(); $("addModal").classList.add("show"); requestAnimationFrame(()=>__markModalPristine($("addModal"))); };
   window.closeAddModal = () => { $("addModal").classList.remove("show"); };
 
   window.selectRadio = (groupId, val, el) => {
@@ -2750,10 +2792,40 @@ ${v.search_keywords ? `
     `;
 
     const isAdmin = ST.isAdmin;
+    const canEditService = canEditCustomerService();
     $("detailActions").classList.toggle("hidden", !isAdmin);
     $("requestEditSection").classList.add("hidden");
     $("btnDeleteDetail").classList.toggle("hidden", !isAdmin);
+    $("serviceEditSection").classList.toggle("hidden", !canEditService);
+    if (canEditService) {
+      const btn = $("serviceEditBtn");
+      btn.textContent = v.is_customer_service === true ? "取消客服來源" : "標記為客服來源";
+      btn.dataset.nextValue = v.is_customer_service === true ? "false" : "true";
+    }
     $("detailModal").classList.add("show");
+  };
+
+  window.toggleCurrentCustomerService = async () => {
+    if (!canEditCustomerService() || !ST.currentDetailId) return;
+    const btn = $("serviceEditBtn");
+    const nextValue = btn?.dataset.nextValue === "true";
+    if (btn) { btn.disabled = true; btn.textContent = "儲存中…"; }
+    try {
+      const { data, error } = await hubDb.rpc("hub_set_visit_customer_service", {
+        p_visit_id: Number(ST.currentDetailId),
+        p_is_customer_service: nextValue
+      });
+      if (error || !data?.ok) throw error || new Error("客服來源更新失敗");
+      const currentId = ST.currentDetailId;
+      await fetchAllData();
+      showDetail(currentId);
+    } catch (err) {
+      alert("客服來源更新失敗：" + (err?.message || err));
+      const current = ST.raw.find(x => String(x.id) === String(ST.currentDetailId));
+      if (current) showDetail(ST.currentDetailId);
+    } finally {
+      if (btn) btn.disabled = false;
+    }
   };
   window.closeDetail = () => $("detailModal").classList.remove("show");
 
@@ -2767,7 +2839,7 @@ ${v.search_keywords ? `
     } catch (err){ alert("刪除失敗：" + (err.message || err)); }
   };
 
-  window.openRequestEdit = () => { $("reqEditReason").value = ""; $("requestEditModal").classList.add("show"); };
+  window.openRequestEdit = () => { $("reqEditReason").value = ""; $("requestEditModal").classList.add("show"); requestAnimationFrame(()=>__markModalPristine($("requestEditModal"))); };
   window.closeRequestEdit = () => $("requestEditModal").classList.remove("show");
   window.submitRequestEdit = async () => {
     if (!ST.isAdmin) return;
@@ -2786,7 +2858,7 @@ ${v.search_keywords ? `
   window.loginSupabase = () => { alert("管理權限請由 WAKODO HUB 的 Owner 帳號登入後自動取得"); };
   window.logout = () => { location.href = "wakodohub.html"; };
 
-  window.openAccountModal = () => { fetchSubAdmins(); $("accountModal").classList.add("show"); };
+  window.openAccountModal = () => { fetchSubAdmins().finally(()=>requestAnimationFrame(()=>__markModalPristine($("accountModal")))); $("accountModal").classList.add("show"); };
   window.closeAccountModal = () => $("accountModal").classList.remove("show");
 
   async function fetchSubAdmins(){
@@ -2826,8 +2898,16 @@ ${v.search_keywords ? `
     if (box) box.innerHTML = CFG.EXPORT_COLS.map(c => `<label class="chk-line" style="display:flex; align-items:center; gap:8px; font-size:14px; font-weight:700; color:var(--text-secondary); padding:8px 12px; border:1px solid rgba(0,0,0,0.1); border-radius:10px; cursor:pointer; background:#fff;"><input type="checkbox" value="${c.k}" checked> ${c.n}</label>`).join("");
     if (window.flatpickr && !ST.exportPicker){ ST.exportPicker = flatpickr("#exportDateRange", { mode:"range", dateFormat:"Y-m-d" }); }
     $("exportModal").classList.add("show");
+    requestAnimationFrame(()=>__markModalPristine($("exportModal")));
   };
   window.closeExportModal = () => $("exportModal").classList.remove("show");
+
+  __bindSmartBackdrop($("addModal"), closeAddModal, {confirmDirty:true});
+  __bindSmartBackdrop($("detailModal"), closeDetail, {confirmDirty:false});
+  __bindSmartBackdrop($("requestEditModal"), closeRequestEdit, {confirmDirty:true});
+  __bindSmartBackdrop($("accountModal"), closeAccountModal, {confirmDirty:true});
+  __bindSmartBackdrop($("exportModal"), closeExportModal, {confirmDirty:true});
+
   window.toggleExportCols = (on) => qa("#exportCols input[type=checkbox]").forEach(c => c.checked = on);
 
   window.doExport = () => {
