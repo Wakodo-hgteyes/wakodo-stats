@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>發文成效分析 | 和光堂 Glass v3</title>
+<title>發文成效分析 | 和光堂 Social Intelligence v4</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Crect%20width='64'%20height='64'%20rx='14'%20fill='%23faf6ef'/%3E%3Cg%20fill='none'%20stroke='%23c9773f'%20stroke-width='3.4'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Ccircle%20cx='20'%20cy='36'%20r='11'/%3E%3Ccircle%20cx='44'%20cy='36'%20r='11'/%3E%3Cpath%20d='M31%2034%20Q32%2029%2033%2034'/%3E%3Cpath%20d='M9%2033%20Q6%2030%209%2026'/%3E%3Cpath%20d='M55%2033%20Q58%2030%2055%2026'/%3E%3C/g%3E%3C/svg%3E" />
 <script defer src="https://cdn.plot.ly/plotly-2.35.2.min.js" onload="window.plotlyReady=true;window.dispatchEvent(new Event('plotly-ready'))"></script>
 
@@ -1605,6 +1605,63 @@ body > :not(.ambient-stage):not(.modal-overlay):not(.lightbox-overlay):not(.toas
   .soc-mobile-search-results{display:none;margin-top:12px}.soc-mobile-search-results.active{display:block}.soc-mobile-empty{padding:20px 4px;text-align:center;font-size:13px;color:#8d867e;font-weight:750}
 }
 html.force-desktop-mode .mobile-desktop-toggle{display:inline-flex;position:fixed;right:14px;bottom:14px;z-index:350;align-items:center;gap:6px;padding:9px 12px;border:1px solid rgba(103,91,78,.16);border-radius:999px;background:rgba(255,255,255,.95);box-shadow:0 8px 24px rgba(40,35,30,.14);color:#62594f;font-size:12px;font-weight:800}
+
+
+/* ==== Meta 自動同步 / AI 整理 v4 ==== */
+.automation-strip{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+  margin:0 0 14px;
+}
+.automation-card{
+  background:rgba(255,255,255,.78);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:11px 13px;
+  box-shadow:var(--shadow);
+  min-width:0;
+}
+.automation-card .kicker{font-size:10px;font-weight:800;letter-spacing:.08em;color:var(--ink-soft);text-transform:uppercase;margin-bottom:4px;}
+.automation-card .value{font-size:14px;font-weight:800;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.automation-card .meta{font-size:11px;color:var(--ink-soft);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.automation-card.pending .value{color:#a86225;}
+.automation-card.ok .value{color:#426b4b;}
+.automation-card.warn .value{color:#9b5b21;}
+.pending-inbox{
+  display:none;
+  margin:0 0 18px;
+  background:rgba(255,248,235,.72);
+  border:1px solid #ead7bd;
+  border-radius:14px;
+  padding:14px;
+}
+.pending-inbox.open{display:block;}
+.pending-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;}
+.pending-head h3{font-size:14px;margin:0;}
+.pending-head .hint{margin:0;}
+.pending-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;}
+.pending-card{background:#fff;border:1px solid var(--line);border-radius:11px;padding:11px 12px;min-width:0;}
+.pending-card-head{display:flex;align-items:center;gap:7px;margin-bottom:7px;}
+.pending-platform{font-size:11px;font-weight:800;padding:3px 8px;border-radius:999px;background:#f4eee5;}
+.pending-platform.ig{color:var(--ig);}.pending-platform.fb{color:var(--fb);}
+.pending-date{font-size:11px;color:var(--ink-soft);margin-left:auto;}
+.pending-caption{font-size:12px;line-height:1.55;color:var(--ink);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;min-height:56px;}
+.pending-actions{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:9px;}
+.pending-actions a{font-size:11px;color:var(--ink-soft);text-decoration:none;}
+.pending-actions a:hover{color:var(--accent);}
+.theme-pill,.exposure-pill,.analysis-pill{display:inline-flex;align-items:center;font-size:11px;padding:3px 8px;border-radius:999px;border:1px solid var(--line);color:var(--ink-soft);background:#fff;}
+.theme-pill{background:#f8f0e6;color:#855c37;border-color:#ead7bd;}
+.exposure-pill{background:#f4f4f1;}
+.analysis-pill.ai{background:#edf3ff;color:#46638c;border-color:#d6e2f5;}
+.analysis-pill.review{background:#fff1dc;color:#9b5b21;border-color:#efd0a8;}
+.analysis-pill.manual{background:#eff5ef;color:#426b4b;border-color:#d9e8da;}
+.ai-hint{font-size:11px;color:var(--ink-soft);margin-top:6px;}
+@media(max-width:760px){
+  .automation-strip{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .pending-grid{grid-template-columns:1fr;}
+}
+
 </style>
 </head>
 <body>
@@ -1734,6 +1791,15 @@ html.force-desktop-mode .mobile-desktop-toggle{display:inline-flex;position:fixe
     <option value="圖文">圖文</option>
     <option value="短影片">短影片</option>
   </select>
+  <select id="filterTheme">
+    <option value="">全部內容主題</option>
+    <option value="商品鏡款">商品鏡款</option>
+    <option value="活動優惠">活動優惠</option>
+    <option value="品牌形象">品牌形象</option>
+    <option value="服務知識">服務知識</option>
+    <option value="門市內容">門市內容</option>
+    <option value="其他">其他</option>
+  </select>
   <select id="filterPlatform">
     <option value="">全部平台</option>
     <option value="instagram">僅 Instagram</option>
@@ -1753,6 +1819,21 @@ html.force-desktop-mode .mobile-desktop-toggle{display:inline-flex;position:fixe
   <input type="text" id="filterSearch" placeholder="搜尋備註內容..." />
   <button class="btn btn-ghost" onclick="resetFilters()">清除篩選</button>
 </div>
+
+<div class="automation-strip" id="automationStrip">
+  <div class="automation-card pending"><div class="kicker">待整理</div><div class="value" id="automationPending">0 筆</div><div class="meta">Meta 新內容收件匣</div></div>
+  <div class="automation-card"><div class="kicker">Meta 同步</div><div class="value" id="automationSync">尚未啟用</div><div class="meta" id="automationSyncMeta">等待後端 Token 設定</div></div>
+  <div class="automation-card"><div class="kicker">AI 整理</div><div class="value" id="automationAi">每日 15:00 / 21:00</div><div class="meta" id="automationAiMeta">只處理新進／未完成資料</div></div>
+  <div class="automation-card ok"><div class="kicker">人工優先</div><div class="value">已鎖定規則</div><div class="meta">人工修改後 AI 不覆寫</div></div>
+</div>
+
+<section class="pending-inbox" id="pendingInbox">
+  <div class="pending-head">
+    <div><h3>自動同步收件匣</h3><div class="hint">Meta 新貼文先進這裡；AI 會在固定巡檢時分組、分類、辨識品牌與型號。</div></div>
+    <span class="analysis-pill review" id="pendingInboxCount">0 筆待整理</span>
+  </div>
+  <div class="pending-grid" id="pendingGrid"></div>
+</section>
 
 <div class="toolbar">
   <button data-admin-only class="btn btn-primary" onclick="openGroupModal()">+ 新增內容項目</button>
@@ -1791,6 +1872,35 @@ html.force-desktop-mode .mobile-desktop-toggle{display:inline-flex;position:fixe
         <option value="圖文">圖文</option>
         <option value="短影片">短影片</option>
       </select>
+    </div>
+
+    <div class="field">
+      <label>內容主題</label>
+      <select id="contentTheme">
+        <option value="">未指定</option>
+        <option value="商品鏡款">商品鏡款</option>
+        <option value="活動優惠">活動優惠</option>
+        <option value="品牌形象">品牌形象</option>
+        <option value="服務知識">服務知識</option>
+        <option value="門市內容">門市內容</option>
+        <option value="其他">其他</option>
+      </select>
+      <div class="hint">「廣告」不是內容類型；商品、活動、品牌、服務等主題與曝光方式分開紀錄</div>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label>曝光方式</label>
+        <select id="exposureMode">
+          <option value="自然">自然</option>
+          <option value="廣告">廣告</option>
+          <option value="自然＋廣告">自然＋廣告</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Campaign / 活動（可留空）</label>
+        <input type="text" id="campaignLabel" placeholder="例如 MYKITA × RIMOWA 聯名特展" />
+      </div>
     </div>
 
     <div class="field">
@@ -1840,7 +1950,7 @@ html.force-desktop-mode .mobile-desktop-toggle{display:inline-flex;position:fixe
 </div>
 
 <!-- ===== 內容項目詳情 Modal（點擊方塊後顯示完整貼文與詢問記錄） ===== -->
-<div class="modal-overlay" id="groupDetailOverlay" onclick="if(event.target===this)closeGroupDetail()">
+<div class="modal-overlay" id="groupDetailOverlay">
   <div class="modal" style="max-width:780px;">
     <div class="detail-header">
       <div id="detailTagRow" class="detail-tag-row"></div>
@@ -2062,23 +2172,39 @@ let __HUB_TICKET = null;
       document.documentElement.innerHTML = `<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>WAKODO HUB｜權限驗證</title></head><body style="margin:0;min-height:100vh;display:grid;place-items:center;background:#f4f5f6;color:#252525;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans TC',sans-serif"><main style="width:min(420px,calc(100% - 40px));padding:30px;border-radius:24px;background:#fff;border:1px solid rgba(0,0,0,.08);box-shadow:0 18px 50px rgba(30,35,40,.10);text-align:center"><div style="font-size:13px;font-weight:900;letter-spacing:.12em;color:#4285f4">WAKODO HUB</div><h1 style="margin:12px 0 8px;font-size:24px">請洽管理員</h1><p style="margin:0;color:#74777b;font-size:14px;line-height:1.7">${message}</p></main></body>`;
     }
   
-    async function __initHubPageAccess() {
-      if (window.top === window.self || !__HUB_TICKET) { __showHubOnly(); return false; }
+    async function __applyHubTicket(ticket, {showFailure=false}={}) {
+      if (!ticket) { if(showFailure) __showHubOnly(); return false; }
       const { data:{ session } } = await sb.auth.getSession();
-      if (!session?.access_token) { __showHubOnly("登入狀態無效，請回到 WAKODO HUB 重新登入。"); return false; }
+      if (!session?.access_token) { if(showFailure) __showHubOnly("登入狀態無效，請回到 WAKODO HUB 重新登入。"); return false; }
       const createPageClient = window.__wakodoCreateClient;
-      if (typeof createPageClient !== "function") { __showHubOnly("頁面授權模組尚未就緒，請回到 WAKODO HUB 重新開啟。"); return false; }
-      hubDb = createPageClient(__HUB_SUPABASE_URL, __HUB_SUPABASE_KEY, {
-        global:{headers:{Authorization:`Bearer ${session.access_token}`,"x-hub-ticket":__HUB_TICKET,"x-hub-page":__HUB_PAGE}},
+      if (typeof createPageClient !== "function") { if(showFailure) __showHubOnly("頁面授權模組尚未就緒，請回到 WAKODO HUB 重新開啟。"); return false; }
+      const nextDb = createPageClient(__HUB_SUPABASE_URL, __HUB_SUPABASE_KEY, {
+        global:{headers:{Authorization:`Bearer ${session.access_token}`,"x-hub-ticket":ticket,"x-hub-page":__HUB_PAGE}},
         auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}
       });
-      const { data, error } = await hubDb.rpc("hub_ticket_profile", { p_page:__HUB_PAGE });
+      const { data, error } = await nextDb.rpc("hub_ticket_profile", { p_page:__HUB_PAGE });
       if (error || !data?.ok || !data?.member || data.member.status !== "active") {
-        __showHubOnly(data?.error || error?.message || "HUB 通行證無效、已過期或沒有此頁權限"); return false;
+        if(showFailure) __showHubOnly(data?.error || error?.message || "HUB 通行證無效、已過期或沒有此頁權限");
+        return false;
       }
+      __HUB_TICKET = ticket;
+      hubDb = nextDb;
       __hubProfile = data.member;
       return true;
     }
+
+    async function __initHubPageAccess() {
+      if (window.top === window.self || !__HUB_TICKET) { __showHubOnly(); return false; }
+      return await __applyHubTicket(__HUB_TICKET, {showFailure:true});
+    }
+
+    window.addEventListener("message", async event => {
+      if (event.source !== window.parent || event.origin !== location.origin) return;
+      const msg = event.data || {};
+      if (msg.type !== "wakodo-hub-ticket-refresh" || msg.page !== __HUB_PAGE || typeof msg.ticket !== "string" || !msg.ticket) return;
+      try { await __applyHubTicket(msg.ticket, {showFailure:false}); }
+      catch (err) { console.warn("HUB 頁面授權自動續期失敗", err); }
+    });
 
 function isMobileSocialSummary(){
   return window.matchMedia('(max-width:760px)').matches && !document.documentElement.classList.contains('force-desktop-mode');
@@ -2152,7 +2278,11 @@ function setupMobileSocialControls(){
 let isHubOwner = false;
 let allTags = [];      // [{id, brand, model}]
 let allGroups = [];     // full joined data
+let allPendingPosts = []; // Meta 自動同步後、尚未掛入 posts_group 的貼文
+let latestSyncRun = null;
+let latestAiRun = null;
 let currentGroupId = null;
+let currentPendingPostId = null;
 let editingTagId = null;
 let platformInputCounter = 0;
 let currentInquiryId = null;
@@ -2195,9 +2325,11 @@ function showToast(msg){
 async function loadAll(){
   // tags 與貼文群組彼此獨立，並行讀取可縮短首屏等待；
   // 限動必須在 groups 之後，避免詢問索引被 rebuildInquiryIndex() 覆寫。
-  await Promise.all([loadTags(), loadGroups()]);
+  await Promise.all([loadTags(), loadGroups(), loadPendingPosts(), loadAutomationStatus()]);
   await loadStories();
   populateTagFilterOptions();
+  renderAutomationPanel();
+  renderPendingInbox();
 }
 
 async function loadTags(){
@@ -2215,8 +2347,10 @@ async function loadGroups(){
     .from('posts_group')
     .select(`
       id, post_type, note, created_at, tag_id, post_date,
+      content_theme, exposure_mode, campaign_label, analysis_status, analysis_source,
+      analysis_confidence, analysis_note, review_required, user_locked,
       tags ( id, model, brand_id, brands ( id, name ) ),
-      platform_posts ( id, platform, post_url, created_at, inquiries ( id, inquiry_date, inquiry_type, note, screenshot_url ) )
+      platform_posts ( id, platform, post_url, created_at, external_id, source, caption, published_at, media_type, meta_account_id, last_synced_at, analysis_status, analysis_note, inquiries ( id, inquiry_date, inquiry_type, note, screenshot_url ) )
     `);
 
   if(error){ console.error(error); showToast('讀取失敗，請檢查主控台'); return; }
@@ -2233,6 +2367,86 @@ async function loadGroups(){
   });
   rebuildInquiryIndex();
   renderGroups();
+}
+
+async function loadPendingPosts(){
+  const { data, error } = await hubDb
+    .from('platform_posts')
+    .select('id, platform, post_url, external_id, source, caption, published_at, media_type, meta_account_id, last_synced_at, analysis_status, analysis_note, group_id')
+    .eq('source','meta')
+    .is('group_id', null)
+    .order('published_at', { ascending:false, nullsFirst:false })
+    .limit(60);
+  if(error){ console.error(error); allPendingPosts=[]; return; }
+  allPendingPosts = data || [];
+}
+
+async function loadAutomationStatus(){
+  const [syncRes, aiRes] = await Promise.all([
+    hubDb.from('social_sync_runs').select('id,started_at,finished_at,status,facebook_seen,facebook_inserted,instagram_seen,instagram_inserted,updated_count,error_message').order('started_at',{ascending:false}).limit(1).maybeSingle(),
+    hubDb.from('social_ai_runs').select('id,started_at,finished_at,status,pending_found,groups_created,posts_linked,auto_tagged,needs_review,error_message').order('started_at',{ascending:false}).limit(1).maybeSingle()
+  ]);
+  if(syncRes.error) console.warn('social_sync_runs', syncRes.error);
+  if(aiRes.error) console.warn('social_ai_runs', aiRes.error);
+  latestSyncRun = syncRes.data || null;
+  latestAiRun = aiRes.data || null;
+}
+
+function formatAutomationTime(value){
+  if(!value) return '尚無紀錄';
+  const d = new Date(value);
+  if(Number.isNaN(d.getTime())) return '尚無紀錄';
+  return d.toLocaleString('zh-TW',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false});
+}
+
+function renderAutomationPanel(){
+  const pendingEl=document.getElementById('automationPending');
+  if(pendingEl) pendingEl.textContent=`${allPendingPosts.length} 筆`;
+  const syncEl=document.getElementById('automationSync');
+  const syncMeta=document.getElementById('automationSyncMeta');
+  if(syncEl && syncMeta){
+    if(latestSyncRun){
+      syncEl.textContent=latestSyncRun.status==='completed'?'正常':latestSyncRun.status==='error'?'錯誤':'最近有執行';
+      syncMeta.textContent=`最近 ${formatAutomationTime(latestSyncRun.finished_at||latestSyncRun.started_at)}`;
+      syncEl.closest('.automation-card')?.classList.toggle('warn',latestSyncRun.status!=='completed');
+    } else {
+      syncEl.textContent='待啟用';
+      syncMeta.textContent='後端 Token 設定後啟用';
+    }
+  }
+  const aiEl=document.getElementById('automationAi');
+  const aiMeta=document.getElementById('automationAiMeta');
+  if(aiEl && aiMeta){
+    aiEl.textContent='每日 15:00 / 21:00';
+    aiMeta.textContent=latestAiRun?`最近 ${formatAutomationTime(latestAiRun.finished_at||latestAiRun.started_at)} · ${latestAiRun.status}`:'只處理新進／未完成資料';
+  }
+}
+
+function renderPendingInbox(){
+  const box=document.getElementById('pendingInbox');
+  const grid=document.getElementById('pendingGrid');
+  const count=document.getElementById('pendingInboxCount');
+  if(!box||!grid||!count) return;
+  count.textContent=`${allPendingPosts.length} 筆待整理`;
+  box.classList.toggle('open',allPendingPosts.length>0);
+  if(!allPendingPosts.length){ grid.innerHTML=''; return; }
+  grid.innerHTML=allPendingPosts.map(post=>{
+    const isIg=post.platform==='instagram';
+    const date=post.published_at?new Date(post.published_at).toLocaleString('zh-TW',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}):'未填時間';
+    const url=safeExternalUrl(post.post_url);
+    const caption=(post.caption||'（沒有可讀文案）').trim();
+    const status=post.analysis_status==='needs_review'?'需確認':post.analysis_status==='error'?'錯誤':'待 AI 整理';
+    return `<article class="pending-card">
+      <div class="pending-card-head"><span class="pending-platform ${isIg?'ig':'fb'}">${isIg?'Instagram':'Facebook'}</span><span class="analysis-pill ${post.analysis_status==='needs_review'?'review':'ai'}">${escapeHtml(status)}</span><span class="pending-date">${escapeHtml(date)}</span></div>
+      <div class="pending-caption">${escapeHtml(caption)}</div>
+      <div class="pending-actions">${url?`<a href="${url}" target="_blank" rel="noopener noreferrer">原貼文 ↗</a>`:'<span></span>'}${isHubOwner?`<button data-admin-only class="btn btn-ghost" style="font-size:11px;padding:6px 9px" onclick="openPendingForManualReview('${post.id}')">手動整理</button>`:''}</div>
+    </article>`;
+  }).join('');
+}
+
+function openPendingForManualReview(postId){
+  if(!isHubOwner) return;
+  openGroupModal(null, postId);
 }
 
 let allInquiriesById = {};
@@ -2257,20 +2471,22 @@ function countInquiries(g){
 }
 
 /* ================= 篩選 ================= */
-let filterState = { brand:'', model:'', postType:'', platform:'', hasInquiry:false, search:'', dateTarget:'post', dateStart:'', dateEnd:'' };
+let filterState = { brand:'', model:'', postType:'', contentTheme:'', platform:'', hasInquiry:false, search:'', dateTarget:'post', dateStart:'', dateEnd:'' };
 
 function filteredGroups(){
   return allGroups.filter(g => {
     if(filterState.brand && (!g.tags || g.tags.brand !== filterState.brand)) return false;
     if(filterState.model && (!g.tags || g.tags.model !== filterState.model)) return false;
     if(filterState.postType && g.post_type !== filterState.postType) return false;
+    if(filterState.contentTheme && g.content_theme !== filterState.contentTheme) return false;
     if(filterState.platform && !g.platform_posts.some(pp => pp.platform === filterState.platform)) return false;
     if(filterState.hasInquiry && countInquiries(g) === 0) return false;
     if(filterState.search){
       const s = filterState.search.toLowerCase();
       const noteMatch = (g.note||'').toLowerCase().includes(s);
       const tagMatch = g.tags && (g.tags.brand+g.tags.model).toLowerCase().includes(s);
-      if(!noteMatch && !tagMatch) return false;
+      const metaMatch = `${g.content_theme||''} ${g.campaign_label||''}`.toLowerCase().includes(s);
+      if(!noteMatch && !tagMatch && !metaMatch) return false;
     }
     if(filterState.dateStart || filterState.dateEnd){
       if(filterState.dateTarget === 'inquiry'){
@@ -2293,10 +2509,11 @@ function filteredGroups(){
 }
 
 function resetFilters(){
-  filterState = { brand:'', model:'', postType:'', platform:'', hasInquiry:false, search:'', dateTarget:'post', dateStart:'', dateEnd:'' };
+  filterState = { brand:'', model:'', postType:'', contentTheme:'', platform:'', hasInquiry:false, search:'', dateTarget:'post', dateStart:'', dateEnd:'' };
   document.getElementById('filterBrand').value = '';
   populateModelFilterOptions();
   document.getElementById('filterType').value = '';
+  document.getElementById('filterTheme').value = '';
   document.getElementById('filterPlatform').value = '';
   document.getElementById('filterHasInquiry').checked = false;
   document.getElementById('filterSearch').value = '';
@@ -2342,6 +2559,7 @@ function setupFilterBar(){
   });
   document.getElementById('filterModel').addEventListener('change', e => { filterState.model = e.target.value; renderGroups(); });
   document.getElementById('filterType').addEventListener('change', e => { filterState.postType = e.target.value; renderGroups(); });
+  document.getElementById('filterTheme').addEventListener('change', e => { filterState.contentTheme = e.target.value; renderGroups(); });
   document.getElementById('filterPlatform').addEventListener('change', e => { filterState.platform = e.target.value; renderGroups(); });
   document.getElementById('filterHasInquiry').addEventListener('change', e => { filterState.hasInquiry = e.target.checked; renderGroups(); });
   let searchRenderTimer = null;
@@ -2359,7 +2577,7 @@ setupFilterBar();
 /* ================= 統計卡片 + 詢問度排行圖表 ================= */
 function hasActiveStatsFilter(){
   return Boolean(
-    filterState.brand || filterState.model || filterState.postType || filterState.platform ||
+    filterState.brand || filterState.model || filterState.postType || filterState.contentTheme || filterState.platform ||
     filterState.hasInquiry || filterState.search || filterState.dateStart || filterState.dateEnd
   );
 }
@@ -2683,7 +2901,12 @@ function buildTagTypeHtml(g){
        </span>`
     : `<span class="tag-pill empty">未分類標籤</span>`;
   const typeHtml = g.post_type ? `<span class="type-pill">${escapeHtml(g.post_type)}</span>` : '';
-  return `${tagHtml}${typeHtml}`;
+  const themeHtml = g.content_theme ? `<span class="theme-pill">${escapeHtml(g.content_theme)}</span>` : '';
+  const exposureHtml = g.exposure_mode && g.exposure_mode !== '自然' ? `<span class="exposure-pill">${escapeHtml(g.exposure_mode)}</span>` : '';
+  let analysisHtml='';
+  if(g.review_required || g.analysis_status==='needs_review') analysisHtml='<span class="analysis-pill review">待確認</span>';
+  else if(g.analysis_source==='ai') analysisHtml='<span class="analysis-pill ai">AI 整理</span>';
+  return `${tagHtml}${typeHtml}${themeHtml}${exposureHtml}${analysisHtml}`;
 }
 
 function buildPlatformsHtml(g){
@@ -2774,7 +2997,8 @@ function refreshOpenDetailModals(){
     const g = allGroups.find(x => x.id === currentDetailGroupId);
     if(g){
       document.getElementById('detailTagRow').innerHTML = buildTagTypeHtml(g);
-      document.getElementById('detailNote').textContent = g.note || '';
+      const detailNoteEl=document.getElementById('detailNote');
+      detailNoteEl.innerHTML = `${g.note?escapeHtml(g.note):''}${g.campaign_label?`<div class="ai-hint">Campaign：${escapeHtml(g.campaign_label)}</div>`:''}${g.analysis_source==='ai'&&g.analysis_confidence!=null?`<div class="ai-hint">AI 信心 ${Math.round(Number(g.analysis_confidence)*100)}%${g.analysis_note?` · ${escapeHtml(g.analysis_note)}`:''}</div>`:''}`;
       const detailPlatformRow = document.getElementById('detailPlatformRow');
       detailPlatformRow.innerHTML = buildPlatformsHtml(g);
       reInitEmbeds(detailPlatformRow);
@@ -3129,10 +3353,28 @@ function renderInquiryList(inquiries, parentType, parentId){
   }).join('');
 }
 
+
+  function __modalUiState(root){
+    if(!root)return "";
+    const controls=Array.from(root.querySelectorAll('input,select,textarea')).filter(el=>!['button','submit','reset'].includes(el.type)).map((el,i)=>(el.type==='checkbox'||el.type==='radio')?`${i}:${el.checked?1:0}`:`${i}:${el.value}`);
+    const toggles=Array.from(root.querySelectorAll('.selected,.checked')).map((el,i)=>`${i}:${el.textContent.trim()}`);
+    return JSON.stringify([controls,toggles]);
+  }
+  function __markModalPristine(root){if(root){root.dataset.modalPristine=__modalUiState(root);root.dataset.modalDirty='0';}}
+  function __modalIsDirty(root){return !!root&&(root.dataset.modalDirty==='1'||(root.dataset.modalPristine!=null&&root.dataset.modalPristine!==__modalUiState(root)));}
+  function __bindSmartBackdrop(root,closeFn,{confirmDirty=true}={}){
+    if(!root||root.dataset.smartBackdropBound)return;root.dataset.smartBackdropBound='1';
+    root.addEventListener('input',()=>root.dataset.modalDirty='1');
+    root.addEventListener('change',()=>root.dataset.modalDirty='1');
+    root.addEventListener('pointerdown',e=>{root._backdropPointer={target:e.target,x:e.clientX,y:e.clientY};});
+    root.addEventListener('click',e=>{const p=root._backdropPointer;root._backdropPointer=null;if(e.target!==root||!p||p.target!==root)return;if(Math.hypot(e.clientX-p.x,e.clientY-p.y)>6)return;if(confirmDirty&&__modalIsDirty(root)&&!confirm('有未儲存的變更，確定關閉嗎？'))return;closeFn();});
+  }
+
 /* ================= 內容項目 Modal ================= */
-function openGroupModal(id){
+function openGroupModal(id, pendingPostId){
   if(!isHubOwner) return;
   currentGroupId = id || null;
+  currentPendingPostId = pendingPostId || null;
   document.getElementById('groupModalTitle').textContent = id ? '編輯內容項目' : '新增內容項目';
   document.getElementById('deleteGroupBtn').style.display = id ? 'inline-block' : 'none';
   document.getElementById('platformInputs').innerHTML = '';
@@ -3141,25 +3383,35 @@ function openGroupModal(id){
   if(id){
     const g = allGroups.find(x => x.id === id);
     document.getElementById('postType').value = g.post_type || '';
+    document.getElementById('contentTheme').value = g.content_theme || '';
+    document.getElementById('exposureMode').value = g.exposure_mode || '自然';
+    document.getElementById('campaignLabel').value = g.campaign_label || '';
     document.getElementById('postDate').value = g.post_date || '';
     document.getElementById('tagBrand').value = g.tags ? g.tags.brand : '';
     document.getElementById('tagModel').value = g.tags ? g.tags.model : '';
     document.getElementById('groupNote').value = g.note || '';
     g.platform_posts.forEach(pp => addPlatformInput(pp.platform, pp.post_url, pp.id));
   } else {
-    document.getElementById('postType').value = '圖文';
-    document.getElementById('postDate').value = new Date().toISOString().slice(0,10);
+    const pending = currentPendingPostId ? allPendingPosts.find(x=>x.id===currentPendingPostId) : null;
+    const isVideo = pending && /VIDEO|REEL/i.test(pending.media_type||'');
+    document.getElementById('postType').value = isVideo ? '短影片' : '圖文';
+    document.getElementById('contentTheme').value = '';
+    document.getElementById('exposureMode').value = '自然';
+    document.getElementById('campaignLabel').value = '';
+    document.getElementById('postDate').value = pending?.published_at ? pending.published_at.slice(0,10) : new Date().toISOString().slice(0,10);
     document.getElementById('tagBrand').value = '';
     document.getElementById('tagModel').value = '';
-    document.getElementById('groupNote').value = '';
+    document.getElementById('groupNote').value = pending?.caption ? pending.caption.trim().split(/\n+/)[0].slice(0,100) : '';
+    if(pending) addPlatformInput(pending.platform, pending.post_url, pending.id);
   }
   renderComboSuggestions();
-  document.getElementById('groupModalOverlay').classList.add('open');
+  document.getElementById('groupModalOverlay').classList.add('open'); requestAnimationFrame(()=>__markModalPristine(document.getElementById('groupModalOverlay')));
 }
 
 function closeGroupModal(){
   document.getElementById('groupModalOverlay').classList.remove('open');
   currentGroupId = null;
+  currentPendingPostId = null;
 }
 
 function addPlatformInput(platform, value, existingId){
@@ -3224,6 +3476,9 @@ function renderComboSuggestions(){
 async function saveGroup(){
   if(!isHubOwner) return;
   const postType = document.getElementById('postType').value || null;
+  const contentTheme = document.getElementById('contentTheme').value || null;
+  const exposureMode = document.getElementById('exposureMode').value || '自然';
+  const campaignLabel = document.getElementById('campaignLabel').value.trim() || null;
   const postDate = document.getElementById('postDate').value || null;
   const brand = document.getElementById('tagBrand').value.trim();
   const model = document.getElementById('tagModel').value.trim();
@@ -3238,12 +3493,12 @@ async function saveGroup(){
   let groupId = currentGroupId;
   if(groupId){
     const { error } = await hubDb.from('posts_group')
-      .update({ post_type: postType, tag_id: tagId, note, post_date: postDate })
+      .update({ post_type: postType, tag_id: tagId, note, post_date: postDate, content_theme: contentTheme, exposure_mode: exposureMode, campaign_label: campaignLabel, analysis_status:'completed', analysis_source:'manual', analysis_confidence:null, analysis_note:'人工確認／編輯', review_required:false, user_locked:true })
       .eq('id', groupId);
     if(error){ console.error(error); showToast('更新失敗'); return; }
   } else {
     const { data, error } = await hubDb.from('posts_group')
-      .insert({ post_type: postType, tag_id: tagId, note, post_date: postDate })
+      .insert({ post_type: postType, tag_id: tagId, note, post_date: postDate, content_theme: contentTheme, exposure_mode: exposureMode, campaign_label: campaignLabel, analysis_status:'completed', analysis_source:'manual', analysis_confidence:null, analysis_note:'人工建立', review_required:false, user_locked:true })
       .select().single();
     if(error){ console.error(error); showToast('新增失敗'); return; }
     groupId = data.id;
@@ -3258,7 +3513,7 @@ async function saveGroup(){
     if(!url) continue;
 
     if(existingId){
-      await hubDb.from('platform_posts').update({ post_url: url }).eq('id', existingId);
+      await hubDb.from('platform_posts').update({ group_id: groupId, post_url: url, analysis_status:'completed', analysis_note:'人工掛入內容項目' }).eq('id', existingId);
     } else {
       await hubDb.from('platform_posts').insert({ group_id: groupId, platform, post_url: url });
     }
@@ -3318,7 +3573,7 @@ function openTagModal(tagId){
   const t = allTags.find(x => x.id === tagId);
   document.getElementById('editTagBrand').value = t.brand;
   document.getElementById('editTagModel').value = t.model;
-  document.getElementById('tagModalOverlay').classList.add('open');
+  document.getElementById('tagModalOverlay').classList.add('open'); requestAnimationFrame(()=>__markModalPristine(document.getElementById('tagModalOverlay')));
 }
 function closeTagModal(){
   document.getElementById('tagModalOverlay').classList.remove('open');
@@ -3397,7 +3652,7 @@ function openInquiryModal(inquiryId, parentType, parentId){
     document.getElementById('inquiryNote').value = '';
     clearShotPreview();
   }
-  document.getElementById('inquiryModalOverlay').classList.add('open');
+  document.getElementById('inquiryModalOverlay').classList.add('open'); requestAnimationFrame(()=>__markModalPristine(document.getElementById('inquiryModalOverlay')));
 }
 
 function closeInquiryModal(){
@@ -3849,7 +4104,7 @@ function openStoryModal(id){
     clearStoryImagePreview();
   }
   onStoryCategoryChange();
-  document.getElementById('storyModalOverlay').classList.add('open');
+  document.getElementById('storyModalOverlay').classList.add('open'); requestAnimationFrame(()=>__markModalPristine(document.getElementById('storyModalOverlay')));
 }
 
 function closeStoryModal(){
@@ -4098,6 +4353,13 @@ function closeHighlightModal(){
   editingHighlightId = null;
 }
 async function saveHighlightEdit(){ showToast('目前資料庫未啟用精選分類'); }
+
+__bindSmartBackdrop(document.getElementById('groupModalOverlay'), closeGroupModal, {confirmDirty:true});
+__bindSmartBackdrop(document.getElementById('groupDetailOverlay'), closeGroupDetail, {confirmDirty:false});
+__bindSmartBackdrop(document.getElementById('tagModalOverlay'), closeTagModal, {confirmDirty:true});
+__bindSmartBackdrop(document.getElementById('storyModalOverlay'), closeStoryModal, {confirmDirty:true});
+__bindSmartBackdrop(document.getElementById('storyDetailOverlay'), closeStoryDetail, {confirmDirty:false});
+__bindSmartBackdrop(document.getElementById('inquiryModalOverlay'), closeInquiryModal, {confirmDirty:true});
 </script>
 <script>
 (function(){
