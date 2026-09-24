@@ -557,7 +557,18 @@ Use the provided character reference images as the only source of the person's i
 [EYEWEAR REFERENCE — FIXED PROTECTED ASSET]
 Treat the provided eyewear reference images as a fixed, protected visual asset and the only valid source of product truth, never as design inspiration. The generated person must wear this exact eyewear. Preserve the original front silhouette, overall proportions, perceived size, bridge, rim thickness, hinges, temples, nose pads, material, transparency, gloss, color, logo, printed details, and every visible feature. The eyewear may be positioned naturally on the face for realistic wear, but the product itself must not be redesigned, simplified, enlarged, beautified, or replaced with a similar pair.
 
+Do not reconstruct the eyewear from semantic knowledge of the brand or model. Reproduce the supplied eyewear as one immutable physical 3D object, preserving all local spatial relationships between lens rim, endpiece, hinge, temple, nose pads, branding hardware, engravings, and decorative components. Perspective may change only how this fixed object is viewed; it must never change where any physical component exists on the eyewear.
+
 If a product detail is unclear in one reference image, resolve it only by cross-checking the other eyewear references. If it remains uncertain, preserve the visible product conservatively rather than inventing a new feature.
+
+[BRANDING / HARDWARE — STRICT SPATIAL ANCHOR LOCK]
+Treat every visible logo, monogram, emblem, metal badge, rivet, hinge detail, engraving, and decorative hardware element as a fixed physical component of the eyewear, not as decorative text and not as an element that may be freely repositioned. The eyewear reference images are the sole source of truth for both the shape of these elements and their exact physical placement.
+
+Preserve each branding or hardware element's exact component ownership and spatial relationship to the surrounding frame structure. In particular, preserve its exact relationship to the lens rim, outer endpiece, hinge seam, and beginning of the temple; preserve its distance from those landmarks, its size relative to the frame surface, vertical and horizontal placement, orientation, rotation, proportions, relief, finish, and material appearance.
+
+A logo or hardware element must remain attached to the same physical frame section shown in the reference. It must not migrate forward toward the lens, backward along the temple, upward, downward, across the hinge boundary, or onto another frame component. Do not center, enlarge, shrink, rotate, mirror, reverse, simplify, redraw, stylize, substitute, or relocate branding to make it more visible or aesthetically convenient. Do not invent extra branding or hide an existing element behind an incorrectly reconstructed hinge or temple.
+
+If head pose, camera angle, composition, or facial fit creates a conflict, preserve the eyewear product geometry and the branding/hardware anchor points first, then adapt the pose, viewpoint, or fit around the fixed product. Product fidelity has priority over aesthetic composition.
 
 [EYEWEAR ON-FACE SCALE]
 Keep the eyewear naturally fitted, moderate in size, and professionally proportioned to the face. The glasses must remain clearly visible without overpowering the face. The outer frame width should stay close to the subject's natural face width, and the lower rim should sit naturally. If actual product measurements are provided, treat them as hard constraints for on-face scale.`;
