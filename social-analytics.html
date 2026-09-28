@@ -2010,9 +2010,23 @@ html.force-desktop-mode .mobile-desktop-toggle{display:inline-flex;position:fixe
     </div>
 
     <div class="field">
+      <label>日期</label>
+      <input type="date" id="storyDate" />
+    </div>
+
+    <div class="field">
       <label>品牌＋型號</label>
-      <input type="text" id="storyBrandModel" placeholder="例如：MYKITA EERO" list="storyBrandModelSuggestions" />
-      <datalist id="storyBrandModelSuggestions"></datalist>
+      <div class="row2">
+        <div class="combo">
+          <input type="text" id="storyBrand" placeholder="品牌，例如 MYKITA" autocomplete="off" />
+          <div class="combo-list" id="storyBrandList"></div>
+        </div>
+        <div class="combo">
+          <input type="text" id="storyModel" placeholder="型號，例如 EERO" autocomplete="off" />
+          <div class="combo-list" id="storyModelList"></div>
+        </div>
+      </div>
+      <div class="hint">可從既有品牌／型號選擇，也可直接輸入新品牌與型號</div>
     </div>
 
     <div class="field">
@@ -4055,10 +4069,59 @@ function renderStories(){
   renderStats();
 }
 
-function populateBrandModelDatalist(){
-  const el = document.getElementById('storyBrandModelSuggestions');
-  if(!el) return;
-  el.innerHTML = allTags.map(t => `<option value="${escapeHtml(t.brand)} ${escapeHtml(t.model)}"></option>`).join('');
+function localTodayYmd(){
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+function renderStoryComboSuggestions(){
+  const brandInput = document.getElementById('storyBrand');
+  const modelInput = document.getElementById('storyModel');
+  const brandList = document.getElementById('storyBrandList');
+  const modelList = document.getElementById('storyModelList');
+  if(!brandInput || !modelInput || !brandList || !modelList) return;
+
+  const uniqueBrands = [...new Set(allTags.map(t => (t.brand || '').trim()).filter(Boolean))]
+    .sort((a,b) => a.localeCompare(b, 'zh-Hant'));
+
+  function refreshBrandList(){
+    const val = brandInput.value.trim().toLowerCase();
+    const matches = uniqueBrands.filter(b => !val || b.toLowerCase().includes(val));
+    brandList.innerHTML = matches.map(b => `<div class="combo-item">${escapeHtml(b)}</div>`).join('');
+    brandList.querySelectorAll('.combo-item').forEach((el,i) => {
+      el.onclick = () => {
+        brandInput.value = matches[i];
+        brandList.classList.remove('open');
+        modelInput.value = '';
+        refreshModelList();
+      };
+    });
+  }
+
+  function refreshModelList(){
+    const brandVal = brandInput.value.trim().toLowerCase();
+    const val = modelInput.value.trim().toLowerCase();
+    const models = [...new Set(allTags
+      .filter(t => (t.brand || '').trim().toLowerCase() === brandVal)
+      .map(t => (t.model || '').trim())
+      .filter(Boolean))];
+    const matches = models.filter(m => !val || m.toLowerCase().includes(val));
+    modelList.innerHTML = matches.map(m => `<div class="combo-item">${escapeHtml(m)}</div>`).join('');
+    modelList.querySelectorAll('.combo-item').forEach((el,i) => {
+      el.onclick = () => { modelInput.value = matches[i]; modelList.classList.remove('open'); };
+    });
+  }
+
+  brandInput.oninput = () => { refreshBrandList(); brandList.classList.add('open'); };
+  brandInput.onfocus = () => { refreshBrandList(); brandList.classList.add('open'); };
+  brandInput.onblur = () => setTimeout(() => brandList.classList.remove('open'), 150);
+
+  modelInput.oninput = () => { refreshModelList(); modelList.classList.add('open'); };
+  modelInput.onfocus = () => { refreshModelList(); modelList.classList.add('open'); };
+  modelInput.onblur = () => setTimeout(() => modelList.classList.remove('open'), 150);
 }
 
 function renderHighlightSuggestions(){
@@ -4078,7 +4141,7 @@ function openStoryModal(id){
   document.getElementById('storyModalTitle').textContent = id ? '編輯限時動態' : '新增限時動態';
   document.getElementById('deleteStoryBtn').style.display = id ? 'inline-block' : 'none';
 
-  populateBrandModelDatalist();
+  renderStoryComboSuggestions();
   renderHighlightSuggestions();
 
   currentStoryImageBlob = null;
@@ -4092,14 +4155,19 @@ function openStoryModal(id){
     currentStoryGroupId = se.story_group_id;
     document.getElementById('storyCategory').value = se.category === '精選' ? '精選' : '當日';
     document.getElementById('storyHighlightName').value = '';
-    document.getElementById('storyBrandModel').value = se.brand_model_text || '';
+    document.getElementById('storyDate').value = se.story_date || (se.created_at ? se.created_at.slice(0,10) : localTodayYmd());
+    const storyTag = allTags.find(t => t.id === se.tag_id);
+    document.getElementById('storyBrand').value = storyTag ? storyTag.brand : '';
+    document.getElementById('storyModel').value = storyTag ? storyTag.model : '';
     document.getElementById('storyNote').value = se.note || '';
     existingStoryImageUrl = se.image_url;
     showStoryImagePreview(se.image_url);
   } else {
     document.getElementById('storyCategory').value = '當日';
     document.getElementById('storyHighlightName').value = '';
-    document.getElementById('storyBrandModel').value = '';
+    document.getElementById('storyDate').value = localTodayYmd();
+    document.getElementById('storyBrand').value = '';
+    document.getElementById('storyModel').value = '';
     document.getElementById('storyNote').value = '';
     clearStoryImagePreview();
   }
@@ -4151,9 +4219,13 @@ async function saveStoryEntry(){
     return;
   }
 
-  const brandModel = document.getElementById('storyBrandModel').value.trim();
-  if(!brandModel){ showToast('請填寫品牌＋型號'); return; }
-  const tagId = await resolveStoryTagId(brandModel);
+  const storyDate = document.getElementById('storyDate').value || '';
+  if(!storyDate){ showToast('請選擇日期'); return; }
+
+  const brand = document.getElementById('storyBrand').value.trim();
+  const model = document.getElementById('storyModel').value.trim();
+  if(!brand || !model){ showToast('請填寫品牌與型號'); return; }
+  const tagId = await upsertTag(brand, model);
   if(!tagId) return;
 
   const oldImageUrl = existingStoryImageUrl;
@@ -4175,7 +4247,7 @@ async function saveStoryEntry(){
     if(!se){ if(uploadedNewUrl) await removeStorageUrls([uploadedNewUrl], 'story-images'); showToast('找不到這筆限時動態'); return; }
 
     const { error: groupError } = await hubDb.from('story_groups')
-      .update({ tag_id:tagId, note })
+      .update({ tag_id:tagId, note, story_date:storyDate })
       .eq('id', se.story_group_id);
     if(groupError){
       console.error(groupError);
@@ -4197,7 +4269,7 @@ async function saveStoryEntry(){
     }
   } else {
     const { data: group, error: groupError } = await hubDb.from('story_groups')
-      .insert({ tag_id:tagId, note })
+      .insert({ tag_id:tagId, note, story_date:storyDate })
       .select('id')
       .single();
     if(groupError || !group){
