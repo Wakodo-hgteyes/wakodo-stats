@@ -124,6 +124,7 @@
       <div class="field"><label>廣告平台</label><select id="channelFilter"><option value="">FB + IG 全部</option><option value="Facebook">Facebook</option><option value="Instagram">Instagram</option><option value="Mixed">FB + IG 混合</option></select></div>
       <div class="field"><label>廣告角色</label><select id="roleFilter"><option value="">全部角色</option><option value="first">首觸</option><option value="last">末觸</option><option value="both">首觸＋末觸</option><option value="assist">中間輔助</option></select></div>
       <div class="field"><label>回訪狀態</label><select id="returnFilter"><option value="">全部</option><option value="returned">有回訪</option><option value="not_returned">尚未回訪</option></select></div>
+      <div class="field"><label>配鏡狀態</label><select id="fittingFilter"><option value="">全部</option><option value="fitted">有配鏡</option></select></div>
       <div class="toolbar-actions"><button id="resetBtn" class="btn">重設</button><button id="refreshBtn" class="btn primary">重新整理資料</button></div>
     </section>
 
@@ -168,7 +169,7 @@
     const HUB_PAGE="ad_tracking";
     const SUPABASE_URL="https://mdjnidbwqedzobjbhocd.supabase.co";
     const SUPABASE_KEY="sb_publishable_RoO2nFORoi-VzRgWt75wWQ_OnHAbl9Y";
-    const TICKET=(()=>{const raw=String(location.hash||"");const m=raw.match(/^#hub=([^&]+)$/);if(!m)return"";try{return decodeURIComponent(m[1]);}catch{return"";}})();
+    let TICKET=(()=>{const raw=String(location.hash||"");const m=raw.match(/^#hub=([^&]+)$/);if(!m)return"";try{return decodeURIComponent(m[1]);}catch{return"";}})();
     const $=id=>document.getElementById(id);
     const esc=s=>String(s??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
     const nf=new Intl.NumberFormat("zh-TW");
@@ -187,23 +188,34 @@
     function fmtDate(v){if(!v)return"—";const d=new Date(`${v}T00:00:00`);return Number.isNaN(d.getTime())?String(v):new Intl.DateTimeFormat("zh-TW",{year:"numeric",month:"2-digit",day:"2-digit"}).format(d);}
     function daysBetween(a,b){if(!a||!b)return null;const x=new Date(`${a}T00:00:00`),y=new Date(`${b}T00:00:00`);return Math.round((y-x)/86400000);}
     function purchased(v){return v.has_purchased===true;}
+    function fitted(v){return (Array.isArray(v.visit_purposes)?v.visit_purposes:[]).some(p=>p==="驗光配鏡"||p==="單純配鏡不驗光");}
     function sumAmount(visits){return visits.reduce((s,v)=>s+(purchased(v)?(Number(v.amount)||0):0),0);}
     function visitMoneyText(v){if(!purchased(v))return "";const n=Number(v.amount)||0;if(n>0)return `$${nf.format(Math.round(n))}`;return "金額未登記";}
     function customerMoneyHtml(c){const total=Math.round(c.totalAmount||0),unknown=c.unknownAmountVisits||0;if(total>0)return `<strong>$${nf.format(total)}</strong>${unknown?`<div class="amount-note">另 ${unknown} 筆金額未登記</div>`:""}`;return c.purchaseVisits?'<span class="status-yes">有消費 · 金額未登記</span>':'<span class="status-no">未消費</span>';}
     function sourcePath(v){const tags=Array.isArray(v.source_tags)?v.source_tags.filter(Boolean):[];return tags.length?tags.join(" → "):"未記錄來源";}
     function storeMatch(s,filter){if(!filter)return true;return String(s||"").includes(filter);}
 
+    async function applyTicket(ticket,{showFailure=false}={}){
+      if(!ticket){if(showFailure)deny();return false;}
+      for(let i=0;i<80;i++){if(typeof window.__wakodoCreateClient==="function"&&window.supabase?.auth)break;await new Promise(r=>setTimeout(r,50));}
+      if(typeof window.__wakodoCreateClient!=="function"||!window.supabase?.auth){if(showFailure)deny("頁面授權模組尚未就緒，請回到 WAKODO HUB 重新開啟。");return false;}
+      const {data:{session}}=await window.supabase.auth.getSession();
+      if(!session?.access_token){if(showFailure)deny("登入狀態無效，請回到 WAKODO HUB 重新登入。");return false;}
+      const nextDb=window.__wakodoCreateClient(SUPABASE_URL,SUPABASE_KEY,{global:{headers:{Authorization:`Bearer ${session.access_token}`,"x-hub-ticket":ticket,"x-hub-page":HUB_PAGE}},auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
+      const {data,error}=await nextDb.rpc("hub_ticket_profile",{p_page:HUB_PAGE});
+      if(error||!data?.ok||!data?.member||data.member.status!=="active"){if(showFailure)deny(data?.error||error?.message||"HUB 通行證無效、已過期或沒有此頁權限");return false;}
+      TICKET=ticket;db=nextDb;profile=data.member;return true;
+    }
     async function initAccess(){
       if(window.top===window.self||!TICKET){deny();return false;}
-      for(let i=0;i<80;i++){if(typeof window.__wakodoCreateClient==="function"&&window.supabase?.auth)break;await new Promise(r=>setTimeout(r,50));}
-      if(typeof window.__wakodoCreateClient!=="function"||!window.supabase?.auth){deny("頁面授權模組尚未就緒，請回到 WAKODO HUB 重新開啟。");return false;}
-      const {data:{session}}=await window.supabase.auth.getSession();
-      if(!session?.access_token){deny("登入狀態無效，請回到 WAKODO HUB 重新登入。");return false;}
-      db=window.__wakodoCreateClient(SUPABASE_URL,SUPABASE_KEY,{global:{headers:{Authorization:`Bearer ${session.access_token}`,"x-hub-ticket":TICKET,"x-hub-page":HUB_PAGE}},auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
-      const {data,error}=await db.rpc("hub_ticket_profile",{p_page:HUB_PAGE});
-      if(error||!data?.ok||!data?.member||data.member.status!=="active"){deny(data?.error||error?.message||"HUB 通行證無效、已過期或沒有此頁權限");return false;}
-      profile=data.member;return true;
+      return await applyTicket(TICKET,{showFailure:true});
     }
+    window.addEventListener('message',async event=>{
+      if(event.source!==window.parent||event.origin!==location.origin)return;
+      const msg=event.data||{};
+      if(msg.type!=="wakodo-hub-ticket-refresh"||msg.page!==HUB_PAGE||typeof msg.ticket!=="string"||!msg.ticket)return;
+      try{await applyTicket(msg.ticket,{showFailure:false});}catch(err){console.warn("HUB 頁面授權自動續期失敗",err);}
+    });
 
     async function fetchAll(){
       const rows=[];let from=0;const size=1000;
@@ -228,7 +240,7 @@
         out.push({
           key:String(first.customer_group_id),name:first.customer_name||"未留姓名",gender:first.gender||"",age:first.age_range||"",
           first,visits,later,channel,role,returnCount:later.length,returned:later.length>0,
-          firstPurchase:purchased(first),laterPurchase:later.some(purchased),last:visits[visits.length-1],
+          firstPurchase:purchased(first),laterPurchase:later.some(purchased),hasFitting:visits.some(fitted),last:visits[visits.length-1],
           daysToSecond:second?daysBetween(first.form_date,second.form_date):null,totalAmount:sumAmount(visits),purchaseVisits:visits.filter(purchased).length,unknownAmountVisits:visits.filter(v=>purchased(v)&&!(Number(v.amount)>0)).length
         });
       }
@@ -239,9 +251,9 @@
       if(!allCustomers.length)return;const dates=allCustomers.map(c=>c.first.form_date).filter(Boolean).sort();if(!$('dateFrom').value)$('dateFrom').value=dates[0]||"";if(!$('dateTo').value)$('dateTo').value=dates[dates.length-1]||"";
     }
     function getFiltered(){
-      const from=$('dateFrom').value,to=$('dateTo').value,store=$('storeFilter').value,channel=$('channelFilter').value,role=$('roleFilter').value,ret=$('returnFilter').value,q=$('searchInput').value.trim().toLowerCase();
+      const from=$('dateFrom').value,to=$('dateTo').value,store=$('storeFilter').value,channel=$('channelFilter').value,role=$('roleFilter').value,ret=$('returnFilter').value,fitting=$('fittingFilter').value,q=$('searchInput').value.trim().toLowerCase();
       return allCustomers.filter(c=>{
-        if(from&&c.first.form_date<from)return false;if(to&&c.first.form_date>to)return false;if(!storeMatch(c.first.store_branch,store))return false;if(channel&&c.channel!==channel)return false;if(role&&c.role!==role)return false;if(ret==='returned'&&!c.returned)return false;if(ret==='not_returned'&&c.returned)return false;
+        if(from&&c.first.form_date<from)return false;if(to&&c.first.form_date>to)return false;if(!storeMatch(c.first.store_branch,store))return false;if(channel&&c.channel!==channel)return false;if(role&&c.role!==role)return false;if(ret==='returned'&&!c.returned)return false;if(ret==='not_returned'&&c.returned)return false;if(fitting==='fitted'&&!c.hasFitting)return false;
         if(q){const blob=[c.name,c.first.store_branch,c.last.store_branch,sourcePath(c.first),...c.visits.flatMap(v=>[v.store_branch,sourcePath(v),(v.visit_purposes||[]).join(' ')])].join(' ').toLowerCase();if(!blob.includes(q))return false;}
         return true;
       });
@@ -287,7 +299,7 @@
     function closeJourney(){$('journeyModal').classList.remove('open');$('journeyModal').setAttribute('aria-hidden','true');}
 
     function render(){filteredCustomers=getFiltered();renderKpis(filteredCustomers);renderCharts(filteredCustomers);renderTable(filteredCustomers);renderQuality();}
-    function bind(){['dateFrom','dateTo','storeFilter','channelFilter','roleFilter','returnFilter'].forEach(id=>$(id).addEventListener('change',render));$('searchInput').addEventListener('input',()=>{clearTimeout(bind.t);bind.t=setTimeout(render,120);});$('resetBtn').addEventListener('click',()=>{$('dateFrom').value='';$('dateTo').value='';$('storeFilter').value='';$('channelFilter').value='';$('roleFilter').value='';$('returnFilter').value='';$('searchInput').value='';setDateDefaults();render();});$('refreshBtn').addEventListener('click',loadData);$('closeModal').addEventListener('click',closeJourney);$('journeyModal').addEventListener('click',e=>{if(e.target===$('journeyModal'))closeJourney();});document.addEventListener('keydown',e=>{if(e.key==='Escape')closeJourney();});}
+    function bind(){['dateFrom','dateTo','storeFilter','channelFilter','roleFilter','returnFilter','fittingFilter'].forEach(id=>$(id).addEventListener('change',render));$('searchInput').addEventListener('input',()=>{clearTimeout(bind.t);bind.t=setTimeout(render,120);});$('resetBtn').addEventListener('click',()=>{$('dateFrom').value='';$('dateTo').value='';$('storeFilter').value='';$('channelFilter').value='';$('roleFilter').value='';$('returnFilter').value='';$('fittingFilter').value='';$('searchInput').value='';setDateDefaults();render();});$('refreshBtn').addEventListener('click',loadData);$('closeModal').addEventListener('click',closeJourney);$('journeyModal').addEventListener('click',e=>{if(e.target===$('journeyModal'))closeJourney();});document.addEventListener('keydown',e=>{if(e.key==='Escape')closeJourney();});}
 
     async function loadData(){
       $('refreshBtn').disabled=true;$('refreshBtn').textContent='更新中…';
