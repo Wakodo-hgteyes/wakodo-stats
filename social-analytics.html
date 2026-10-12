@@ -523,19 +523,67 @@
     text-overflow:ellipsis;
     white-space:nowrap;
   }
+  .story-subhead-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:10px;
+  }
+  .story-subhead-row .story-subtitle{ margin:0; }
   .highlight-group{
-    margin-bottom:22px;
+    margin-bottom:16px;
+    padding:14px;
+    border:1px solid rgba(103,91,78,.10);
+    border-radius:18px;
+    background:linear-gradient(145deg,rgba(255,255,255,.56),rgba(255,255,255,.30));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.82);
   }
   .highlight-header{
     display:flex;
     align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:12px;
+  }
+  .highlight-title-wrap{
+    display:flex;
+    align-items:center;
     gap:8px;
-    margin-bottom:10px;
+    min-width:0;
   }
   .highlight-name{
     font-size:14px;
+    font-weight:800;
+    color:var(--accent-deep,var(--accent));
+  }
+  .highlight-count{
+    font-size:11px;
+    color:var(--ink-soft);
+    white-space:nowrap;
+  }
+  .highlight-actions{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    flex-shrink:0;
+  }
+  .highlight-empty-entry{
+    color:var(--ink-soft);
+    font-size:12px;
+    padding:18px 4px 8px;
+  }
+  .story-location-pill{
+    display:inline-flex;
+    align-items:center;
+    min-height:38px;
+    padding:9px 12px;
+    border:1px solid rgba(103,91,78,.10);
+    border-radius:12px;
+    background:rgba(255,255,255,.42);
+    color:var(--ink);
+    font-size:13px;
     font-weight:700;
-    color:var(--accent);
   }
 
   /* ==== 篩選器 ==== */
@@ -1845,7 +1893,7 @@ html.force-desktop-mode .mobile-desktop-toggle{display:inline-flex;position:fixe
 <!-- ===== 限時動態 ===== -->
 <div class="section-divider">
   <h2 class="section-title">限時動態</h2>
-  <button data-admin-only class="btn btn-primary" onclick="openStoryModal()">+ 新增限時動態</button>
+  <button data-admin-only class="btn btn-primary" onclick="openStoryModal()">+ 新增當日限動</button>
 </div>
 
 <div class="story-block">
@@ -1855,9 +1903,12 @@ html.force-desktop-mode .mobile-desktop-toggle{display:inline-flex;position:fixe
 </div>
 
 <div class="story-block">
-  <h3 class="story-subtitle">精選</h3>
+  <div class="story-subhead-row">
+    <h3 class="story-subtitle">精選</h3>
+    <button data-admin-only class="btn btn-ghost" style="font-size:12px;" onclick="openHighlightModal()">+ 新增精選</button>
+  </div>
   <div id="storyHighlightGroups"></div>
-  <div id="storyHighlightEmpty" class="empty-state" style="display:none; padding:24px 0;">目前還沒有「精選」限時動態記錄。</div>
+  <div id="storyHighlightEmpty" class="empty-state" style="display:none; padding:24px 0;">目前還沒有精選目錄，先新增一個精選，再把限動加入其中。</div>
 </div>
 
 <!-- ===== 內容項目 Modal（新增/編輯） ===== -->
@@ -1993,20 +2044,9 @@ html.force-desktop-mode .mobile-desktop-toggle{display:inline-flex;position:fixe
     <h2 id="storyModalTitle">新增限時動態</h2>
 
     <div class="field">
-      <label>分類</label>
-      <select id="storyCategory" onchange="onStoryCategoryChange()">
-        <option value="當日">當日</option>
-        <option value="精選">精選</option>
-      </select>
-    </div>
-
-    <div class="field" id="storyHighlightField" style="display:none;">
-      <label>精選名稱</label>
-      <div class="combo">
-        <input type="text" id="storyHighlightName" placeholder="例如：鏡框特輯" autocomplete="off" />
-        <div class="combo-list" id="storyHighlightList"></div>
-      </div>
-      <div class="hint">輸入過的精選名稱會變成下拉建議，方便同一輯持續加入新項目</div>
+      <label>位置</label>
+      <div id="storyLocationPill" class="story-location-pill">當日</div>
+      <div class="hint" id="storyLocationHint">一般限動會直接顯示在「當日」；精選限動請從對應精選目錄內新增。</div>
     </div>
 
     <div class="field">
@@ -2081,15 +2121,15 @@ html.force-desktop-mode .mobile-desktop-toggle{display:inline-flex;position:fixe
   </div>
 </div>
 
-<!-- ===== 精選 名稱編輯 Modal ===== -->
+<!-- ===== 精選目錄 新增/編輯 Modal ===== -->
 <div class="modal-overlay" id="highlightModalOverlay">
   <div class="modal" style="max-width:360px;">
-    <h2>編輯精選名稱</h2>
+    <h2 id="highlightModalTitle">新增精選</h2>
     <div class="field">
-      <label>名稱</label>
-      <input type="text" id="editHighlightName" />
+      <label>精選名稱</label>
+      <input type="text" id="editHighlightName" placeholder="例如：LINDBERG 精選" />
     </div>
-    <div class="hint" style="margin-bottom:16px;">修改後，所有屬於此精選的項目會一併更新</div>
+    <div class="hint" id="highlightModalHint" style="margin-bottom:16px;">先建立精選目錄，再從目錄內新增限時動態。</div>
     <div class="modal-footer">
       <span></span>
       <div class="right">
@@ -3924,19 +3964,21 @@ async function deleteInquiry(){
 /* ================= 限時動態 ================= */
 /*
   現行 Supabase schema：
-  story_groups (群組層：tag / note / story_date / story_category / highlight_name)
-    -> story_images (圖片層)
-      -> inquiries.story_image_id (詢問綁定到單張限動圖片)
+  story_highlights（精選目錄層）
+    -> story_groups.highlight_id（限動內容群組；當日限動為 NULL）
+      -> story_images（單張限動圖片）
+        -> inquiries.story_image_id（詢問綁定到單張限動圖片）
 
-  當日／精選分類直接由 story_groups 管理；精選名稱也存於 story_groups，
-  不恢復舊 stories_highlights / story_entries 雙表，避免再形成第二套限動資料模型。
+  精選比一般限動多一層「精選目錄」。story_groups.highlight_name 僅保留舊版相容快照，
+  正式精選名稱以 story_highlights.name 為準。
   UI 仍把 story_groups + story_images 正規化成 allStoryEntries（每張圖片一筆 UI entry）。
 */
 let allStoryGroups = [];
-let allStoriesHighlights = []; // [{name}]，由 story_groups 的精選名稱即時計算
+let allStoriesHighlights = []; // [{id,name,created_at}]，正式精選目錄
 let allStoryEntries = [];
-let currentStoryEntryId = null; // 現在代表 story_images.id
+let currentStoryEntryId = null; // story_images.id
 let currentStoryGroupId = null; // story_groups.id
+let currentStoryHighlightId = null; // story_highlights.id；NULL = 當日
 let currentStoryDetailId = null;
 let editingHighlightId = null;
 let currentStoryImageBlob = null;
@@ -3958,18 +4000,22 @@ function normalizeStoryGroups(groups){
       String(a.created_at || '').localeCompare(String(b.created_at || ''))
     );
     const groupImageCount = images.length;
+    const directory = group.story_highlights || null;
+    const highlightId = group.highlight_id || (directory && directory.id) || null;
+    const category = highlightId ? '精選' : '當日';
+    const highlightName = category === '精選'
+      ? ((directory && directory.name) || group.highlight_name || '').trim()
+      : '';
     return images.map(image => {
       const inquiries = image.inquiries || [];
-      const category = group.story_category === '精選' ? '精選' : '當日';
-      const highlightName = category === '精選' ? (group.highlight_name || '').trim() : '';
       return {
         id: image.id,
         story_group_id: group.id,
         tag_id: group.tag_id,
         category,
         highlight_name: highlightName,
-        highlight_id: highlightName || null,
-        stories_highlights: highlightName ? { name:highlightName } : null,
+        highlight_id: highlightId,
+        stories_highlights: directory || (highlightId ? { id:highlightId, name:highlightName } : null),
         brand_model_text: label,
         image_url: image.image_url,
         note: group.note || '',
@@ -3988,32 +4034,36 @@ function normalizeStoryGroups(groups){
 }
 
 async function loadStories(){
-  const { data, error } = await hubDb
-    .from('story_groups')
-    .select(`
-      id, tag_id, note, story_date, story_category, highlight_name, created_at,
-      tags ( id, model, brand_id, brands ( id, name ) ),
-      story_images (
-        id, story_group_id, image_url, sort_order, created_at,
-        inquiries ( id, inquiry_date, inquiry_type, note, screenshot_url, story_source )
-      )
-    `)
-    .order('story_date', { ascending:false })
-    .order('created_at', { ascending:false });
+  const [highlightRes, groupRes] = await Promise.all([
+    hubDb.from('story_highlights')
+      .select('id, name, created_at')
+      .order('created_at', { ascending:true }),
+    hubDb.from('story_groups')
+      .select(`
+        id, tag_id, note, story_date, story_category, highlight_id, highlight_name, created_at,
+        story_highlights ( id, name ),
+        tags ( id, model, brand_id, brands ( id, name ) ),
+        story_images (
+          id, story_group_id, image_url, sort_order, created_at,
+          inquiries ( id, inquiry_date, inquiry_type, note, screenshot_url, story_source )
+        )
+      `)
+      .order('story_date', { ascending:false })
+      .order('created_at', { ascending:false })
+  ]);
 
-  if(error){
-    console.error(error);
+  if(highlightRes.error || groupRes.error){
+    console.error(highlightRes.error || groupRes.error);
     showToast('限時動態讀取失敗');
     return;
   }
 
-  allStoryGroups = data || [];
-  allStoriesHighlights = [...new Set(allStoryGroups
-    .filter(g => g.story_category === '精選')
-    .map(g => (g.highlight_name || '').trim())
-    .filter(Boolean))]
-    .sort((a,b) => a.localeCompare(b, 'zh-Hant'))
-    .map(name => ({ name }));
+  allStoriesHighlights = (highlightRes.data || []).map(h => ({
+    id:h.id,
+    name:(h.name || '').trim(),
+    created_at:h.created_at || ''
+  }));
+  allStoryGroups = groupRes.data || [];
   allStoryEntries = normalizeStoryGroups(allStoryGroups);
   rebuildStoryInquiryIndex();
   renderStories();
@@ -4058,30 +4108,35 @@ function renderStories(){
     return;
   }
 
-  const daily = allStoryEntries.filter(se => se.category !== '精選');
+  const daily = allStoryEntries.filter(se => !se.highlight_id);
   dailyList.innerHTML = daily.map(se => buildStoryTileHtml(se)).join('');
   dailyEmpty.style.display = daily.length === 0 ? 'block' : 'none';
 
-  const highlightEntries = allStoryEntries.filter(se => se.category === '精選');
-  if(highlightEntries.length === 0){
+  if(allStoriesHighlights.length === 0){
     highlightWrap.innerHTML = '';
     highlightEmpty.style.display = 'block';
   } else {
     highlightEmpty.style.display = 'none';
-    const groups = new Map();
-    highlightEntries.forEach(se => {
-      const name = (se.highlight_name || '').trim() || '未命名精選';
-      if(!groups.has(name)) groups.set(name, []);
-      groups.get(name).push(se);
-    });
-    highlightWrap.innerHTML = [...groups.entries()].map(([name, items]) => `
-      <div class="highlight-group">
-        <div class="highlight-header">
-          <span class="highlight-name">${escapeHtml(name)}</span>
-          ${isHubOwner ? `<button data-admin-only class="icon-btn" onclick="event.stopPropagation();openHighlightModal('${encodeURIComponent(name).replace(/'/g,'%27')}')">編輯名稱</button>` : ''}
-        </div>
-        <div class="story-grid">${items.map(se => buildStoryTileHtml(se)).join('')}</div>
-      </div>`).join('');
+    highlightWrap.innerHTML = allStoriesHighlights.map(highlight => {
+      const items = allStoryEntries.filter(se => se.highlight_id === highlight.id);
+      return `
+        <div class="highlight-group" data-highlight-id="${highlight.id}">
+          <div class="highlight-header">
+            <div class="highlight-title-wrap">
+              <span class="highlight-name">${escapeHtml(highlight.name)}</span>
+              <span class="highlight-count">${items.length} 則限動</span>
+            </div>
+            ${isHubOwner ? `
+              <div class="highlight-actions" data-admin-only>
+                <button class="btn btn-ghost" style="font-size:11px;padding:7px 10px;" onclick="event.stopPropagation();openStoryModal(null,'${highlight.id}')">+ 新增限動</button>
+                <button class="icon-btn" onclick="event.stopPropagation();openHighlightModal('${highlight.id}')">編輯名稱</button>
+              </div>` : ''}
+          </div>
+          ${items.length
+            ? `<div class="story-grid">${items.map(se => buildStoryTileHtml(se)).join('')}</div>`
+            : `<div class="highlight-empty-entry">這個精選還沒有內容，可從右上方「新增限動」加入。</div>`}
+        </div>`;
+    }).join('');
   }
 
   renderStats();
@@ -4142,46 +4197,15 @@ function renderStoryComboSuggestions(){
   modelInput.onblur = () => setTimeout(() => modelList.classList.remove('open'), 150);
 }
 
-function renderHighlightSuggestions(){
-  const input = document.getElementById('storyHighlightName');
-  const list = document.getElementById('storyHighlightList');
-  if(!input || !list) return;
-  const names = allStoriesHighlights.map(h => h.name).filter(Boolean);
-
-  function refresh(){
-    const value = input.value.trim().toLowerCase();
-    const matches = names.filter(name => !value || name.toLowerCase().includes(value));
-    list.innerHTML = matches.map(name => `<div class="combo-item">${escapeHtml(name)}</div>`).join('');
-    list.querySelectorAll('.combo-item').forEach((el,index) => {
-      el.onclick = () => { input.value = matches[index]; list.classList.remove('open'); };
-    });
-    return matches.length;
-  }
-
-  input.oninput = () => { list.classList.toggle('open', refresh() > 0); };
-  input.onfocus = () => { list.classList.toggle('open', refresh() > 0); };
-  input.onblur = () => setTimeout(() => list.classList.remove('open'), 150);
-}
-
-function onStoryCategoryChange(){
-  const category = document.getElementById('storyCategory')?.value || '當日';
-  const field = document.getElementById('storyHighlightField');
-  if(field) field.style.display = category === '精選' ? 'block' : 'none';
-  if(category !== '精選'){
-    const input = document.getElementById('storyHighlightName');
-    if(input) input.value = '';
-  }
-}
-
-function openStoryModal(id){
+function openStoryModal(id, highlightId=null){
   if(!isHubOwner) return;
   currentStoryEntryId = id || null;
   currentStoryGroupId = null;
+  currentStoryHighlightId = highlightId || null;
   document.getElementById('storyModalTitle').textContent = id ? '編輯限時動態' : '新增限時動態';
   document.getElementById('deleteStoryBtn').style.display = id ? 'inline-block' : 'none';
 
   renderStoryComboSuggestions();
-  renderHighlightSuggestions();
 
   currentStoryImageBlob = null;
   currentStoryImageChanged = false;
@@ -4192,8 +4216,7 @@ function openStoryModal(id){
     const se = allStoryEntries.find(x => x.id === id);
     if(!se){ showToast('找不到這筆限時動態'); return; }
     currentStoryGroupId = se.story_group_id;
-    document.getElementById('storyCategory').value = se.category === '精選' ? '精選' : '當日';
-    document.getElementById('storyHighlightName').value = se.highlight_name || '';
+    currentStoryHighlightId = se.highlight_id || null;
     document.getElementById('storyDate').value = se.story_date || (se.created_at ? se.created_at.slice(0,10) : localTodayYmd());
     const storyTag = allTags.find(t => t.id === se.tag_id);
     document.getElementById('storyBrand').value = storyTag ? storyTag.brand : '';
@@ -4202,22 +4225,35 @@ function openStoryModal(id){
     existingStoryImageUrl = se.image_url;
     showStoryImagePreview(se.image_url);
   } else {
-    document.getElementById('storyCategory').value = '當日';
-    document.getElementById('storyHighlightName').value = '';
+    if(currentStoryHighlightId && !allStoriesHighlights.some(h => h.id === currentStoryHighlightId)){
+      showToast('找不到這個精選目錄');
+      currentStoryHighlightId = null;
+      return;
+    }
     document.getElementById('storyDate').value = localTodayYmd();
     document.getElementById('storyBrand').value = '';
     document.getElementById('storyModel').value = '';
     document.getElementById('storyNote').value = '';
     clearStoryImagePreview();
   }
-  document.getElementById('storyCategory').dispatchEvent(new Event('change',{bubbles:true}));
-  document.getElementById('storyModalOverlay').classList.add('open'); requestAnimationFrame(()=>__markModalPristine(document.getElementById('storyModalOverlay')));
+
+  const highlight = currentStoryHighlightId
+    ? allStoriesHighlights.find(h => h.id === currentStoryHighlightId)
+    : null;
+  document.getElementById('storyLocationPill').textContent = highlight ? `精選 · ${highlight.name}` : '當日';
+  document.getElementById('storyLocationHint').textContent = highlight
+    ? '此限動會加入這個精選目錄，詢問紀錄仍綁定在單張限動。'
+    : '一般限動會直接顯示在「當日」；精選限動請從對應精選目錄內新增。';
+
+  document.getElementById('storyModalOverlay').classList.add('open');
+  requestAnimationFrame(()=>__markModalPristine(document.getElementById('storyModalOverlay')));
 }
 
 function closeStoryModal(){
   document.getElementById('storyModalOverlay').classList.remove('open');
   currentStoryEntryId = null;
   currentStoryGroupId = null;
+  currentStoryHighlightId = null;
 }
 
 async function resolveStoryTagId(label){
@@ -4244,19 +4280,14 @@ async function resolveStoryTagId(label){
   return await upsertTag(brand, model);
 }
 
-async function upsertHighlight(name){
-  const value = (name || '').trim();
-  if(!value){ showToast('請填寫精選名稱'); return null; }
-  return value;
-}
-
 async function saveStoryEntry(){
   if(!isHubOwner) return;
-  const category = document.getElementById('storyCategory').value === '精選' ? '精選' : '當日';
-  const highlightName = category === '精選'
-    ? await upsertHighlight(document.getElementById('storyHighlightName').value)
-    : null;
-  if(category === '精選' && !highlightName) return;
+  const highlightId = currentStoryHighlightId || null;
+  const category = highlightId ? '精選' : '當日';
+  if(highlightId && !allStoriesHighlights.some(h => h.id === highlightId)){
+    showToast('找不到這個精選目錄');
+    return;
+  }
 
   const storyDate = document.getElementById('storyDate').value || '';
   if(!storyDate){ showToast('請選擇日期'); return; }
@@ -4286,7 +4317,7 @@ async function saveStoryEntry(){
     if(!se){ if(uploadedNewUrl) await removeStorageUrls([uploadedNewUrl], 'story-images'); showToast('找不到這筆限時動態'); return; }
 
     const { error: groupError } = await hubDb.from('story_groups')
-      .update({ tag_id:tagId, note, story_date:storyDate, story_category:category, highlight_name:highlightName })
+      .update({ tag_id:tagId, note, story_date:storyDate, story_category:category, highlight_id:highlightId, highlight_name:null })
       .eq('id', se.story_group_id);
     if(groupError){
       console.error(groupError);
@@ -4308,7 +4339,7 @@ async function saveStoryEntry(){
     }
   } else {
     const { data: group, error: groupError } = await hubDb.from('story_groups')
-      .insert({ tag_id:tagId, note, story_date:storyDate, story_category:category, highlight_name:highlightName })
+      .insert({ tag_id:tagId, note, story_date:storyDate, story_category:category, highlight_id:highlightId, highlight_name:null })
       .select('id')
       .single();
     if(groupError || !group){
@@ -4460,16 +4491,26 @@ function editCurrentStoryEntry(){
   openStoryModal(id);
 }
 
-/* ---- 精選名稱編輯：同名精選視為同一組，改名會同步更新該組全部 story_groups ---- */
-function openHighlightModal(encodedName){
+/* ---- 精選目錄管理：目錄 > 限動 > 詢問 ---- */
+function openHighlightModal(id=null){
   if(!isHubOwner) return;
-  const name = decodeURIComponent(encodedName || '');
-  if(!name) return;
-  editingHighlightId = name;
-  document.getElementById('editHighlightName').value = name;
+  editingHighlightId = id || null;
+  const current = editingHighlightId
+    ? allStoriesHighlights.find(h => h.id === editingHighlightId)
+    : null;
+  if(editingHighlightId && !current){ showToast('找不到這個精選目錄'); return; }
+
+  document.getElementById('highlightModalTitle').textContent = current ? '編輯精選名稱' : '新增精選';
+  document.getElementById('editHighlightName').value = current ? current.name : '';
+  document.getElementById('highlightModalHint').textContent = current
+    ? '修改的是精選目錄名稱，目錄內既有的限動與詢問紀錄不會改變。'
+    : '先建立精選目錄，再從目錄內新增限時動態。';
   const overlay = document.getElementById('highlightModalOverlay');
   overlay.classList.add('open');
-  requestAnimationFrame(()=>__markModalPristine(overlay));
+  requestAnimationFrame(()=>{
+    __markModalPristine(overlay);
+    document.getElementById('editHighlightName').focus();
+  });
 }
 function closeHighlightModal(){
   const el = document.getElementById('highlightModalOverlay');
@@ -4477,15 +4518,28 @@ function closeHighlightModal(){
   editingHighlightId = null;
 }
 async function saveHighlightEdit(){
-  if(!isHubOwner || !editingHighlightId) return;
+  if(!isHubOwner) return;
   const nextName = document.getElementById('editHighlightName').value.trim();
   if(!nextName){ showToast('請填寫精選名稱'); return; }
-  const { error } = await hubDb.from('story_groups')
-    .update({ highlight_name:nextName })
-    .eq('story_category','精選')
-    .eq('highlight_name', editingHighlightId);
-  if(error){ console.error(error); showToast('精選名稱更新失敗'); return; }
-  showToast('精選名稱已更新');
+
+  let error = null;
+  if(editingHighlightId){
+    const res = await hubDb.from('story_highlights')
+      .update({ name:nextName })
+      .eq('id', editingHighlightId);
+    error = res.error;
+  } else {
+    const res = await hubDb.from('story_highlights')
+      .insert({ name:nextName });
+    error = res.error;
+  }
+
+  if(error){
+    console.error(error);
+    showToast(error.code === '23505' ? '已有同名精選' : (editingHighlightId ? '精選名稱更新失敗' : '精選新增失敗'));
+    return;
+  }
+  showToast(editingHighlightId ? '精選名稱已更新' : '精選已建立');
   closeHighlightModal();
   await loadStories();
 }
