@@ -450,6 +450,10 @@
                         <option value="male">限男性</option>
                     </select>
                 </div>
+                <div class="form-group" id="framing-profile-group" hidden>
+                    <div class="form-label"><label for="edit-framing-profile">鏡位 Profile</label></div>
+                    <select id="edit-framing-profile"></select>
+                </div>
                 <div class="form-group">
                     <div class="form-label"><label for="edit-prompt">英文 Prompt 內容</label></div>
                     <textarea id="edit-prompt" style="min-height:190px" placeholder="輸入完整英文 Prompt 片段"></textarea>
@@ -486,6 +490,9 @@
     let currentGender = "female";
     let currentManageCategory = "OUTFITS";
     let DATA_MAP = { APPEARANCES: [], OUTFITS: [], SCENES: [], POSES: [], STYLES: [], PRODUCT_LAYOUTS: [] };
+    let PROMPT_MODULES = {};
+    let PROMPT_PROFILES = {};
+    let PROMPT_SECTIONS = [];
     let draggedIndex = null;
     let fullPromptText = "";
     let currentPreviewSections = [];
@@ -539,93 +546,78 @@
         window.generatePrompt();
     };
 
+    function renderPromptTemplate(text, context) {
+        return String(text || "").replace(/\{\{([a-zA-Z0-9_]+)\}\}/g, (match, key) => {
+            return Object.prototype.hasOwnProperty.call(context, key) ? String(context[key] ?? "") : match;
+        });
+    }
+
+    function getSelectedPromptItems() {
+        return {
+            APPEARANCES: getAppearanceForGender(),
+            OUTFITS: getSelectedItem("OUTFITS", "select-outfits"),
+            SCENES: getSelectedItem("SCENES", "select-scenes"),
+            POSES: getSelectedItem("POSES", "select-poses"),
+            STYLES: getSelectedItem("STYLES", "select-styles"),
+            PRODUCT_LAYOUTS: getSelectedItem("PRODUCT_LAYOUTS", "select-product-layouts")
+        };
+    }
+
+    function getDefaultFramingProfile() {
+        const profiles = Object.values(PROMPT_PROFILES)
+            .filter(profile => profile.enabled !== false)
+            .sort((a, b) => (a.sort_order ?? 9999) - (b.sort_order ?? 9999));
+        return profiles.find(profile => profile.is_default === true) || profiles[0] || null;
+    }
+
+    function getSelectedFramingProfile(selectedItems) {
+        const pose = selectedItems.POSES;
+        const requestedKey = pose?.framing_profile;
+        return (requestedKey && PROMPT_PROFILES[requestedKey]) || getDefaultFramingProfile();
+    }
+
+    function resolvePromptSection(section, selectedItems, context, framingProfile) {
+        let text = "";
+
+        if (section.source_type === "module") {
+            text = PROMPT_MODULES[section.source_key]?.prompt_text || "";
+        } else if (section.source_type === "category") {
+            text = selectedItems[section.source_key]?.prompt_text || "";
+        } else if (section.source_type === "profile") {
+            text = framingProfile?.prompt_text || "";
+        } else if (section.source_type === "user_input") {
+            text = context[section.source_key] || "";
+        }
+
+        text = renderPromptTemplate(text, context).trim();
+        if (!text && section.skip_if_empty) return null;
+        if (!text) {
+            console.error(`Prompt engine missing required content: ${section.mode}/${section.section_key}`);
+            return null;
+        }
+
+        return { title: section.title, text };
+    }
+
     window.generatePrompt = function() {
         const ratio = document.getElementById("select-ratio").value;
-        let sections = [];
+        const selectedItems = getSelectedPromptItems();
+        const eyewear = document.getElementById("input-eyewear").value.trim();
+        const framingProfile = currentMode === "model" ? getSelectedFramingProfile(selectedItems) : null;
+        const context = {
+            ratio,
+            mode: currentMode,
+            gender: currentGender,
+            additional_eyewear: eyewear,
+            framing_profile: framingProfile?.profile_key || "",
+            framing_prompt: framingProfile?.prompt_text || ""
+        };
 
-        if (currentMode === "model") {
-            const appearance = getAppearanceForGender();
-            const outfit = getSelectedItem("OUTFITS", "select-outfits");
-            const scene = getSelectedItem("SCENES", "select-scenes");
-            const pose = getSelectedItem("POSES", "select-poses");
-            const style = getSelectedItem("STYLES", "select-styles");
-            const eyewear = document.getElementById("input-eyewear").value.trim();
-
-            const referenceRules = `[PRIORITY ORDER — HARD]
-1. Exact eyewear product fidelity
-2. Exact character identity
-3. Selected pose and its framing
-4. Hairstyle and natural hair behavior
-5. Outfit
-6. Scene and photographic style
-
-If any requirement conflicts, preserve the higher-priority requirement and simplify the lower-priority one. Do not trade eyewear accuracy, identity, or the selected pose/framing for atmosphere, headroom, safe-crop convenience, or styling.
-
-[CHARACTER REFERENCE — STRICT IDENTITY LOCK]
-Use all provided character reference images as one identity set for the same person. Preserve the exact facial identity, facial proportions, bone structure, eyes, brows, nose, lips, hairstyle, hairline, apparent age, skin tone, and natural skin character. Do not redesign, beautify into a different person, age-shift, or substitute the subject. Character references define identity only; clothing, background, lighting, and pose come from their selected modules.
-
-[EYEWEAR REFERENCE — HIGHEST PRIORITY PRODUCT LOCK]
-Use the uploaded eyewear reference images as the only source of product truth. The subject must wear the exact referenced eyewear, not a similar or generic substitute. Preserve the front silhouette, lens shape, rim thickness, bridge, nose pads, endpieces, hinges, temples, material, finish, color, transparency, logos, engravings, and visible hardware. Keep the local spatial relationship between rim, endpiece, hinge, connector, and temple exactly consistent with the references.
-
-Do not reconstruct the eyewear from brand or model knowledge. Cross-check all eyewear references when a detail is unclear. If uncertainty remains, preserve the visible structure conservatively rather than inventing or simplifying it. Perspective may change only how the same fixed product is viewed; it must not redesign the product.
-
-[BRANDING / HARDWARE — SPATIAL ANCHOR LOCK]
-Visible logos, badges, rivets, hinge details, connectors, engravings, and decorative hardware are fixed physical parts of the product. Keep each element on the same frame component and in the same relative position, scale, angle, orientation, finish, and relationship to the rim, endpiece, hinge seam, and temple.
-
-[EYEWEAR ON-FACE SCALE]
-Fit the exact product naturally on the face at realistic scale. Keep the frame proportions consistent with the reference product and the subject's face. If actual measurements are supplied, treat them as hard scale constraints.`
-
-            const poseLabel = pose?.label || "";
-            let framingDirective;
-            if (poseLabel.startsWith("[特寫]")) {
-                framingDirective = `The selected pose is a CLOSE-UP portrait. Frame from approximately the upper chest or collarbone upward. The face and eyewear must be large and dominant in the image. Keep the waist, skirt or trousers, hips, thighs, knees, and full lower body outside the frame. Use compact natural portrait headroom. Do not zoom out to preserve more environment or to satisfy a fixed safe-crop percentage.`;
-            } else if (poseLabel.startsWith("[全身]")) {
-                framingDirective = `The selected pose is a FULL-BODY portrait. Show the complete pose at a natural camera distance while keeping the face and eyewear clearly readable. Use natural headroom and do not crop away the body action required by the selected pose.`;
-            } else {
-                framingDirective = `The selected pose is a HALF-BODY portrait. Keep the final image focused from approximately the upper abdomen upward, showing the face, eyewear, shoulders, arms, and required upper-body gesture. Keep the hips, thighs, knees, and full lower body outside the frame. Use natural environmental headroom without making the subject unnecessarily small.`;
-            }
-
-            const composition = `Generate a photorealistic portrait in a ${ratio} aspect ratio.
-
-[FRAMING MODE — AUTHORITATIVE]
-${framingDirective}
-
-The selected pose controls the final camera distance, body crop, upper-body gesture, shoulder line, head angle, gaze, expression, and hand placement. Follow the framing stated by the selected pose and by the framing mode above. Do not widen a close-up into a half-body image and do not override the selected crop merely to show more background.
-
-Keep the important face-and-eyewear area reasonably compatible with a later central crop when practical, but safe-crop convenience is secondary to the selected framing. Headroom must adapt to the selected framing: compact for close-ups, more environmental only for wider portraits.
-
-Maintain believable physical distance between the subject and major background surfaces when the scene allows it, so the background has natural depth without forcing a wider composition.
-
-[SCENE INTERPRETATION]
-Treat the selected scene as a direction for location and atmosphere, not a fixed prop inventory. Background details may vary naturally, but they must remain subordinate to the person, exact eyewear, and selected pose/framing.`
-
-            const realism = `Skin should look natural, realistic, healthy, clean, fresh, and flattering. Preserve believable skin depth, fine natural texture, subtle tonal variation, and realistic light response while keeping the complexion lively, even, and well-rested. Do not deliberately intensify pores, blemishes, under-eye darkness, beard shadow, roughness, dullness, facial hollowness, deep lines, fatigue, or other aging cues. Keep real skin structure without beauty-filter smoothing, waxy skin, or a plastic appearance, but also avoid gritty, harsh, tired, or prematurely aged rendering.
-
-The selected photographic style may change color, contrast, grain, exposure, highlights, and overall rendering character, but it must not alter the subject's identity, facial structure, apparent age, or authentic skin character. Eyewear and scene materials must retain physically believable structure, scale, surface response, and reflections.`;
-
-            sections = [
-                { title: "Reference Rules", text: referenceRules },
-                { title: "Character Identity", text: appearance?.prompt_text || "" },
-                { title: "Pose and Camera Angle", text: pose?.prompt_text || "" },
-                { title: "Composition and Scene Rules", text: composition },
-                { title: "Outfit", text: outfit?.prompt_text || "" },
-                { title: "Scene and Background", text: scene?.prompt_text || "" },
-                { title: "Photographic Style", text: style?.prompt_text || "" },
-                { title: "Realism Standards", text: realism }
-            ];
-
-            if (eyewear) sections.splice(1, 0, { title: "Additional Eyewear Details", text: eyewear });
-            sections.push({
-                title: "Output Requirements",
-                text: `Output the highest-quality photorealistic final image the system can produce. Priority order: exact eyewear fidelity > exact character identity > selected pose and its framing > hairstyle and hair behavior > outfit > scene and photographic style. Preserve the exact referenced eyewear and person, and follow the selected pose's camera distance, crop, head angle, gaze, hand placement, and body relationship. Do not widen or shrink the selected framing merely to preserve extra environment, fixed headroom, or a central safe crop. Keep skin, body structure, eyewear placement, product materials, reflections, and scene lighting physically believable. Photographic style must remain subordinate to eyewear, identity, pose, and framing. Output ratio: ${ratio}.`
-            });
-        } else {
-            const layout = getSelectedItem("PRODUCT_LAYOUTS", "select-product-layouts");
-            sections = [
-                { title: "Still Life Background Mode", text: layout?.prompt_text || "" },
-                { title: "Output Requirements", text: `Output the highest-quality professional commercial still-life image the system can produce. Output ratio: ${ratio}.` }
-            ];
-        }
+        const sections = PROMPT_SECTIONS
+            .filter(section => section.enabled !== false && section.mode === currentMode)
+            .sort((a, b) => (a.sort_order ?? 9999) - (b.sort_order ?? 9999))
+            .map(section => resolvePromptSection(section, selectedItems, context, framingProfile))
+            .filter(Boolean);
 
         currentPreviewSections = sections;
         fullPromptText = sections.map(section => `[${section.title}]\n${section.text}`).join("\n\n");
@@ -809,12 +801,34 @@ The selected photographic style may change color, contrast, grain, exposure, hig
         renderModalList();
     }
 
+    function refreshFramingProfileEditor(selectedKey = "") {
+        const group = document.getElementById("framing-profile-group");
+        const select = document.getElementById("edit-framing-profile");
+        const isPose = currentManageCategory === "POSES";
+        group.hidden = !isPose;
+        select.replaceChildren();
+        if (!isPose) return;
+
+        const profiles = Object.values(PROMPT_PROFILES)
+            .filter(profile => profile.enabled !== false)
+            .sort((a, b) => (a.sort_order ?? 9999) - (b.sort_order ?? 9999));
+        profiles.forEach(profile => {
+            const option = document.createElement("option");
+            option.value = profile.profile_key;
+            option.textContent = profile.label;
+            select.appendChild(option);
+        });
+        const preferred = selectedKey || getDefaultFramingProfile()?.profile_key || "";
+        if ([...select.options].some(option => option.value === preferred)) select.value = preferred;
+    }
+
     window.resetForm = function() {
         document.getElementById("formTitle").textContent = "新增項目";
         document.getElementById("edit-id").value = "";
         document.getElementById("edit-label").value = "";
         document.getElementById("edit-gender").value = "both";
         document.getElementById("edit-prompt").value = "";
+        refreshFramingProfileEditor();
     };
 
     window.editItem = function(id) {
@@ -825,6 +839,7 @@ The selected photographic style may change color, contrast, grain, exposure, hig
         document.getElementById("edit-label").value = item.label;
         document.getElementById("edit-gender").value = item.gender;
         document.getElementById("edit-prompt").value = item.prompt_text;
+        refreshFramingProfileEditor(item.framing_profile || getDefaultFramingProfile()?.profile_key || "");
     };
 
     window.saveItem = async function() {
@@ -832,6 +847,9 @@ The selected photographic style may change color, contrast, grain, exposure, hig
         const label = document.getElementById("edit-label").value.trim();
         const gender = document.getElementById("edit-gender").value;
         const prompt_text = document.getElementById("edit-prompt").value.trim();
+        const framing_profile = currentManageCategory === "POSES"
+            ? (document.getElementById("edit-framing-profile").value || getDefaultFramingProfile()?.profile_key || null)
+            : null;
         if (!label || !prompt_text) return alert("請填寫顯示名稱與 Prompt 內容");
 
         const button = document.getElementById("saveBtn");
@@ -839,7 +857,9 @@ The selected photographic style may change color, contrast, grain, exposure, hig
         button.textContent = "儲存中…";
         try {
             if (id) {
-                const { error } = await supabase.from("wako_prompts").update({ label, gender, prompt_text }).eq("id", id);
+                const updatePayload = { label, gender, prompt_text };
+                if (currentManageCategory === "POSES") updatePayload.framing_profile = framing_profile;
+                const { error } = await supabase.from("wako_prompts").update(updatePayload).eq("id", id);
                 if (error) throw error;
                 window.showToast("雲端修改成功");
             } else {
@@ -850,7 +870,8 @@ The selected photographic style may change color, contrast, grain, exposure, hig
                     label,
                     gender,
                     prompt_text,
-                    sort_order: maxSort + 1
+                    sort_order: maxSort + 1,
+                    ...(currentManageCategory === "POSES" ? { framing_profile } : {})
                 }]);
                 if (error) throw error;
                 window.showToast("雲端新增成功");
@@ -961,14 +982,23 @@ The selected photographic style may change color, contrast, grain, exposure, hig
     async function loadData({ state = null, notifyReload = false } = {}) {
         const workspaceState = state || readWorkspaceState();
         setStatus("載入資料中…", "var(--muted)");
-        const { data, error } = await supabase.from("wako_prompts").select("*");
-        if (error) {
-            console.error(error);
-            setStatus("連線失敗", "var(--danger)");
-            window.showToast("Supabase 連線失敗");
+
+        const [promptsResult, modulesResult, profilesResult, sectionsResult] = await Promise.all([
+            supabase.from("wako_prompts").select("*"),
+            supabase.from("wako_prompt_modules").select("*"),
+            supabase.from("wako_prompt_profiles").select("*"),
+            supabase.from("wako_prompt_sections").select("*")
+        ]);
+
+        const failed = [promptsResult, modulesResult, profilesResult, sectionsResult].find(result => result.error);
+        if (failed) {
+            console.error(failed.error);
+            setStatus("Prompt Engine 載入失敗", "var(--danger)");
+            window.showToast("Supabase Prompt Engine 載入失敗");
             return;
         }
 
+        const data = promptsResult.data || [];
         data.sort((a, b) => {
             const orderA = a.sort_order ?? 9999;
             const orderB = b.sort_order ?? 9999;
@@ -981,10 +1011,28 @@ The selected photographic style may change color, contrast, grain, exposure, hig
             if (DATA_MAP[item.category]) DATA_MAP[item.category].push(item);
         });
 
-        setStatus("雲端同步完成", "var(--success)");
+        PROMPT_MODULES = Object.fromEntries(
+            (modulesResult.data || []).map(module => [module.module_key, module])
+        );
+        PROMPT_PROFILES = Object.fromEntries(
+            (profilesResult.data || []).map(profile => [profile.profile_key, profile])
+        );
+        PROMPT_SECTIONS = (sectionsResult.data || []).sort((a, b) => {
+            if (a.mode !== b.mode) return a.mode.localeCompare(b.mode);
+            return (a.sort_order ?? 9999) - (b.sort_order ?? 9999);
+        });
+
+        if (!PROMPT_SECTIONS.some(section => section.mode === "model" && section.enabled !== false)
+            || !PROMPT_SECTIONS.some(section => section.mode === "product" && section.enabled !== false)) {
+            setStatus("Prompt Engine 設定缺漏", "var(--danger)");
+            window.showToast("Prompt Engine 設定缺漏");
+            return;
+        }
+
+        setStatus("雲端 Prompt Engine 已同步", "var(--success)");
         restoreWorkspaceState(workspaceState);
         window.generatePrompt();
-        if (notifyReload) window.showToast("資料已重新載入，工作台設定已保留");
+        if (notifyReload) window.showToast("資料與 Prompt Engine 已重新載入，工作台設定已保留");
     }
 
     function setStatus(text, color) {
@@ -1082,7 +1130,11 @@ The selected photographic style may change color, contrast, grain, exposure, hig
             const strong = document.createElement("strong");
             strong.textContent = item.label;
             const meta = document.createElement("span");
-            meta.textContent = item.gender === "both" ? "通用" : item.gender === "female" ? "女性" : "男性";
+            const genderText = item.gender === "both" ? "通用" : item.gender === "female" ? "女性" : "男性";
+            const profileText = currentManageCategory === "POSES" && item.framing_profile
+                ? ` · ${PROMPT_PROFILES[item.framing_profile]?.label || item.framing_profile}`
+                : "";
+            meta.textContent = `${genderText}${profileText}`;
             info.append(strong, meta);
             main.append(handle, info);
 
@@ -1134,7 +1186,8 @@ The selected photographic style may change color, contrast, grain, exposure, hig
             label: item.label,
             gender: item.gender,
             prompt_text: item.prompt_text,
-            sort_order: item.sort_order
+            sort_order: item.sort_order,
+            framing_profile: item.framing_profile ?? null
         }));
         const { error } = await supabase.from("wako_prompts").upsert(updates, { onConflict: "id" });
         if (error) {
