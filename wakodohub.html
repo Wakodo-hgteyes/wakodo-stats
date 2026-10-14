@@ -426,14 +426,58 @@
       .hub-brand-copy{display:none}
     }
 
-    .perm-grid{display:flex;flex-wrap:wrap;gap:7px;align-items:center}
-    .perm-check{display:inline-flex;align-items:center;gap:5px;padding:6px 8px;border:1px solid var(--line);border-radius:9px;background:#f8f9fa;color:#555b61;font-size:10px;font-weight:850;white-space:nowrap}
-    .perm-check input{accent-color:var(--blue)}
-    .member-access-row,.code-access-row{padding:13px;border:1px solid var(--line);border-radius:14px;background:#fff;display:grid;gap:10px}
-    .member-access-head,.code-access-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
-    .member-access-meta,.code-access-meta{font-size:10px;color:#85898e;font-weight:750;line-height:1.55;margin-top:3px}
-    .access-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+    .perm-grid{display:grid;gap:10px}
+    .perm-section{display:grid;gap:7px}
+    .perm-section-title{font-size:13px;font-weight:900;color:#686d73}
+    .perm-grid-inner{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+    .perm-check{display:inline-flex;align-items:center;gap:7px;padding:8px 11px;border:1px solid var(--line);border-radius:10px;background:#f8f9fa;color:#555b61;font-size:13px;font-weight:850;white-space:nowrap;transition:transform .18s ease,background .18s ease,border-color .18s ease}
+    .perm-check:has(input:checked){background:rgba(66,133,244,.08);border-color:rgba(66,133,244,.20);color:#2f6fd8}
+    .perm-check input{accent-color:var(--blue);width:16px;height:16px}
+    .member-access-row,.code-access-row{padding:15px 16px;border:1px solid var(--line);border-radius:16px;background:#fff;display:grid;gap:12px}
+    .member-access-row.is-disabled{background:#fafafa}
+    .member-access-head,.code-access-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap}
+    .member-access-meta,.code-access-meta{font-size:13px;color:#757a80;font-weight:700;line-height:1.6;margin-top:5px}
+    .access-actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
     .pending-label{color:#d97706;font-weight:900}.rejected-label{color:#b3261e;font-weight:900}
+    .member-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 13px}
+    .member-search{flex:1 1 230px;max-width:360px;height:42px;font-size:14px}
+    .member-filters{display:flex;gap:7px;flex-wrap:wrap}
+    .member-filter{height:36px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:#fff;color:#656a70;font-size:13px;font-weight:850}
+    .member-filter.active{background:#202124;color:#fff;border-color:#202124}
+    .member-counts{display:flex;gap:8px;flex-wrap:wrap;margin-top:5px;font-size:13px!important}
+    .member-counts b{color:#35393d}
+    .member-details{display:grid;gap:12px;padding-top:12px;border-top:1px solid var(--line)}
+    .member-details.hidden{display:none!important}
+    .member-name-editor{grid-template-columns:minmax(210px,1fr) auto;gap:9px;margin-top:0}
+    .member-name-editor .modal-input{height:42px;font-size:14px}
+    .member-name-check{font-size:13px}
+    .member-section-label{font-size:13px;font-weight:900;color:#686d73}
+    .danger-zone{padding:12px;border-radius:12px;background:rgba(234,67,53,.045);border:1px solid rgba(234,67,53,.12)}
+    .danger-note{font-size:13px;color:#8a5250;line-height:1.6;font-weight:700;margin-bottom:8px}
+    .code-editor{display:grid;grid-template-columns:minmax(150px,1fr) auto;gap:8px;align-items:end;margin-top:4px}
+    .code-date-field{display:grid;gap:5px}
+    .code-date-field label{font-size:13px;font-weight:850;color:#686d73}
+    .admin-summary strong{font-size:16px}
+    .admin-summary span{font-size:13px}
+    .row-main strong{font-size:15px}
+    .row-main span,.row-cell{font-size:13px}
+    .status-tag{font-size:13px}
+    .tiny-btn{height:36px;padding:0 11px;font-size:13px;border-radius:10px}
+    .admin-tab{font-size:14px;padding:9px 14px}
+    .modal-sub{font-size:13px}
+    .modal-input,.modal-select{font-size:14px}
+    .secondary-btn,.primary-small{font-size:13px}
+    .empty-state{font-size:13px}
+    .new-invite-result strong{font-size:13px}
+    .invite-create{grid-template-columns:minmax(170px,1fr) minmax(150px,.75fr) 120px auto!important}
+    @media(max-width:720px){
+      .member-toolbar{align-items:stretch}.member-search{max-width:none;flex-basis:100%}
+      .member-filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}
+      .member-filter{width:100%}
+      .member-name-editor,.code-editor{grid-template-columns:1fr}
+      .invite-create{grid-template-columns:1fr!important}
+      .access-actions{justify-content:flex-start}
+    }
   </style>
 </head>
 <body>
@@ -583,7 +627,7 @@
         </div>
         <div id="passwordMessage" class="form-message"></div>
         <div class="form-actions"><button id="changePasswordBtn" class="primary-small" type="button">更新密碼</button></div>
-        <div class="version-line">WAKODO HUB v2.2.0</div>
+        <div class="version-line">WAKODO HUB v2.4.0</div>
       </div>
     </div>
   </div>
@@ -591,7 +635,7 @@
   <div id="adminModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-label="帳號與邀請碼管理">
     <div class="hub-modal admin">
       <div class="modal-head">
-        <div><div class="modal-title">帳號與權限管理</div><div class="modal-sub">Owner 專屬 · 審核帳號、頁面權限、完整姓名與單筆消費金額權限、多人邀請碼</div></div>
+        <div><div class="modal-title">帳號與權限管理</div><div class="modal-sub">Owner 專屬 · 審核帳號、頁面權限、完整姓名 / Index單筆金額權限、多人邀請碼</div></div>
         <button class="modal-close" type="button" data-close-modal="adminModal">×</button>
       </div>
       <div class="modal-body">
@@ -600,14 +644,24 @@
           <button class="admin-tab" type="button" data-admin-tab="codes">邀請碼</button>
         </div>
         <div id="adminMembersPanel" class="admin-panel">
-          <div class="admin-summary"><div><strong>成員名單</strong><span id="memberCount"></span></div><button id="refreshAdmin" class="secondary-btn" type="button">重新整理</button></div>
+          <div class="admin-summary"><div><strong>成員名單</strong><span id="memberCount"></span><div id="memberCounts" class="member-counts"></div></div><button id="refreshAdmin" class="secondary-btn" type="button">重新整理</button></div>
+          <div class="member-toolbar">
+            <input id="memberSearch" class="modal-input member-search" type="search" placeholder="搜尋登入帳號" autocomplete="off" />
+            <div id="memberFilters" class="member-filters">
+              <button class="member-filter active" type="button" data-member-filter="all">全部</button>
+              <button class="member-filter" type="button" data-member-filter="pending">待審核</button>
+              <button class="member-filter" type="button" data-member-filter="active">使用中</button>
+              <button class="member-filter" type="button" data-member-filter="disabled">停用區</button>
+              <button class="member-filter" type="button" data-member-filter="rejected">未核准</button>
+            </div>
+          </div>
           <div id="memberList" class="member-list"><div class="empty-state">正在載入…</div></div>
         </div>
         <div id="adminCodesPanel" class="admin-panel hidden">
-          <div class="admin-summary"><div><strong>多人邀請碼</strong><span>同一組邀請碼可依設定重複使用；持碼者無需人工審核</span></div></div>
-          <div class="invite-create" style="grid-template-columns:minmax(150px,1fr) 105px 105px auto">
+          <div class="admin-summary"><div><strong>多人邀請碼</strong><span>可自訂到期日；到期自動停用，再啟用會從當下延長 15 天</span></div></div>
+          <div class="invite-create">
             <input id="codeLabel" class="modal-input" type="text" maxlength="120" placeholder="邀請碼用途／對象" />
-            <select id="codeDays" class="modal-select"><option value="7">7 天</option><option value="30" selected>30 天</option><option value="90">90 天</option><option value="365">365 天</option></select>
+            <input id="codeExpiryDate" class="modal-input" type="date" title="有效期限" />
             <input id="codeMaxUses" class="modal-input" type="number" min="1" placeholder="不限人數" title="留空代表不限使用次數" />
             <button id="createCodeBtn" class="primary-small" type="button">建立邀請碼</button>
           </div>
@@ -622,13 +676,13 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const HUB=Object.freeze({
-      VERSION:"2.3.2",SUPABASE_URL:"https://mdjnidbwqedzobjbhocd.supabase.co",SUPABASE_KEY:"sb_publishable_RoO2nFORoi-VzRgWt75wWQ_OnHAbl9Y",
+      VERSION:"2.4.0",SUPABASE_URL:"https://mdjnidbwqedzobjbhocd.supabase.co",SUPABASE_KEY:"sb_publishable_RoO2nFORoi-VzRgWt75wWQ_OnHAbl9Y",
       LOGIN_AT_KEY:"wakodo_hub_login_at_v2",MAX_LOGIN_AGE:30*24*60*60*1000,TICKET_REFRESH_MS:20*60*1000,TICKET_CHECK_MS:60*1000,STORE_RADIUS_M:150,STORE_COORDS_KEY:"wakodo_hub_store_coords_v1",
       STORES:{linan:{label:"臨安店",address:"台南市中西區臨安路一段100號"},nanke:{label:"南科店",address:"台南市新市區龍目井路165號"}},
       PAGES:{customer:{label:"客源分析",src:"index.html",permission:"can_view_index",ticketPage:"index"},performance:{label:"業績分析",src:"performance.html",permission:"can_view_performance",ticketPage:"performance"},adtracking:{label:"廣告客追蹤",src:"ad-tracking.html",permission:"can_view_ad_tracking",ticketPage:"ad_tracking"},marketing:{label:"行銷開支分析",src:"marketing.html",permission:"can_view_marketing",ticketPage:"marketing"},social:{label:"社群發文成效分析",src:"social-analytics.html",permission:"can_view_social",ticketPage:"social"}}
     });
     const sb=window.supabase.createClient(HUB.SUPABASE_URL,HUB.SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
-    const state={active:"customer",loaded:new Set(),profile:null,members:[],codes:[],ticketAt:new Map(),ticketRefreshing:new Set()};
+    const state={active:"customer",loaded:new Set(),profile:null,members:[],codes:[],ticketAt:new Map(),ticketRefreshing:new Set(),adminMemberFilter:"all",adminMemberQuery:"",expandedMemberId:null};
     const $=id=>document.getElementById(id),qa=sel=>Array.from(document.querySelectorAll(sel));
     const esc=t=>String(t??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
     const fmtDate=v=>{if(!v)return"—";try{return new Intl.DateTimeFormat("zh-TW",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"}).format(new Date(v));}catch{return"—";}};
@@ -727,78 +781,91 @@
     async function renameMe(){const input=$("myLoginName"),status=$("myLoginNameCheck"),msg=$("renameMessage"),btn=$("renameMeBtn"),name=cleanLoginName(input.value);msg.style.color="var(--red)";msg.textContent="";if(!name)return msg.textContent="請輸入登入帳號";btn.disabled=true;try{const {data,error}=await sb.functions.invoke("hub-access",{body:{action:"rename",login_name:name}});if(error||data?.error)throw new Error(data?.error||await functionError(error,"名稱修改失敗"));state.profile=data.member;input.value=state.profile.display_name;renderNameCheck(status,"available","帳號名稱可以使用");updateUserChrome();msg.style.color="#188038";msg.textContent="登入帳號已更新";showToast("登入帳號已更新");markModalPristine("accountModal");}catch(e){const m=e.message||"名稱修改失敗";renderNameCheck(status,m.includes("重複")?"duplicate":"",m.includes("重複")?"名稱重複不可用":"");msg.textContent=m;}finally{btn.disabled=false;}}
     async function changePassword(){const current=$("currentPassword").value,np=$("newPassword").value,np2=$("newPassword2").value,msg=$("passwordMessage");msg.style.color="var(--red)";msg.textContent="";if(!current)return msg.textContent="請輸入目前密碼";if(np.length<8)return msg.textContent="新密碼至少需要 8 個字元";if(np!==np2)return msg.textContent="兩次輸入的新密碼不一致";const btn=$("changePasswordBtn");btn.disabled=true;try{const {data:{user}}=await sb.auth.getUser();if(!user?.email)throw new Error("登入狀態無效，請重新登入");const {error:v}=await sb.auth.signInWithPassword({email:user.email,password:current});if(v)throw new Error("目前密碼不正確");const {error}=await sb.auth.updateUser({password:np});if(error)throw error;$("currentPassword").value=$("newPassword").value=$("newPassword2").value="";msg.style.color="#188038";msg.textContent="密碼已更新";showToast("密碼已更新");markModalPristine("accountModal");}catch(e){msg.textContent=e.message||"密碼更新失敗";}finally{btn.disabled=false;}}
     async function callAdmin(action,payload={}){const {data,error}=await sb.functions.invoke("hub-admin",{body:{action,...payload}});if(error)throw new Error(await functionError(error,"管理操作失敗"));if(data?.error)throw new Error(data.error);return data;}
-    const permDefs=[['can_view_index','客源'],['can_edit_index_customer_service','客服'],['can_view_performance','業績'],['can_view_ad_tracking','廣告追蹤'],['can_view_marketing','支出'],['can_view_social','社群'],['can_view_index_sensitive','完整姓名＋單筆消費金額']];
-    function permHtml(obj,prefix,disabled=false){return permDefs.map(([k,label])=>`<label class="perm-check"><input type="checkbox" data-perm-owner="${prefix}" data-perm-key="${k}" ${obj?.[k]?'checked':''} ${disabled?'disabled':''}>${label}</label>`).join("");}
-    function readPerms(prefix){const out={};permDefs.forEach(([k])=>{const e=document.querySelector(`[data-perm-owner="${prefix}"][data-perm-key="${k}"]`);out[k]=!!e?.checked;});return out;}
+    const permDefs=[
+      {key:'can_view_index',label:'客源',group:'page'},
+      {key:'can_view_performance',label:'業績',group:'page'},
+      {key:'can_view_ad_tracking',label:'廣告追蹤',group:'page'},
+      {key:'can_view_marketing',label:'支出',group:'page'},
+      {key:'can_view_social',label:'社群',group:'page'},
+      {key:'can_edit_index_customer_service',label:'客服',group:'extra'},
+      {key:'can_view_index_sensitive',label:'完整姓名 / Index單筆金額',group:'extra'}
+    ];
+    const registrationLabel=v=>({self:'自行申請',invite:'邀請碼加入',owner_legacy:'既有管理帳號',legacy:'既有帳號'}[v]||v||'既有帳號');
+    const statusLabel=v=>({pending:'待審核',active:'使用中',disabled:'已停用',rejected:'未核准'}[v]||v||'—');
+    function permHtml(obj,prefix,disabled=false){
+      const section=(group,title)=>{const defs=permDefs.filter(x=>x.group===group).sort((a,b)=>Number(!!obj?.[b.key])-Number(!!obj?.[a.key]));return `<div class="perm-section" data-perm-section="${prefix}-${group}"><div class="perm-section-title">${title}</div><div class="perm-grid-inner">${defs.map(({key,label})=>`<label class="perm-check" data-perm-order="${permDefs.findIndex(x=>x.key===key)}"><input type="checkbox" data-perm-owner="${prefix}" data-perm-key="${key}" ${obj?.[key]?'checked':''} ${disabled?'disabled':''}>${label}</label>`).join('')}</div></div>`;};
+      return section('page','頁面權限')+section('extra','額外能力');
+    }
+    function readPerms(prefix){const out={};permDefs.forEach(({key})=>{const e=document.querySelector(`[data-perm-owner="${prefix}"][data-perm-key="${key}"]`);out[key]=!!e?.checked;});return out;}
+    function sortPermSection(input){const section=input?.closest('.perm-section'),box=section?.querySelector('.perm-grid-inner');if(!box)return;Array.from(box.querySelectorAll('.perm-check')).sort((a,b)=>{const ai=a.querySelector('input')?.checked?1:0,bi=b.querySelector('input')?.checked?1:0;return bi-ai||Number(a.dataset.permOrder)-Number(b.dataset.permOrder);}).forEach(x=>box.appendChild(x));}
+    function bindPermUX(root,onDirty){root?.querySelectorAll('input[data-perm-owner]').forEach(input=>input.addEventListener('change',()=>{sortPermSection(input);onDirty?.(input);}));}
+    function taipeiDateString(date=new Date()){const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Taipei',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(date);const get=t=>parts.find(p=>p.type===t)?.value;return `${get('year')}-${get('month')}-${get('day')}`;}
+    function defaultExpiryDate(days=15){return taipeiDateString(new Date(Date.now()+days*86400000));}
+    function dateInputValue(v){if(!v)return'';return taipeiDateString(new Date(v));}
+    function expiryIsoFromDate(v){if(!/^\d{4}-\d{2}-\d{2}$/.test(String(v||'')))return null;return `${v}T23:59:59+08:00`;}
     async function loadAdminData(){if(state.profile?.role!=="owner")return;try{const [m,c]=await Promise.all([callAdmin("list_members"),callAdmin("list_access_codes")]);state.members=m.members||[];state.codes=c.codes||[];renderMembers();renderCodes();requestAnimationFrame(()=>markModalPristine("adminModal"));}catch(e){showToast(e.message||"管理資料載入失敗");}}
     function statusText(m){if(m.status==="pending")return'<span class="pending-label">待審核</span>';if(m.status==="rejected")return'<span class="rejected-label">未核准</span>';if(m.status==="disabled")return'已停用';return'使用中';}
+    function memberCounts(){const c={pending:0,active:0,disabled:0,rejected:0};state.members.forEach(m=>{if(m.role!=='owner'&&c[m.status]!=null)c[m.status]++;});return c;}
+    function filteredMembers(){const q=state.adminMemberQuery.trim().toLowerCase();return state.members.filter(m=>(state.adminMemberFilter==='all'||m.status===state.adminMemberFilter)&&(!q||String(m.display_name||'').toLowerCase().includes(q))).sort((a,b)=>{if(state.adminMemberFilter==='all'){const rank={pending:0,active:1,disabled:2,rejected:3};const ra=a.role==='owner'?-1:(rank[a.status]??9),rb=b.role==='owner'?-1:(rank[b.status]??9);if(ra!==rb)return ra-rb;}return new Date(b.last_seen_at||0)-new Date(a.last_seen_at||0)||new Date(a.created_at)-new Date(b.created_at);});}
     function renderMembers(){
+      const counts=memberCounts();
       $("memberCount").textContent=`${state.members.length} 位`;
-      if(!state.members.length){$("memberList").innerHTML='<div class="empty-state">尚無成員</div>';return;}
-      $("memberList").innerHTML=state.members.map((m,i)=>{
-        const owner=m.role==="owner",prefix=`m-${m.user_id}`;
-        let actions=owner?'':m.status==="pending"?`<button class="tiny-btn" data-approve="${m.user_id}">核准</button><button class="tiny-btn danger" data-reject="${m.user_id}">拒絕</button>`:`<button class="tiny-btn" data-save-member="${m.user_id}">儲存權限</button><button class="tiny-btn ${m.status==='active'?'danger':''}" data-status="${m.user_id}" data-next="${m.status==='active'?'disabled':'active'}">${m.status==='active'?'停用':'啟用'}</button>`;
-        return`<div class="member-access-row" style="animation-delay:${Math.min(i,8)*20}ms">
+      $("memberCounts").innerHTML=`<span>待審核 <b>${counts.pending}</b></span><span>使用中 <b>${counts.active}</b></span><span>停用 <b>${counts.disabled}</b></span><span>未核准 <b>${counts.rejected}</b></span>`;
+      qa('[data-member-filter]').forEach(b=>b.classList.toggle('active',b.dataset.memberFilter===state.adminMemberFilter));
+      const rows=filteredMembers();
+      if(!rows.length){$("memberList").innerHTML='<div class="empty-state">目前沒有符合條件的成員</div>';return;}
+      $("memberList").innerHTML=rows.map((m,i)=>{
+        const owner=m.role==="owner",prefix=`m-${m.user_id}`,expanded=m.status==='pending'||state.expandedMemberId===m.user_id;
+        let primary='';
+        if(!owner){
+          if(m.status==='pending')primary=`<button class="tiny-btn" data-approve="${m.user_id}">核准</button><button class="tiny-btn danger" data-reject="${m.user_id}">拒絕</button>`;
+          else if(m.status==='active')primary=`<button class="tiny-btn danger" data-status="${m.user_id}" data-next="disabled">停用</button>`;
+          else if(m.status==='disabled')primary=`<button class="tiny-btn" data-status="${m.user_id}" data-next="active">啟用</button>`;
+          else if(m.status==='rejected')primary=`<button class="tiny-btn" data-status="${m.user_id}" data-next="disabled">移至停用</button>`;
+        }
+        const deleteAction=!owner&&m.status==='disabled'&&state.adminMemberFilter==='disabled'?`<div class="danger-zone"><div class="danger-note">永久刪除只會出現在停用區。刪除後帳號本體與登入資格會移除，歷史稽核紀錄保留。</div><button class="tiny-btn danger" data-delete-member="${m.user_id}">永久刪除帳號</button></div>`:'';
+        return`<div class="member-access-row ${m.status==='disabled'?'is-disabled':''}" style="animation-delay:${Math.min(i,8)*20}ms">
           <div class="member-access-head">
-            <div class="row-main"><strong>${esc(m.display_name)} ${owner?'<span class="mini-pill owner">Owner</span>':''}</strong><div class="member-access-meta">${statusText(m)} · ${esc(m.registration_source||'legacy')} · 建立 ${fmtDate(m.created_at)}</div></div>
-            <div class="access-actions">${actions}</div>
+            <div class="row-main"><strong>${esc(m.display_name)} ${owner?'<span class="mini-pill owner">Owner</span>':''}</strong><div class="member-access-meta">${statusText(m)} · ${esc(registrationLabel(m.registration_source))} · 建立 ${fmtDate(m.created_at)} · 最後使用 ${m.last_seen_at?fmtDate(m.last_seen_at):'尚無紀錄'}</div></div>
+            <div class="access-actions">${primary}<button class="tiny-btn" data-toggle-member="${m.user_id}">${expanded?'收合':'管理'}</button></div>
           </div>
-          <div class="member-name-editor">
-            <input class="modal-input" type="text" maxlength="80" value="${esc(m.display_name)}" data-member-name-input="${m.user_id}" aria-label="登入帳號">
-            <button class="tiny-btn" type="button" data-save-name="${m.user_id}">儲存名稱</button>
-            <div class="name-helper member-name-check">中英文不限，建議以常用的名字或暱稱以利管理員辨認。</div>
-            <div class="name-check member-name-check" data-member-name-check="${m.user_id}" aria-live="polite"></div>
+          <div class="member-details ${expanded?'':'hidden'}" data-member-details="${m.user_id}">
+            <div class="member-section-label">登入帳號</div>
+            <div class="member-name-editor">
+              <input class="modal-input" type="text" maxlength="80" value="${esc(m.display_name)}" data-member-name-input="${m.user_id}" aria-label="登入帳號">
+              <button class="tiny-btn" type="button" data-save-name="${m.user_id}">儲存名稱</button>
+              <div class="name-helper member-name-check">中英文不限，建議以常用名字或暱稱以利辨認。</div>
+              <div class="name-check member-name-check" data-member-name-check="${m.user_id}" aria-live="polite"></div>
+            </div>
+            <div class="perm-grid" data-member-perms="${m.user_id}">${permHtml(m,prefix,owner)}</div>
+            ${owner?'':`<div class="form-actions"><button class="primary-small hidden" data-save-member="${m.user_id}">儲存權限變更</button></div>`}
+            ${deleteAction}
           </div>
-          <div class="perm-grid">${permHtml(m,prefix,owner)}</div>
         </div>`;
       }).join("");
-      qa('[data-member-name-input]').forEach(input=>{
-        const m=state.members.find(x=>x.user_id===input.dataset.memberNameInput),status=document.querySelector(`[data-member-name-check="${input.dataset.memberNameInput}"]`);
-        bindLiveNameCheck(input,status,{currentName:m?.display_name||""});
-      });
-      qa('[data-save-name]').forEach(b=>b.onclick=async()=>{
-        const id=b.dataset.saveName,input=document.querySelector(`[data-member-name-input="${id}"]`),status=document.querySelector(`[data-member-name-check="${id}"]`),name=cleanLoginName(input?.value);
-        if(!name)return showToast('請輸入登入帳號');
-        b.disabled=true;
-        try{
-          const data=await callAdmin('rename_member',{user_id:id,login_name:name});
-          renderNameCheck(status,'available','帳號名稱可以使用');
-          if(id===state.profile?.user_id){state.profile={...state.profile,...data.member};updateUserChrome();}
-          showToast('登入帳號已更新');await loadAdminData();
-        }catch(e){const m=e.message||'名稱修改失敗';if(m.includes('重複'))renderNameCheck(status,'duplicate','名稱重複不可用');showToast(m);}
-        finally{b.disabled=false;}
-      });
+      qa('[data-toggle-member]').forEach(b=>b.onclick=()=>{state.expandedMemberId=state.expandedMemberId===b.dataset.toggleMember?null:b.dataset.toggleMember;renderMembers();});
+      qa('[data-member-name-input]').forEach(input=>{const m=state.members.find(x=>x.user_id===input.dataset.memberNameInput),status=document.querySelector(`[data-member-name-check="${input.dataset.memberNameInput}"]`);bindLiveNameCheck(input,status,{currentName:m?.display_name||""});});
+      qa('[data-member-perms]').forEach(root=>{const id=root.dataset.memberPerms,save=document.querySelector(`[data-save-member="${id}"]`);bindPermUX(root,()=>{save?.classList.remove('hidden');});});
+      qa('[data-save-name]').forEach(b=>b.onclick=async()=>{const id=b.dataset.saveName,input=document.querySelector(`[data-member-name-input="${id}"]`),status=document.querySelector(`[data-member-name-check="${id}"]`),name=cleanLoginName(input?.value);if(!name)return showToast('請輸入登入帳號');b.disabled=true;try{const data=await callAdmin('rename_member',{user_id:id,login_name:name});renderNameCheck(status,'available','帳號名稱可以使用');if(id===state.profile?.user_id){state.profile={...state.profile,...data.member};updateUserChrome();}showToast('登入帳號已更新');await loadAdminData();}catch(e){const m=e.message||'名稱修改失敗';if(m.includes('重複'))renderNameCheck(status,'duplicate','名稱重複不可用');showToast(m);}finally{b.disabled=false;}});
       qa('[data-save-member]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{await callAdmin('set_member_permissions',{user_id:b.dataset.saveMember,...readPerms(`m-${b.dataset.saveMember}`)});showToast('權限已更新');await loadAdminData();}catch(e){showToast(e.message);}finally{b.disabled=false;}});
       qa('[data-approve]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{await callAdmin('approve_member',{user_id:b.dataset.approve,...readPerms(`m-${b.dataset.approve}`)});showToast('已核准帳號');await loadAdminData();}catch(e){showToast(e.message);}finally{b.disabled=false;}});
       qa('[data-reject]').forEach(b=>b.onclick=async()=>{if(!confirm('確定拒絕這個帳號申請？'))return;try{await callAdmin('reject_member',{user_id:b.dataset.reject});showToast('已拒絕申請');await loadAdminData();}catch(e){showToast(e.message);}});
-      qa('[data-status]').forEach(b=>b.onclick=async()=>{try{await callAdmin('set_member_status',{user_id:b.dataset.status,status:b.dataset.next});showToast('帳號狀態已更新');await loadAdminData();}catch(e){showToast(e.message);}});
+      qa('[data-status]').forEach(b=>b.onclick=async()=>{const to=b.dataset.next;if(to==='disabled'&&!confirm('確定停用這個帳號？停用後將無法登入，但仍可在停用區重新啟用或永久刪除。'))return;try{await callAdmin('set_member_status',{user_id:b.dataset.status,status:to});showToast(to==='disabled'?'帳號已停用':'帳號已啟用');await loadAdminData();}catch(e){showToast(e.message);}});
+      qa('[data-delete-member]').forEach(b=>b.onclick=async()=>{const m=state.members.find(x=>x.user_id===b.dataset.deleteMember);if(!m)return;if(!confirm(`確定永久刪除「${m.display_name}」？\n\n此帳號已停用。刪除後將移除登入帳號，無法直接復原密碼；稽核歷史仍會保留。`))return;if(!confirm(`最後確認：永久刪除「${m.display_name}」帳號？`))return;b.disabled=true;try{await callAdmin('delete_member',{user_id:m.user_id});showToast('帳號已永久刪除');state.expandedMemberId=null;await loadAdminData();}catch(e){showToast(e.message||'刪除帳號失敗');}finally{b.disabled=false;}});
     }
     function codeStatus(c){if(new Date(c.expires_at).getTime()<=Date.now())return'已過期';if(c.max_uses!=null&&Number(c.use_count)>=Number(c.max_uses))return'已額滿';return c.is_active?'有效':'已停用';}
     function renderCodes(){
       if(!state.codes.length){$("codeList").innerHTML='<div class="empty-state">尚未建立邀請碼</div>';return;}
-      $("codeList").innerHTML=state.codes.map((c,i)=>{
-        const prefix=`c-${c.id}`,usable=c.code&&c.is_active&&new Date(c.expires_at).getTime()>Date.now();
-        return`<div class="code-access-row"><div class="code-access-head"><div class="row-main"><strong>${esc(c.label||'未命名邀請碼')}</strong><div class="code-access-meta">${esc(c.code||'舊資料未保存可讀邀請碼')} · ${codeStatus(c)} · 已使用 ${c.use_count}${c.max_uses==null?' / 不限':` / ${c.max_uses}`} · 到期 ${fmtDate(c.expires_at)}</div></div><div class="access-actions">${usable?`<button class="tiny-btn" data-copy-code="${c.id}">複製邀請碼</button>`:''}<button class="tiny-btn" data-save-code="${c.id}">儲存權限</button><button class="tiny-btn ${c.is_active?'danger':''}" data-toggle-code="${c.id}" data-active="${c.is_active?'false':'true'}">${c.is_active?'停用':'啟用'}</button><button class="tiny-btn danger" data-delete-code="${c.id}">刪除</button></div></div><div class="perm-grid">${permHtml(c,prefix,false)}</div></div>`;
-      }).join("");
-      qa('[data-copy-code]').forEach(b=>b.onclick=async()=>{
-        const c=state.codes.find(x=>x.id===b.dataset.copyCode);if(!c?.code)return;
-        try{await navigator.clipboard.writeText(c.code);showToast('邀請碼已複製');}catch{showToast('無法自動複製');}
-      });
-      qa('[data-save-code]').forEach(b=>b.onclick=async()=>{
-        try{await callAdmin('update_access_code',{id:b.dataset.saveCode,...readPerms(`c-${b.dataset.saveCode}`)});showToast('邀請碼權限已更新');await loadAdminData();}catch(e){showToast(e.message);}
-      });
-      qa('[data-toggle-code]').forEach(b=>b.onclick=async()=>{
-        try{await callAdmin('set_access_code_active',{id:b.dataset.toggleCode,active:b.dataset.active==='true'});showToast('邀請碼狀態已更新');await loadAdminData();}catch(e){showToast(e.message);}
-      });
-      qa('[data-delete-code]').forEach(b=>b.onclick=async()=>{
-        const c=state.codes.find(x=>x.id===b.dataset.deleteCode);
-        if(!confirm(`確定永久刪除邀請碼「${c?.label||c?.code||'未命名'}」？\n\n刪除後此邀請碼會立即失效，且無法重新啟用；已經用此碼完成註冊的會員不受影響。`))return;
-        b.disabled=true;
-        try{await callAdmin('delete_access_code',{id:b.dataset.deleteCode});showToast('邀請碼已永久刪除並失效');await loadAdminData();}catch(e){showToast(e.message||'刪除邀請碼失敗');}finally{b.disabled=false;}
-      });
+      $("codeList").innerHTML=state.codes.map((c,i)=>{const prefix=`c-${c.id}`,usable=c.code&&c.is_active&&new Date(c.expires_at).getTime()>Date.now();return`<div class="code-access-row"><div class="code-access-head"><div class="row-main"><strong>${esc(c.label||'未命名邀請碼')}</strong><div class="code-access-meta">${esc(c.code||'舊資料未保存可讀邀請碼')} · ${codeStatus(c)} · 已使用 ${c.use_count}${c.max_uses==null?' / 不限':` / ${c.max_uses}`}</div></div><div class="access-actions">${usable?`<button class="tiny-btn" data-copy-code="${c.id}">複製邀請碼</button>`:''}<button class="tiny-btn ${c.is_active?'danger':''}" data-toggle-code="${c.id}" data-active="${c.is_active?'false':'true'}">${c.is_active?'停用':'啟用＋15天'}</button><button class="tiny-btn danger" data-delete-code="${c.id}">刪除</button></div></div><div class="code-editor"><div class="code-date-field"><label for="code-exp-${c.id}">有效期限</label><input id="code-exp-${c.id}" class="modal-input" type="date" value="${dateInputValue(c.expires_at)}" data-code-expiry="${c.id}"></div><button class="secondary-btn" type="button" data-save-expiry="${c.id}">更新到期日</button></div><div class="perm-grid" data-code-perms="${c.id}">${permHtml(c,prefix,false)}</div><div class="form-actions"><button class="primary-small hidden" data-save-code="${c.id}">儲存權限變更</button></div></div>`;}).join("");
+      qa('[data-code-perms]').forEach(root=>{const id=root.dataset.codePerms,save=document.querySelector(`[data-save-code="${id}"]`);bindPermUX(root,()=>save?.classList.remove('hidden'));});
+      qa('[data-copy-code]').forEach(b=>b.onclick=async()=>{const c=state.codes.find(x=>x.id===b.dataset.copyCode);if(!c?.code)return;try{await navigator.clipboard.writeText(c.code);showToast('邀請碼已複製');}catch{showToast('無法自動複製');}});
+      qa('[data-save-code]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{await callAdmin('update_access_code',{id:b.dataset.saveCode,...readPerms(`c-${b.dataset.saveCode}`)});showToast('邀請碼權限已更新');await loadAdminData();}catch(e){showToast(e.message);}finally{b.disabled=false;}});
+      qa('[data-save-expiry]').forEach(b=>b.onclick=async()=>{const input=document.querySelector(`[data-code-expiry="${b.dataset.saveExpiry}"]`),expires_at=expiryIsoFromDate(input?.value);if(!expires_at)return showToast('請選擇有效到期日');b.disabled=true;try{await callAdmin('update_access_code',{id:b.dataset.saveExpiry,expires_at});showToast('到期日已更新');await loadAdminData();}catch(e){showToast(e.message||'到期日更新失敗');}finally{b.disabled=false;}});
+      qa('[data-toggle-code]').forEach(b=>b.onclick=async()=>{const enabling=b.dataset.active==='true';try{await callAdmin('set_access_code_active',{id:b.dataset.toggleCode,active:enabling});showToast(enabling?'邀請碼已啟用，效期自動延長 15 天':'邀請碼已停用');await loadAdminData();}catch(e){showToast(e.message);}});
+      qa('[data-delete-code]').forEach(b=>b.onclick=async()=>{const c=state.codes.find(x=>x.id===b.dataset.deleteCode);if(!confirm(`確定永久刪除邀請碼「${c?.label||c?.code||'未命名'}」？\n\n刪除後此邀請碼會立即失效，且無法重新啟用；已經用此碼完成註冊的會員不受影響。`))return;b.disabled=true;try{await callAdmin('delete_access_code',{id:b.dataset.deleteCode});showToast('邀請碼已永久刪除並失效');await loadAdminData();}catch(e){showToast(e.message||'刪除邀請碼失敗');}finally{b.disabled=false;}});
     }
-    function initCodePerms(){const defaults={can_view_index:true,can_edit_index_customer_service:false,can_view_performance:true,can_view_marketing:false,can_view_ad_tracking:false,can_view_social:false,can_view_index_sensitive:false};$("codeCreatePerms").innerHTML=permHtml(defaults,'newcode',false);}
-    async function createCode(){const btn=$("createCodeBtn");btn.disabled=true;try{const data=await callAdmin('create_access_code',{label:$("codeLabel").value.trim(),expires_days:Number($("codeDays").value||30),max_uses:$("codeMaxUses").value?Number($("codeMaxUses").value):null,...readPerms('newcode')});const code=data.code.code;$("newCodeValue").value=code;$("newCodeResult").classList.remove('hidden');$("codeLabel").value='';try{await navigator.clipboard.writeText(code);showToast('邀請碼已建立並複製');}catch{showToast('邀請碼已建立');}await loadAdminData();}catch(e){showToast(e.message||'建立邀請碼失敗');}finally{btn.disabled=false;}}
+    function initCodePerms(){const defaults={can_view_index:true,can_edit_index_customer_service:false,can_view_performance:true,can_view_marketing:false,can_view_ad_tracking:false,can_view_social:false,can_view_index_sensitive:false};$("codeCreatePerms").innerHTML=permHtml(defaults,'newcode',false);bindPermUX($("codeCreatePerms"));if(!$("codeExpiryDate").value)$("codeExpiryDate").value=defaultExpiryDate(15);}
+    async function createCode(){const btn=$("createCodeBtn"),expires_at=expiryIsoFromDate($("codeExpiryDate").value);if(!expires_at)return showToast('請選擇邀請碼到期日');btn.disabled=true;try{const data=await callAdmin('create_access_code',{label:$("codeLabel").value.trim(),expires_at,max_uses:$("codeMaxUses").value?Number($("codeMaxUses").value):null,...readPerms('newcode')});const code=data.code.code;$("newCodeValue").value=code;$("newCodeResult").classList.remove('hidden');$("codeLabel").value='';$("codeExpiryDate").value=defaultExpiryDate(15);try{await navigator.clipboard.writeText(code);showToast('邀請碼已建立並複製');}catch{showToast('邀請碼已建立');}await loadAdminData();}catch(e){showToast(e.message||'建立邀請碼失敗');}finally{btn.disabled=false;}}
     async function restoreSession(){const {data:{session}}=await sb.auth.getSession();if(!session)return showLoginGate();const at=Number(localStorage.getItem(HUB.LOGIN_AT_KEY)||0);if(at&&Date.now()-at>HUB.MAX_LOGIN_AGE){await logout(false);return showLoginGate('登入狀態已超過 30 天，請重新登入');}if(!at)localStorage.setItem(HUB.LOGIN_AT_KEY,String(Date.now()));const p=await loadMyProfile();if(!p)return showLoginGate('此帳號沒有 WAKODO HUB 使用權限');if(p.status==='pending'){await sb.auth.signOut();showPanel('pendingPanel');$("authTitle").textContent='等待管理員審核';return;}if(p.status!=='active'){await sb.auth.signOut();return showLoginGate(p.status==='rejected'?'此帳號申請未獲核准':'此帳號目前已停用，請聯絡管理員');}await sb.rpc('hub_touch_my_session');showHub(p);requestCurrentLocation(false);}
 
     qa('.tab').forEach(b=>b.addEventListener('click',()=>switchView(b.dataset.view)));
@@ -809,7 +876,10 @@
     bindLiveNameCheck($('myLoginName'),$('myLoginNameCheck'),{currentName:()=>state.profile?.display_name||''});
     $('renameMeBtn').addEventListener('click',renameMe);
     qa('[data-close-modal]').forEach(b=>b.addEventListener('click',()=>closeModal(b.dataset.closeModal)));qa('.modal-backdrop').forEach(e=>bindSmartBackdrop(e,()=>closeModal(e.id),{confirmDirty:true}));$('refreshMyLocation').addEventListener('click',()=>requestCurrentLocation(true));$('changePasswordBtn').addEventListener('click',changePassword);
-    qa('[data-admin-tab]').forEach(b=>b.addEventListener('click',()=>{qa('[data-admin-tab]').forEach(x=>x.classList.toggle('active',x===b));$('adminMembersPanel').classList.toggle('hidden',b.dataset.adminTab!=='members');$('adminCodesPanel').classList.toggle('hidden',b.dataset.adminTab!=='codes');}));$('refreshAdmin').addEventListener('click',loadAdminData);$('createCodeBtn').addEventListener('click',createCode);$('copyCodeBtn').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('newCodeValue').value);showToast('邀請碼已複製');}catch{showToast('無法自動複製');}});initCodePerms();
+    qa('[data-admin-tab]').forEach(b=>b.addEventListener('click',()=>{qa('[data-admin-tab]').forEach(x=>x.classList.toggle('active',x===b));$('adminMembersPanel').classList.toggle('hidden',b.dataset.adminTab!=='members');$('adminCodesPanel').classList.toggle('hidden',b.dataset.adminTab!=='codes');}));
+    qa('[data-member-filter]').forEach(b=>b.addEventListener('click',()=>{state.adminMemberFilter=b.dataset.memberFilter||'all';state.expandedMemberId=null;renderMembers();}));
+    $('memberSearch').addEventListener('input',e=>{state.adminMemberQuery=e.target.value||'';state.expandedMemberId=null;renderMembers();});
+    $('refreshAdmin').addEventListener('click',loadAdminData);$('createCodeBtn').addEventListener('click',createCode);$('copyCodeBtn').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('newCodeValue').value);showToast('邀請碼已複製');}catch{showToast('無法自動複製');}});initCodePerms();
     $('reloadCurrent').addEventListener('click',()=>loadView(state.active,true));$('openCurrent').addEventListener('click',()=>showToast('功能頁僅可於 WAKODO HUB 內使用'));
     window.addEventListener('hashchange',async()=>{if(state.profile){const key=String(location.hash||'').replace(/^#/,'');if(canPage(key))await switchView(key,false);}});
     window.addEventListener('resize',()=>requestAnimationFrame(()=>{syncHubViewportHeight();syncTabSlider(state.active);}));
