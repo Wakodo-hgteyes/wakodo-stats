@@ -532,7 +532,7 @@
     .member-permission-summary{display:flex;align-items:center;justify-content:flex-end;gap:5px 9px;flex-wrap:wrap;min-width:0;padding:2px 0}
     .access-summary-prefix{font-size:11px;font-weight:850;color:#a0a4aa;margin-right:-3px}
     .access-summary-divider{font-size:11px;font-weight:900;color:#c3c6ca;margin:0 -2px}
-    .access-summary-token{font-size:12px;font-weight:900;line-height:1.2;white-space:nowrap;text-shadow:0 0 12px currentColor;opacity:.94}
+    .access-summary-token{font-size:12px;font-weight:900;line-height:1.2;white-space:nowrap;opacity:1}
     .access-summary-token[data-perm="can_view_index"]{color:#2f74df}
     .access-summary-token[data-perm="can_view_performance"]{color:#1a9844}
     .access-summary-token[data-perm="can_view_ad_tracking"]{color:#744ce7}
@@ -540,7 +540,13 @@
     .access-summary-token[data-perm="can_view_social"]{color:#b78300}
     .access-summary-token[data-perm="can_edit_index_customer_service"]{color:#0b8f8b}
     .access-summary-token[data-perm="can_view_index_sensitive"]{color:#c63775}
-    .access-summary-empty{font-size:12px;font-weight:850;color:#b1b4b8}
+    .access-summary-empty{font-size:12px;font-weight:850;color:#a2a6ab}
+
+    .perspective-bar{height:38px;max-width:220px;display:inline-flex;align-items:center;gap:7px;padding:0 7px 0 10px;border:1px solid rgba(34,34,34,.09);border-radius:12px;background:#f6f7f8;color:#4f5459;box-shadow:0 2px 7px rgba(0,0,0,.035);white-space:nowrap}
+    .perspective-label{min-width:0;max-width:126px;overflow:hidden;text-overflow:ellipsis;font-size:11px;font-weight:900}
+    .perspective-readonly{font-size:10px;font-weight:800;color:#8a8e93}
+    .perspective-exit{height:26px;padding:0 8px;border:1px solid rgba(34,34,34,.09);border-radius:8px;background:#fff;color:#5f6368;font-size:10px;font-weight:900}
+    .perspective-exit:hover{color:#202124;border-color:rgba(34,34,34,.16)}
 
     .tiny-btn,.secondary-btn,.primary-small,.modal-close{transition:transform .18s cubic-bezier(.22,.85,.28,1.08),box-shadow .20s ease,border-color .20s ease,color .20s ease,filter .20s ease}
     .tiny-btn:hover,.secondary-btn:hover,.modal-close:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(66,133,244,.12),0 0 15px rgba(66,133,244,.10);border-color:rgba(66,133,244,.26)}
@@ -560,6 +566,16 @@
       .member-access-head{grid-template-columns:1fr}
       .member-permission-summary{grid-column:auto;justify-content:flex-start}
       .access-actions{justify-content:flex-start}
+    }
+    @media(max-width:1050px){
+      .perspective-bar{max-width:165px}
+      .perspective-label{max-width:92px}
+    }
+    @media(max-width:720px){
+      .perspective-bar{max-width:96px;padding:0 5px 0 7px;gap:4px}
+      .perspective-label{max-width:54px;font-size:10px}
+      .perspective-readonly{display:none}
+      .perspective-exit{padding:0 6px}
     }
     @media(prefers-reduced-motion:reduce){
       .member-filter-slider,.admin-tab-slider,.member-list,.member-access-row,.member-filter,.tiny-btn,.secondary-btn,.primary-small,.modal-close{transition:none!important;animation:none!important}
@@ -633,6 +649,9 @@
       </nav>
 
       <div class="actions">
+        <div id="perspectiveBar" class="perspective-bar hidden" role="status" aria-live="polite">
+          <span id="perspectiveLabel" class="perspective-label">視角切換</span><span class="perspective-readonly">唯讀</span><button id="exitPerspective" class="perspective-exit" type="button">退出</button>
+        </div>
         <div class="user-wrap">
           <button id="userMenuBtn" class="user-btn" type="button" aria-haspopup="true" aria-expanded="false">
             <span id="userAvatar" class="user-avatar">W</span><span id="userMenuName" class="user-name">帳號</span><span class="user-chevron">⌄</span>
@@ -713,7 +732,7 @@
         </div>
         <div id="passwordMessage" class="form-message"></div>
         <div class="form-actions"><button id="changePasswordBtn" class="primary-small" type="button">更新密碼</button></div>
-        <div class="version-line">WAKODO HUB v2.4.1</div>
+        <div class="version-line">WAKODO HUB v2.4.3</div>
       </div>
     </div>
   </div>
@@ -764,13 +783,13 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const HUB=Object.freeze({
-      VERSION:"2.4.1",SUPABASE_URL:"https://mdjnidbwqedzobjbhocd.supabase.co",SUPABASE_KEY:"sb_publishable_RoO2nFORoi-VzRgWt75wWQ_OnHAbl9Y",
+      VERSION:"2.4.3",SUPABASE_URL:"https://mdjnidbwqedzobjbhocd.supabase.co",SUPABASE_KEY:"sb_publishable_RoO2nFORoi-VzRgWt75wWQ_OnHAbl9Y",
       LOGIN_AT_KEY:"wakodo_hub_login_at_v2",MAX_LOGIN_AGE:30*24*60*60*1000,TICKET_REFRESH_MS:20*60*1000,TICKET_CHECK_MS:60*1000,STORE_RADIUS_M:150,STORE_COORDS_KEY:"wakodo_hub_store_coords_v1",
       STORES:{linan:{label:"臨安店",address:"台南市中西區臨安路一段100號"},nanke:{label:"南科店",address:"台南市新市區龍目井路165號"}},
       PAGES:{customer:{label:"客源分析",src:"index.html",permission:"can_view_index",ticketPage:"index"},performance:{label:"業績分析",src:"performance.html",permission:"can_view_performance",ticketPage:"performance"},adtracking:{label:"廣告客追蹤",src:"ad-tracking.html",permission:"can_view_ad_tracking",ticketPage:"ad_tracking"},marketing:{label:"行銷開支分析",src:"marketing.html",permission:"can_view_marketing",ticketPage:"marketing"},social:{label:"社群發文成效分析",src:"social-analytics.html",permission:"can_view_social",ticketPage:"social"}}
     });
     const sb=window.supabase.createClient(HUB.SUPABASE_URL,HUB.SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
-    const state={active:"customer",loaded:new Set(),profile:null,members:[],codes:[],ticketAt:new Map(),ticketRefreshing:new Set(),adminMemberFilter:"all",adminMemberQuery:"",expandedMemberId:null};
+    const state={active:"customer",loaded:new Set(),profile:null,previewMember:null,viewContextVersion:0,members:[],codes:[],ticketAt:new Map(),ticketRefreshing:new Set(),adminMemberFilter:"all",adminMemberQuery:"",expandedMemberId:null};
     const $=id=>document.getElementById(id),qa=sel=>Array.from(document.querySelectorAll(sel));
     const esc=t=>String(t??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
     const fmtDate=v=>{if(!v)return"—";try{return new Intl.DateTimeFormat("zh-TW",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"}).format(new Date(v));}catch{return"—";}};
@@ -797,10 +816,16 @@
     async function register(){setRegisterError("");const name=cleanLoginName($("registerName").value),pwd=$("registerPassword").value,pwd2=$("registerPassword2").value,code=$("accessCode").value.trim();if(!name)return setRegisterError("請填寫登入帳號");if(pwd.length<8)return setRegisterError("密碼至少需要 8 個字元");if(pwd!==pwd2)return setRegisterError("兩次輸入的密碼不一致");try{const available=await publicNameAvailable(name);renderNameCheck($("registerNameCheck"),available?"available":"duplicate",available?"帳號名稱可以使用":"名稱重複不可用");if(!available)return setRegisterError("名稱重複不可用");}catch(e){return setRegisterError(e.message||"名稱檢查失敗");}if(code&&!(await validateCode()))return;const btn=$("registerSubmit");btn.disabled=true;btn.textContent="送出中…";try{const action=code?"register_code":"register_self";const {data,error}=await sb.functions.invoke("hub-register",{body:{action,access_code:code||undefined,login_name:name,password:pwd}});if(error||data?.error)throw new Error(data?.error||await functionError(error,"註冊失敗"));if(data.status==="pending"){showPanel("pendingPanel");$("authTitle").textContent="等待管理員審核";$("authDesc").textContent="申請已成功建立。";return;}await signInByLoginName(name,pwd);localStorage.setItem(HUB.LOGIN_AT_KEY,String(Date.now()));const profile=await loadMyProfile();if(!profile||profile.status!=="active")throw new Error("帳號尚未取得使用權限");await sb.rpc("hub_touch_my_session");history.replaceState(null,"",`${location.pathname}${location.search}#customer`);showHub(profile);requestCurrentLocation(false);}catch(e){setRegisterError(e.message||"註冊失敗");}finally{btn.disabled=false;btn.textContent="送出註冊";}}
     async function loadMyProfile(){const {data,error}=await sb.functions.invoke("hub-access",{body:{action:"me"}});if(error||data?.error)return null;state.profile=data.member||null;return state.profile;}
     async function login(){setGateError("");const loginName=cleanLoginName($("loginName").value),password=$("loginPassword").value;if(!loginName)return setGateError("請輸入登入帳號");if(!password)return setGateError("請輸入密碼");const btn=$("hubEnter");btn.disabled=true;btn.textContent="登入中…";try{await signInByLoginName(loginName,password);const profile=await loadMyProfile();if(!profile){await sb.auth.signOut();throw new Error("此帳號沒有 WAKODO HUB 使用權限");}if(profile.status==="pending"){await sb.auth.signOut();showPanel("pendingPanel");$("authTitle").textContent="等待管理員審核";$("authDesc").textContent="您的申請已送出，管理員核准後即可登入。";return;}if(profile.status!=="active"){await sb.auth.signOut();throw new Error(profile.status==="rejected"?"此帳號申請未獲核准":"此帳號目前已停用，請聯絡管理員");}localStorage.setItem(HUB.LOGIN_AT_KEY,String(Date.now()));await sb.rpc("hub_touch_my_session");showHub(profile);requestCurrentLocation(false);}catch(e){setGateError(e.message||"登入失敗");}finally{btn.disabled=false;btn.textContent="登入 WAKODO HUB";}}
-    function canPage(name){const p=state.profile;if(!p)return false;return p.role==="owner"||p[HUB.PAGES[name]?.permission]===true;}
+    function activeViewProfile(){return state.previewMember||state.profile;}
+    function canPage(name){const p=activeViewProfile();if(!p)return false;return p.role==="owner"||p[HUB.PAGES[name]?.permission]===true;}
     function permittedPages(){return Object.keys(HUB.PAGES).filter(canPage);}
-    function updateUserChrome(){const p=state.profile;if(!p)return;$("userAvatar").textContent=(p.display_name||"W").trim().charAt(0).toUpperCase()||"W";$("userMenuName").textContent=p.display_name;$("menuProfileName").textContent=p.display_name;$("menuProfileRole").textContent=p.role==="owner"?"Owner · 最高管理員":"Member · 成員";$("openHubAdmin").classList.toggle("hidden",p.role!=="owner");$("profileName").textContent=p.display_name;$("profileRole").textContent=p.role==="owner"?"Owner":"Member";$("profileRole").classList.toggle("owner",p.role==="owner");if($("myLoginName")&&document.activeElement!==$("myLoginName"))$("myLoginName").value=p.display_name||"";renderMyLocation();}
-    function showHub(profile){state.profile=profile;$("hubGate").style.display="none";$("hubApp").classList.remove("hidden");qa(".tab").forEach(btn=>btn.classList.toggle("hidden",!canPage(btn.dataset.view)));qa(".view").forEach(panel=>panel.classList.toggle("hidden",!canPage(panel.dataset.viewPanel)));$("openCurrent").classList.add("hidden");updateUserChrome();const allowed=permittedPages();if(!allowed.length){return showLoginGate("此帳號目前沒有任何頁面查看權限");}const raw=String(location.hash||"").replace(/^#/,"");const target=allowed.includes(raw)?raw:allowed[0];switchView(target,false);}
+    function renderPerspectiveChrome(){const bar=$("perspectiveBar"),p=state.previewMember;if(!bar)return;bar.classList.toggle("hidden",!p);if(p)$("perspectiveLabel").textContent=`視角：${p.display_name||"成員"}`;}
+    function updateUserChrome(){const actual=state.profile,shown=state.previewMember||actual;if(!actual||!shown)return;$("userAvatar").textContent=(shown.display_name||"W").trim().charAt(0).toUpperCase()||"W";$("userMenuName").textContent=shown.display_name;$("menuProfileName").textContent=shown.display_name;$("menuProfileRole").textContent=state.previewMember?"視角預覽 · Member":(actual.role==="owner"?"Owner · 最高管理員":"Member · 成員");$("openMyAccount").classList.toggle("hidden",!!state.previewMember);$("openHubAdmin").classList.toggle("hidden",actual.role!=="owner"||!!state.previewMember);$("profileName").textContent=actual.display_name;$("profileRole").textContent=actual.role==="owner"?"Owner":"Member";$("profileRole").classList.toggle("owner",actual.role==="owner");if($("myLoginName")&&document.activeElement!==$("myLoginName"))$("myLoginName").value=actual.display_name||"";renderPerspectiveChrome();renderMyLocation();}
+    function applyPageVisibility(){qa(".tab").forEach(btn=>btn.classList.toggle("hidden",!canPage(btn.dataset.view)));qa(".view").forEach(panel=>panel.classList.toggle("hidden",!canPage(panel.dataset.viewPanel)));requestAnimationFrame(()=>syncTabSlider(state.active));}
+    function clearLoadedViews(){state.viewContextVersion++;qa('.view iframe').forEach(f=>f.removeAttribute('src'));state.loaded.clear();state.ticketAt.clear();state.ticketRefreshing.clear();}
+    async function enterPerspective(member){if(state.profile?.role!=="owner"||!member||member.role==="owner"||member.status!=="active")return;const allowed=Object.keys(HUB.PAGES).filter(name=>member[HUB.PAGES[name].permission]===true);if(!allowed.length)return showToast("此成員目前沒有頁面查看權限");state.previewMember={...member};clearLoadedViews();applyPageVisibility();updateUserChrome();closeModal("adminModal");const target=allowed.includes(state.active)?state.active:allowed[0];await switchView(target,true);showToast(`已切換為 ${member.display_name} 的視角 · 唯讀預覽`);}
+    async function exitPerspective(){if(!state.previewMember)return;state.previewMember=null;clearLoadedViews();applyPageVisibility();updateUserChrome();const allowed=permittedPages(),target=allowed.includes(state.active)?state.active:allowed[0];if(target)await switchView(target,true);showToast("已退出視角切換，恢復 Owner 視角");}
+    function showHub(profile){state.profile=profile;state.previewMember=null;$("hubGate").style.display="none";$("hubApp").classList.remove("hidden");applyPageVisibility();$("openCurrent").classList.add("hidden");updateUserChrome();const allowed=permittedPages();if(!allowed.length){return showLoginGate("此帳號目前沒有任何頁面查看權限");}const raw=String(location.hash||"").replace(/^#/,"");const target=allowed.includes(raw)?raw:allowed[0];switchView(target,false);}
     async function ensureHubSession(){
       const {data:{session},error}=await sb.auth.getSession();
       if(error)throw error;
@@ -817,7 +842,8 @@
       const page=HUB.PAGES[name];
       const session=await ensureHubSession();
       if(!session){const err=new Error("登入狀態已失效，請重新登入");err.authExpired=true;throw err;}
-      const {data,error}=await sb.functions.invoke("hub-access",{body:{action:"ticket",page:page.ticketPage}});
+      const ticketBody={action:"ticket",page:page.ticketPage};if(state.previewMember?.user_id)ticketBody.preview_user_id=state.previewMember.user_id;
+      const {data,error}=await sb.functions.invoke("hub-access",{body:ticketBody});
       if(error||data?.error)throw new Error(data?.error||await functionError(error,"無法取得頁面通行證"));
       return data.ticket;
     }
@@ -827,9 +853,11 @@
       if(!force&&last&&Date.now()-last<HUB.TICKET_REFRESH_MS)return true;
       const panel=document.querySelector(`[data-view-panel="${name}"]`),frame=panel?.querySelector("iframe");
       if(!frame?.contentWindow)return false;
+      const contextVersion=state.viewContextVersion;
       state.ticketRefreshing.add(name);
       try{
         const ticket=await issueTicket(name);
+        if(contextVersion!==state.viewContextVersion)return false;
         frame.contentWindow.postMessage({type:"wakodo-hub-ticket-refresh",page:HUB.PAGES[name].ticketPage,ticket},location.origin);
         state.ticketAt.set(name,Date.now());
         return true;
@@ -848,10 +876,10 @@
         try{await sb.rpc("hub_touch_my_session");}catch{}
       }catch(e){console.warn("HUB 自動續期暫時失敗",e);showToast("連線暫時中斷，恢復後會自動續期");}
     }
-    async function loadView(name,force=false){if(!canPage(name))return;if(state.loaded.has(name)&&!force)return;const panel=document.querySelector(`[data-view-panel="${name}"]`),frame=panel?.querySelector("iframe"),loading=panel?.querySelector(".loading"),reloadBtn=$("reloadCurrent");if(!frame)return;if(loading){loading.innerHTML='<div class="loading-inner"><div class="spinner"></div>正在載入…</div>';loading.style.display="grid";}if(force&&reloadBtn)reloadBtn.classList.add("is-loading");try{const ticket=await issueTicket(name);const base=HUB.PAGES[name].src;const src=force?`${base}${base.includes("?")?"&":"?"}hubReload=${Date.now()}`:base;frame.onload=()=>{if(loading)loading.style.display="none";if(reloadBtn)reloadBtn.classList.remove("is-loading");if(force)showToast(`${HUB.PAGES[name].label} 已重新載入最新版本`);};frame.src=`${src}#hub=${encodeURIComponent(ticket)}`;state.loaded.add(name);state.ticketAt.set(name,Date.now());}catch(e){if(reloadBtn)reloadBtn.classList.remove("is-loading");if(loading){loading.innerHTML=`<div class="loading-inner">${esc(e.message||"沒有查看權限")}</div>`;}showToast(e.message||"無法開啟頁面");}}
+    async function loadView(name,force=false){if(!canPage(name))return;if(state.loaded.has(name)&&!force)return;const contextVersion=state.viewContextVersion,panel=document.querySelector(`[data-view-panel="${name}"]`),frame=panel?.querySelector("iframe"),loading=panel?.querySelector(".loading"),reloadBtn=$("reloadCurrent");if(!frame)return;if(loading){loading.innerHTML='<div class="loading-inner"><div class="spinner"></div>正在載入…</div>';loading.style.display="grid";}if(force&&reloadBtn)reloadBtn.classList.add("is-loading");try{const ticket=await issueTicket(name);if(contextVersion!==state.viewContextVersion)return;const base=HUB.PAGES[name].src;const src=force?`${base}${base.includes("?")?"&":"?"}hubReload=${Date.now()}`:base;frame.onload=()=>{if(loading)loading.style.display="none";if(reloadBtn)reloadBtn.classList.remove("is-loading");if(force)showToast(`${HUB.PAGES[name].label} 已重新載入最新版本`);};frame.src=`${src}#hub=${encodeURIComponent(ticket)}`;state.loaded.add(name);state.ticketAt.set(name,Date.now());}catch(e){if(contextVersion!==state.viewContextVersion)return;if(reloadBtn)reloadBtn.classList.remove("is-loading");if(loading){loading.innerHTML=`<div class="loading-inner">${esc(e.message||"沒有查看權限")}</div>`;}showToast(e.message||"無法開啟頁面");}}
     function syncTabSlider(name=state.active){const tabs=document.querySelector(".tabs"),slider=document.querySelector(".tab-slider"),active=document.querySelector(`.tab[data-view="${name}"]:not(.hidden)`);if(!tabs||!slider||!active)return;slider.style.width=active.offsetWidth+"px";slider.style.left=active.offsetLeft+"px";}
     async function switchView(name,updateHash=true){if(!canPage(name))name=permittedPages()[0];if(!name)return;state.active=name;qa(".tab").forEach(btn=>btn.classList.toggle("active",btn.dataset.view===name));qa(".view").forEach(panel=>panel.classList.toggle("active",panel.dataset.viewPanel===name));requestAnimationFrame(()=>syncTabSlider(name));await loadView(name);await renewPageTicket(name,{silent:true});if(updateHash&&location.hash!==`#${name}`)history.replaceState(null,"",`${location.pathname}${location.search}#${name}`);document.title=`${HUB.PAGES[name].label}｜WAKODO HUB`;}
-    async function logout(show=true){await sb.auth.signOut();localStorage.removeItem(HUB.LOGIN_AT_KEY);state.profile=null;state.loaded.forEach(name=>{const f=document.querySelector(`[data-view-panel="${name}"] iframe`);if(f)f.removeAttribute("src");});state.loaded.clear();state.ticketAt.clear();state.ticketRefreshing.clear();$("loginName").value="";$("loginPassword").value="";history.replaceState(null,"",`${location.pathname}${location.search}`);showLoginGate();if(show)showToast("已登出 WAKODO HUB");}
+    async function logout(show=true){await sb.auth.signOut();localStorage.removeItem(HUB.LOGIN_AT_KEY);state.profile=null;state.previewMember=null;state.loaded.forEach(name=>{const f=document.querySelector(`[data-view-panel="${name}"] iframe`);if(f)f.removeAttribute("src");});state.loaded.clear();state.ticketAt.clear();state.ticketRefreshing.clear();$("loginName").value="";$("loginPassword").value="";history.replaceState(null,"",`${location.pathname}${location.search}`);showLoginGate();if(show)showToast("已登出 WAKODO HUB");}
     function modalState(el){if(!el)return"";const controls=qa("input,select,textarea",el).filter(x=>!['button','submit','reset'].includes(x.type)).map((x,i)=>x.type==='checkbox'||x.type==='radio'?`${i}:${x.checked?1:0}`:`${i}:${x.value}`);return JSON.stringify(controls);}
     function markModalPristine(id){const e=typeof id==='string'?$(id):id;if(e){e.dataset.modalPristine=modalState(e);e.dataset.modalDirty='0';}}
     function modalIsDirty(e){return !!e&&(e.dataset.modalDirty==='1'||(e.dataset.modalPristine!=null&&e.dataset.modalPristine!==modalState(e)));}
@@ -938,7 +966,7 @@
         let primary='';
         if(!owner){
           if(m.status==='pending')primary=`<button class="tiny-btn" data-approve="${m.user_id}">核准</button><button class="tiny-btn danger" data-reject="${m.user_id}">拒絕</button>`;
-          else if(m.status==='active')primary=`<button class="tiny-btn danger" data-status="${m.user_id}" data-next="disabled">停用</button>`;
+          else if(m.status==='active')primary=`<button class="tiny-btn" data-perspective="${m.user_id}">視角切換</button><button class="tiny-btn danger" data-status="${m.user_id}" data-next="disabled">停用</button>`;
           else if(m.status==='disabled')primary=`<button class="tiny-btn" data-status="${m.user_id}" data-next="active">啟用</button>`;
           else if(m.status==='rejected')primary=`<button class="tiny-btn" data-status="${m.user_id}" data-next="disabled">移至停用</button>`;
         }
@@ -965,6 +993,7 @@
       }).join("");
       setMemberListHtml(memberHtml);
       qa('[data-toggle-member]').forEach(b=>b.onclick=()=>{state.expandedMemberId=state.expandedMemberId===b.dataset.toggleMember?null:b.dataset.toggleMember;renderMembers();});
+      qa('[data-perspective]').forEach(b=>b.onclick=()=>{const m=state.members.find(x=>x.user_id===b.dataset.perspective);if(m)enterPerspective(m);});
       qa('[data-member-name-input]').forEach(input=>{const m=state.members.find(x=>x.user_id===input.dataset.memberNameInput),status=document.querySelector(`[data-member-name-check="${input.dataset.memberNameInput}"]`);bindLiveNameCheck(input,status,{currentName:m?.display_name||""});});
       qa('[data-member-perms]').forEach(root=>{const id=root.dataset.memberPerms,save=document.querySelector(`[data-save-member="${id}"]`);bindPermUX(root,()=>{save?.classList.remove('hidden');});});
       qa('[data-save-name]').forEach(b=>b.onclick=async()=>{const id=b.dataset.saveName,input=document.querySelector(`[data-member-name-input="${id}"]`),status=document.querySelector(`[data-member-name-check="${id}"]`),name=cleanLoginName(input?.value);if(!name)return showToast('請輸入登入帳號');b.disabled=true;try{const data=await callAdmin('rename_member',{user_id:id,login_name:name});renderNameCheck(status,'available','帳號名稱可以使用');if(id===state.profile?.user_id){state.profile={...state.profile,...data.member};updateUserChrome();}showToast('登入帳號已更新');await loadAdminData();}catch(e){const m=e.message||'名稱修改失敗';if(m.includes('重複'))renderNameCheck(status,'duplicate','名稱重複不可用');showToast(m);}finally{b.disabled=false;}});
@@ -993,7 +1022,7 @@
     $('hubEnter').addEventListener('click',login);$('loginName').addEventListener('keydown',e=>{if(e.key==='Enter')login();});$('loginPassword').addEventListener('keydown',e=>{if(e.key==='Enter')login();});$('openRegister').addEventListener('click',()=>openRegister(''));
     bindLiveNameCheck($('registerName'),$('registerNameCheck'));
     $('registerSubmit').addEventListener('click',register);$('accessCode').addEventListener('blur',()=>{if($('accessCode').value.trim())validateCode();});$('backToLogin').addEventListener('click',()=>{history.replaceState(null,'',location.pathname+location.search);showLoginGate();});$('pendingBackLogin').addEventListener('click',()=>showLoginGate());
-    $('userMenuBtn').addEventListener('click',e=>{e.stopPropagation();const m=$('userMenu');const open=!m.classList.contains('hidden');m.classList.toggle('hidden',open);$('userMenuBtn').setAttribute('aria-expanded',String(!open));});document.addEventListener('click',e=>{if(!e.target.closest('.user-wrap'))closeMenu();});$('openMyAccount').addEventListener('click',()=>{closeMenu();updateUserChrome();renderNameCheck($('myLoginNameCheck'),'available','帳號名稱可以使用');$('renameMessage').textContent='';openModal('accountModal');});$('openHubAdmin').addEventListener('click',async()=>{closeMenu();if(state.profile?.role!=='owner')return;openModal('adminModal');await loadAdminData();requestAnimationFrame(()=>{syncAdminTabSlider();syncMemberFilterSlider();});});$('menuLogout').addEventListener('click',()=>logout(true));
+    $('userMenuBtn').addEventListener('click',e=>{e.stopPropagation();const m=$('userMenu');const open=!m.classList.contains('hidden');m.classList.toggle('hidden',open);$('userMenuBtn').setAttribute('aria-expanded',String(!open));});document.addEventListener('click',e=>{if(!e.target.closest('.user-wrap'))closeMenu();});$('openMyAccount').addEventListener('click',()=>{closeMenu();updateUserChrome();renderNameCheck($('myLoginNameCheck'),'available','帳號名稱可以使用');$('renameMessage').textContent='';openModal('accountModal');});$('openHubAdmin').addEventListener('click',async()=>{closeMenu();if(state.profile?.role!=='owner'||state.previewMember)return;openModal('adminModal');await loadAdminData();requestAnimationFrame(()=>{syncAdminTabSlider();syncMemberFilterSlider();});});$('exitPerspective').addEventListener('click',()=>exitPerspective());$('menuLogout').addEventListener('click',()=>logout(true));
     bindLiveNameCheck($('myLoginName'),$('myLoginNameCheck'),{currentName:()=>state.profile?.display_name||''});
     $('renameMeBtn').addEventListener('click',renameMe);
     qa('[data-close-modal]').forEach(b=>b.addEventListener('click',()=>closeModal(b.dataset.closeModal)));qa('.modal-backdrop').forEach(e=>bindSmartBackdrop(e,()=>closeModal(e.id),{confirmDirty:true}));$('refreshMyLocation').addEventListener('click',()=>requestCurrentLocation(true));$('changePasswordBtn').addEventListener('click',changePassword);
