@@ -478,6 +478,92 @@
       .invite-create{grid-template-columns:1fr!important}
       .access-actions{justify-content:flex-start}
     }
+
+    /* ===== Owner admin visual polish v2.4.1 ===== */
+    .hub-modal.admin{
+      background:
+        radial-gradient(circle at 92% 5%,rgba(66,133,244,.08),transparent 26%),
+        radial-gradient(circle at 8% 96%,rgba(124,77,255,.055),transparent 30%),
+        rgba(255,255,255,.985);
+      border-color:rgba(255,255,255,.98);
+      box-shadow:0 34px 96px rgba(25,30,38,.26),0 0 0 1px rgba(66,133,244,.04);
+    }
+    .hub-modal.admin .modal-head{background:rgba(255,255,255,.90);box-shadow:0 8px 28px rgba(34,39,46,.035)}
+    .admin-tabs{position:relative;isolation:isolate;background:rgba(70,74,80,.075);box-shadow:inset 0 1px 3px rgba(35,40,47,.08)}
+    .admin-tab-slider{position:absolute;left:4px;top:4px;height:calc(100% - 8px);width:0;border-radius:10px;z-index:0;pointer-events:none;background:linear-gradient(180deg,#fff,rgba(249,251,255,.94));border:1px solid rgba(255,255,255,.96);box-shadow:0 6px 16px rgba(66,133,244,.15),0 2px 6px rgba(32,37,44,.08);transition:left .32s cubic-bezier(.22,.85,.28,1.08),width .32s cubic-bezier(.22,.85,.28,1.08)}
+    .admin-tab{position:relative;z-index:1;background:transparent!important}
+    .admin-tab:hover{color:#2f6fd8;text-shadow:0 0 14px rgba(66,133,244,.24)}
+    .admin-tab.active{box-shadow:none!important}
+
+    .member-filters{position:relative;isolation:isolate;padding:4px;border-radius:13px;background:rgba(74,79,86,.06);border:1px solid rgba(34,34,34,.055)}
+    .member-filter-slider{position:absolute;left:4px;top:4px;height:calc(100% - 8px);width:0;border-radius:9px;z-index:0;pointer-events:none;background:linear-gradient(135deg,#26292f,#191b20);box-shadow:0 7px 18px rgba(31,35,42,.20),0 0 18px rgba(66,133,244,.16);transition:left .34s cubic-bezier(.22,.85,.28,1.08),top .34s cubic-bezier(.22,.85,.28,1.08),width .34s cubic-bezier(.22,.85,.28,1.08),height .34s cubic-bezier(.22,.85,.28,1.08)}
+    .member-filter{position:relative;z-index:1;border-color:transparent;background:transparent;color:#747980;transition:color .18s ease,transform .20s ease,text-shadow .20s ease,box-shadow .20s ease}
+    .member-filter.active{background:transparent;border-color:transparent;color:#fff;box-shadow:none;text-shadow:0 0 12px rgba(255,255,255,.28)}
+    .member-filter:hover{color:#2f6fd8;transform:translateY(-1px);text-shadow:0 0 14px rgba(66,133,244,.32)}
+    .member-filter.active:hover{color:#fff}
+
+    .member-list{transition:height .38s cubic-bezier(.22,.82,.24,1);will-change:height}
+    .member-list.is-transitioning{overflow:hidden}
+    .member-list.is-switching .member-access-row{animation:memberFilterIn .34s cubic-bezier(.22,.78,.24,1) both}
+    @keyframes memberFilterIn{from{opacity:0;transform:translateY(9px) scale(.992);filter:blur(1.5px)}to{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}}
+
+    .member-access-row{
+      position:relative;overflow:hidden;
+      background:linear-gradient(145deg,rgba(255,255,255,.98),rgba(248,250,253,.95));
+      border-color:rgba(45,50,58,.10);
+      box-shadow:0 5px 18px rgba(37,42,50,.035),inset 0 1px 0 rgba(255,255,255,.92);
+      transition:transform .24s cubic-bezier(.22,.85,.28,1.08),box-shadow .24s ease,border-color .24s ease,background .24s ease;
+    }
+    .member-access-row::before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:2px;border-radius:999px;background:linear-gradient(180deg,rgba(66,133,244,.0),rgba(66,133,244,.32),rgba(66,133,244,0));opacity:.35;transition:opacity .2s ease,box-shadow .2s ease}
+    .member-access-row:hover{transform:translateY(-2px);border-color:rgba(66,133,244,.18);box-shadow:0 12px 30px rgba(42,50,62,.085),0 0 24px rgba(66,133,244,.065)}
+    .member-access-row:hover::before{opacity:1;box-shadow:0 0 12px rgba(66,133,244,.36)}
+    .member-access-row.is-disabled{background:linear-gradient(145deg,rgba(255,250,248,.98),rgba(255,245,241,.88));border-color:rgba(255,91,52,.11)}
+
+    .member-access-head{display:grid;grid-template-columns:minmax(210px,1.15fr) minmax(260px,1fr) auto;align-items:center}
+    .member-identity{min-width:0}
+    .member-name-line{display:flex;align-items:center;gap:9px;min-width:0;flex-wrap:wrap}
+    .member-name-line .member-name-text{font-size:15px;font-weight:950;letter-spacing:-.12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+    .member-live-light{width:10px;height:10px;border-radius:50%;flex:0 0 10px;border:1px solid rgba(255,255,255,.88);box-shadow:0 0 0 3px rgba(0,0,0,.025)}
+    .member-live-light.active{background:#71ff63;box-shadow:0 0 0 3px rgba(113,255,99,.13),0 0 11px rgba(83,255,69,.82),0 0 22px rgba(83,255,69,.42)}
+    .member-live-light.disabled{background:#ff5a32;box-shadow:0 0 0 3px rgba(255,90,50,.11),0 0 10px rgba(255,77,35,.72),0 0 20px rgba(255,77,35,.30)}
+    .member-live-light.pending{background:#ffd84d;box-shadow:0 0 0 3px rgba(255,216,77,.12),0 0 10px rgba(255,194,39,.65)}
+    .member-live-light.rejected{background:#ff3f68;box-shadow:0 0 0 3px rgba(255,63,104,.11),0 0 10px rgba(255,63,104,.58)}
+
+    .member-permission-summary{display:flex;align-items:center;justify-content:flex-end;gap:5px 9px;flex-wrap:wrap;min-width:0;padding:2px 0}
+    .access-summary-prefix{font-size:11px;font-weight:850;color:#a0a4aa;margin-right:-3px}
+    .access-summary-divider{font-size:11px;font-weight:900;color:#c3c6ca;margin:0 -2px}
+    .access-summary-token{font-size:12px;font-weight:900;line-height:1.2;white-space:nowrap;text-shadow:0 0 12px currentColor;opacity:.94}
+    .access-summary-token[data-perm="can_view_index"]{color:#2f74df}
+    .access-summary-token[data-perm="can_view_performance"]{color:#1a9844}
+    .access-summary-token[data-perm="can_view_ad_tracking"]{color:#744ce7}
+    .access-summary-token[data-perm="can_view_marketing"]{color:#e46e16}
+    .access-summary-token[data-perm="can_view_social"]{color:#b78300}
+    .access-summary-token[data-perm="can_edit_index_customer_service"]{color:#0b8f8b}
+    .access-summary-token[data-perm="can_view_index_sensitive"]{color:#c63775}
+    .access-summary-empty{font-size:12px;font-weight:850;color:#b1b4b8}
+
+    .tiny-btn,.secondary-btn,.primary-small,.modal-close{transition:transform .18s cubic-bezier(.22,.85,.28,1.08),box-shadow .20s ease,border-color .20s ease,color .20s ease,filter .20s ease}
+    .tiny-btn:hover,.secondary-btn:hover,.modal-close:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(66,133,244,.12),0 0 15px rgba(66,133,244,.10);border-color:rgba(66,133,244,.26)}
+    .tiny-btn.danger:hover{box-shadow:0 6px 18px rgba(234,67,53,.10),0 0 15px rgba(255,90,50,.12);border-color:rgba(255,90,50,.28)}
+    .primary-small:hover{transform:translateY(-1px);filter:brightness(1.035);box-shadow:0 8px 20px rgba(66,133,244,.28),0 0 18px rgba(66,133,244,.16)}
+    .member-search:focus{box-shadow:0 0 0 3px rgba(66,133,244,.09),0 0 22px rgba(66,133,244,.10)}
+
+    @media(max-width:880px){
+      .member-access-head{grid-template-columns:minmax(180px,1fr) auto}
+      .member-permission-summary{grid-column:1/-1;justify-content:flex-start;padding-top:2px}
+      .member-permission-summary::before{min-width:auto}
+    }
+    @media(max-width:720px){
+      .member-filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}
+      .member-filter-slider{display:none}
+      .member-filter.active{background:#202124;border-color:#202124;box-shadow:0 5px 16px rgba(31,35,42,.18)}
+      .member-access-head{grid-template-columns:1fr}
+      .member-permission-summary{grid-column:auto;justify-content:flex-start}
+      .access-actions{justify-content:flex-start}
+    }
+    @media(prefers-reduced-motion:reduce){
+      .member-filter-slider,.admin-tab-slider,.member-list,.member-access-row,.member-filter,.tiny-btn,.secondary-btn,.primary-small,.modal-close{transition:none!important;animation:none!important}
+    }
   </style>
 </head>
 <body>
@@ -627,7 +713,7 @@
         </div>
         <div id="passwordMessage" class="form-message"></div>
         <div class="form-actions"><button id="changePasswordBtn" class="primary-small" type="button">更新密碼</button></div>
-        <div class="version-line">WAKODO HUB v2.4.0</div>
+        <div class="version-line">WAKODO HUB v2.4.1</div>
       </div>
     </div>
   </div>
@@ -640,6 +726,7 @@
       </div>
       <div class="modal-body">
         <div class="admin-tabs">
+          <span class="admin-tab-slider" aria-hidden="true"></span>
           <button class="admin-tab active" type="button" data-admin-tab="members">成員與審核</button>
           <button class="admin-tab" type="button" data-admin-tab="codes">邀請碼</button>
         </div>
@@ -648,6 +735,7 @@
           <div class="member-toolbar">
             <input id="memberSearch" class="modal-input member-search" type="search" placeholder="搜尋登入帳號" autocomplete="off" />
             <div id="memberFilters" class="member-filters">
+              <span class="member-filter-slider" aria-hidden="true"></span>
               <button class="member-filter active" type="button" data-member-filter="all">全部</button>
               <button class="member-filter" type="button" data-member-filter="pending">待審核</button>
               <button class="member-filter" type="button" data-member-filter="active">使用中</button>
@@ -676,7 +764,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const HUB=Object.freeze({
-      VERSION:"2.4.0",SUPABASE_URL:"https://mdjnidbwqedzobjbhocd.supabase.co",SUPABASE_KEY:"sb_publishable_RoO2nFORoi-VzRgWt75wWQ_OnHAbl9Y",
+      VERSION:"2.4.1",SUPABASE_URL:"https://mdjnidbwqedzobjbhocd.supabase.co",SUPABASE_KEY:"sb_publishable_RoO2nFORoi-VzRgWt75wWQ_OnHAbl9Y",
       LOGIN_AT_KEY:"wakodo_hub_login_at_v2",MAX_LOGIN_AGE:30*24*60*60*1000,TICKET_REFRESH_MS:20*60*1000,TICKET_CHECK_MS:60*1000,STORE_RADIUS_M:150,STORE_COORDS_KEY:"wakodo_hub_store_coords_v1",
       STORES:{linan:{label:"臨安店",address:"台南市中西區臨安路一段100號"},nanke:{label:"南科店",address:"台南市新市區龍目井路165號"}},
       PAGES:{customer:{label:"客源分析",src:"index.html",permission:"can_view_index",ticketPage:"index"},performance:{label:"業績分析",src:"performance.html",permission:"can_view_performance",ticketPage:"performance"},adtracking:{label:"廣告客追蹤",src:"ad-tracking.html",permission:"can_view_ad_tracking",ticketPage:"ad_tracking"},marketing:{label:"行銷開支分析",src:"marketing.html",permission:"can_view_marketing",ticketPage:"marketing"},social:{label:"社群發文成效分析",src:"social-analytics.html",permission:"can_view_social",ticketPage:"social"}}
@@ -792,6 +880,36 @@
     ];
     const registrationLabel=v=>({self:'自行申請',invite:'邀請碼加入',owner_legacy:'既有管理帳號',legacy:'既有帳號'}[v]||v||'既有帳號');
     const statusLabel=v=>({pending:'待審核',active:'使用中',disabled:'已停用',rejected:'未核准'}[v]||v||'—');
+    function memberPermissionSummary(m){
+      const allowed=permDefs.filter(({key})=>m.role==='owner'||m?.[key]);
+      const pages=allowed.filter(x=>x.group==='page'),extras=allowed.filter(x=>x.group==='extra');
+      if(!pages.length&&!extras.length)return '<span class="access-summary-empty">無頁面權限</span>';
+      const tokens=defs=>defs.map(({key,label})=>`<span class="access-summary-token" data-perm="${key}">${esc(label)}</span>`).join('');
+      return `${pages.length?`<span class="access-summary-prefix">可看</span>${tokens(pages)}`:''}${pages.length&&extras.length?'<span class="access-summary-divider">·</span>':''}${extras.length?`<span class="access-summary-prefix">額外</span>${tokens(extras)}`:''}`;
+    }
+    function memberStatusLightClass(status){return ['active','disabled','pending','rejected'].includes(status)?status:'pending';}
+    function syncMemberFilterSlider(){
+      const box=$('memberFilters'),slider=box?.querySelector('.member-filter-slider'),active=box?.querySelector('.member-filter.active');
+      if(!box||!slider||!active||getComputedStyle(slider).display==='none')return;
+      slider.style.width=`${active.offsetWidth}px`;slider.style.height=`${active.offsetHeight}px`;slider.style.left=`${active.offsetLeft}px`;slider.style.top=`${active.offsetTop}px`;
+    }
+    function syncAdminTabSlider(){
+      const box=document.querySelector('.admin-tabs'),slider=box?.querySelector('.admin-tab-slider'),active=box?.querySelector('.admin-tab.active');
+      if(!box||!slider||!active)return;slider.style.width=`${active.offsetWidth}px`;slider.style.left=`${active.offsetLeft}px`;
+    }
+    function setMemberListHtml(html,{animate=true}={}){
+      const list=$('memberList');if(!list)return;
+      const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+      if(!animate||reduced){list.innerHTML=html;list.style.height='';list.classList.remove('is-transitioning','is-switching');return;}
+      const start=Math.max(1,list.getBoundingClientRect().height);
+      list.style.height=`${start}px`;list.classList.add('is-transitioning');
+      list.innerHTML=html;
+      list.style.height='auto';const end=Math.max(1,list.getBoundingClientRect().height);
+      list.style.height=`${start}px`;void list.offsetHeight;list.classList.add('is-switching');
+      requestAnimationFrame(()=>{list.style.height=`${end}px`;});
+      clearTimeout(list._memberTransitionTimer);
+      list._memberTransitionTimer=setTimeout(()=>{list.style.height='';list.classList.remove('is-transitioning','is-switching');},410);
+    }
     function permHtml(obj,prefix,disabled=false){
       const section=(group,title)=>{const defs=permDefs.filter(x=>x.group===group).sort((a,b)=>Number(!!obj?.[b.key])-Number(!!obj?.[a.key]));return `<div class="perm-section" data-perm-section="${prefix}-${group}"><div class="perm-section-title">${title}</div><div class="perm-grid-inner">${defs.map(({key,label})=>`<label class="perm-check" data-perm-order="${permDefs.findIndex(x=>x.key===key)}"><input type="checkbox" data-perm-owner="${prefix}" data-perm-key="${key}" ${obj?.[key]?'checked':''} ${disabled?'disabled':''}>${label}</label>`).join('')}</div></div>`;};
       return section('page','頁面權限')+section('extra','額外能力');
@@ -812,9 +930,10 @@
       $("memberCount").textContent=`${state.members.length} 位`;
       $("memberCounts").innerHTML=`<span>待審核 <b>${counts.pending}</b></span><span>使用中 <b>${counts.active}</b></span><span>停用 <b>${counts.disabled}</b></span><span>未核准 <b>${counts.rejected}</b></span>`;
       qa('[data-member-filter]').forEach(b=>b.classList.toggle('active',b.dataset.memberFilter===state.adminMemberFilter));
+      requestAnimationFrame(syncMemberFilterSlider);
       const rows=filteredMembers();
-      if(!rows.length){$("memberList").innerHTML='<div class="empty-state">目前沒有符合條件的成員</div>';return;}
-      $("memberList").innerHTML=rows.map((m,i)=>{
+      if(!rows.length){setMemberListHtml('<div class="empty-state">目前沒有符合條件的成員</div>');return;}
+      const memberHtml=rows.map((m,i)=>{
         const owner=m.role==="owner",prefix=`m-${m.user_id}`,expanded=m.status==='pending'||state.expandedMemberId===m.user_id;
         let primary='';
         if(!owner){
@@ -826,7 +945,8 @@
         const deleteAction=!owner&&m.status==='disabled'&&state.adminMemberFilter==='disabled'?`<div class="danger-zone"><div class="danger-note">永久刪除只會出現在停用區。刪除後帳號本體與登入資格會移除，歷史稽核紀錄保留。</div><button class="tiny-btn danger" data-delete-member="${m.user_id}">永久刪除帳號</button></div>`:'';
         return`<div class="member-access-row ${m.status==='disabled'?'is-disabled':''}" style="animation-delay:${Math.min(i,8)*20}ms">
           <div class="member-access-head">
-            <div class="row-main"><strong>${esc(m.display_name)} ${owner?'<span class="mini-pill owner">Owner</span>':''}</strong><div class="member-access-meta">${statusText(m)} · ${esc(registrationLabel(m.registration_source))} · 建立 ${fmtDate(m.created_at)} · 最後使用 ${m.last_seen_at?fmtDate(m.last_seen_at):'尚無紀錄'}</div></div>
+            <div class="row-main member-identity"><div class="member-name-line"><span class="member-live-light ${memberStatusLightClass(m.status)}" title="${esc(statusLabel(m.status))}" aria-label="${esc(statusLabel(m.status))}"></span><span class="member-name-text">${esc(m.display_name)}</span>${owner?'<span class="mini-pill owner">Owner</span>':''}</div><div class="member-access-meta">${statusText(m)} · ${esc(registrationLabel(m.registration_source))} · 建立 ${fmtDate(m.created_at)} · 最後使用 ${m.last_seen_at?fmtDate(m.last_seen_at):'尚無紀錄'}</div></div>
+            <div class="member-permission-summary">${memberPermissionSummary(m)}</div>
             <div class="access-actions">${primary}<button class="tiny-btn" data-toggle-member="${m.user_id}">${expanded?'收合':'管理'}</button></div>
           </div>
           <div class="member-details ${expanded?'':'hidden'}" data-member-details="${m.user_id}">
@@ -843,6 +963,7 @@
           </div>
         </div>`;
       }).join("");
+      setMemberListHtml(memberHtml);
       qa('[data-toggle-member]').forEach(b=>b.onclick=()=>{state.expandedMemberId=state.expandedMemberId===b.dataset.toggleMember?null:b.dataset.toggleMember;renderMembers();});
       qa('[data-member-name-input]').forEach(input=>{const m=state.members.find(x=>x.user_id===input.dataset.memberNameInput),status=document.querySelector(`[data-member-name-check="${input.dataset.memberNameInput}"]`);bindLiveNameCheck(input,status,{currentName:m?.display_name||""});});
       qa('[data-member-perms]').forEach(root=>{const id=root.dataset.memberPerms,save=document.querySelector(`[data-save-member="${id}"]`);bindPermUX(root,()=>{save?.classList.remove('hidden');});});
@@ -872,18 +993,18 @@
     $('hubEnter').addEventListener('click',login);$('loginName').addEventListener('keydown',e=>{if(e.key==='Enter')login();});$('loginPassword').addEventListener('keydown',e=>{if(e.key==='Enter')login();});$('openRegister').addEventListener('click',()=>openRegister(''));
     bindLiveNameCheck($('registerName'),$('registerNameCheck'));
     $('registerSubmit').addEventListener('click',register);$('accessCode').addEventListener('blur',()=>{if($('accessCode').value.trim())validateCode();});$('backToLogin').addEventListener('click',()=>{history.replaceState(null,'',location.pathname+location.search);showLoginGate();});$('pendingBackLogin').addEventListener('click',()=>showLoginGate());
-    $('userMenuBtn').addEventListener('click',e=>{e.stopPropagation();const m=$('userMenu');const open=!m.classList.contains('hidden');m.classList.toggle('hidden',open);$('userMenuBtn').setAttribute('aria-expanded',String(!open));});document.addEventListener('click',e=>{if(!e.target.closest('.user-wrap'))closeMenu();});$('openMyAccount').addEventListener('click',()=>{closeMenu();updateUserChrome();renderNameCheck($('myLoginNameCheck'),'available','帳號名稱可以使用');$('renameMessage').textContent='';openModal('accountModal');});$('openHubAdmin').addEventListener('click',async()=>{closeMenu();if(state.profile?.role!=='owner')return;openModal('adminModal');await loadAdminData();});$('menuLogout').addEventListener('click',()=>logout(true));
+    $('userMenuBtn').addEventListener('click',e=>{e.stopPropagation();const m=$('userMenu');const open=!m.classList.contains('hidden');m.classList.toggle('hidden',open);$('userMenuBtn').setAttribute('aria-expanded',String(!open));});document.addEventListener('click',e=>{if(!e.target.closest('.user-wrap'))closeMenu();});$('openMyAccount').addEventListener('click',()=>{closeMenu();updateUserChrome();renderNameCheck($('myLoginNameCheck'),'available','帳號名稱可以使用');$('renameMessage').textContent='';openModal('accountModal');});$('openHubAdmin').addEventListener('click',async()=>{closeMenu();if(state.profile?.role!=='owner')return;openModal('adminModal');await loadAdminData();requestAnimationFrame(()=>{syncAdminTabSlider();syncMemberFilterSlider();});});$('menuLogout').addEventListener('click',()=>logout(true));
     bindLiveNameCheck($('myLoginName'),$('myLoginNameCheck'),{currentName:()=>state.profile?.display_name||''});
     $('renameMeBtn').addEventListener('click',renameMe);
     qa('[data-close-modal]').forEach(b=>b.addEventListener('click',()=>closeModal(b.dataset.closeModal)));qa('.modal-backdrop').forEach(e=>bindSmartBackdrop(e,()=>closeModal(e.id),{confirmDirty:true}));$('refreshMyLocation').addEventListener('click',()=>requestCurrentLocation(true));$('changePasswordBtn').addEventListener('click',changePassword);
-    qa('[data-admin-tab]').forEach(b=>b.addEventListener('click',()=>{qa('[data-admin-tab]').forEach(x=>x.classList.toggle('active',x===b));$('adminMembersPanel').classList.toggle('hidden',b.dataset.adminTab!=='members');$('adminCodesPanel').classList.toggle('hidden',b.dataset.adminTab!=='codes');}));
-    qa('[data-member-filter]').forEach(b=>b.addEventListener('click',()=>{state.adminMemberFilter=b.dataset.memberFilter||'all';state.expandedMemberId=null;renderMembers();}));
+    qa('[data-admin-tab]').forEach(b=>b.addEventListener('click',()=>{qa('[data-admin-tab]').forEach(x=>x.classList.toggle('active',x===b));$('adminMembersPanel').classList.toggle('hidden',b.dataset.adminTab!=='members');$('adminCodesPanel').classList.toggle('hidden',b.dataset.adminTab!=='codes');requestAnimationFrame(syncAdminTabSlider);}));
+    qa('[data-member-filter]').forEach(b=>b.addEventListener('click',()=>{if(state.adminMemberFilter===b.dataset.memberFilter)return;state.adminMemberFilter=b.dataset.memberFilter||'all';state.expandedMemberId=null;renderMembers();requestAnimationFrame(syncMemberFilterSlider);}));
     $('memberSearch').addEventListener('input',e=>{state.adminMemberQuery=e.target.value||'';state.expandedMemberId=null;renderMembers();});
     $('refreshAdmin').addEventListener('click',loadAdminData);$('createCodeBtn').addEventListener('click',createCode);$('copyCodeBtn').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('newCodeValue').value);showToast('邀請碼已複製');}catch{showToast('無法自動複製');}});initCodePerms();
     $('reloadCurrent').addEventListener('click',()=>loadView(state.active,true));$('openCurrent').addEventListener('click',()=>showToast('功能頁僅可於 WAKODO HUB 內使用'));
     window.addEventListener('hashchange',async()=>{if(state.profile){const key=String(location.hash||'').replace(/^#/,'');if(canPage(key))await switchView(key,false);}});
-    window.addEventListener('resize',()=>requestAnimationFrame(()=>{syncHubViewportHeight();syncTabSlider(state.active);}));
-    window.addEventListener('orientationchange',()=>setTimeout(()=>{syncHubViewportHeight();syncTabSlider(state.active);},80));
+    window.addEventListener('resize',()=>requestAnimationFrame(()=>{syncHubViewportHeight();syncTabSlider(state.active);syncAdminTabSlider();syncMemberFilterSlider();}));
+    window.addEventListener('orientationchange',()=>setTimeout(()=>{syncHubViewportHeight();syncTabSlider(state.active);syncAdminTabSlider();syncMemberFilterSlider();},80));
     if(window.visualViewport)window.visualViewport.addEventListener('resize',()=>requestAnimationFrame(syncHubViewportHeight));
     document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')resumeHubSession();});
     window.addEventListener('focus',()=>resumeHubSession());
