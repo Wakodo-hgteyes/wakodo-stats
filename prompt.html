@@ -371,7 +371,7 @@
 
                 <div class="form-group">
                     <div class="form-label"><label for="select-poses">3. 姿勢與取景</label><span>POSE & FRAMING</span></div>
-                    <select id="select-poses" onchange="generatePrompt()"></select>
+                    <select id="select-poses" onchange="rerollPoseVariation()"></select>
                     <div class="option-summary" id="summary-poses"></div>
                 </div>
 
@@ -496,6 +496,7 @@
     let draggedIndex = null;
     let fullPromptText = "";
     let currentPreviewSections = [];
+    const POSE_VARIATION_CACHE = new Map();
     const WORKSPACE_STATE_KEY = "wakoPromptWorkspaceStateV1";
     const USAGE_SESSION_KEY = "wakoPromptUsageSessionV1";
     const USAGE_DEDUPE_WINDOW_MS = 5000;
@@ -521,6 +522,7 @@
 
     window.setGender = function(gender) {
         currentGender = gender;
+        POSE_VARIATION_CACHE.clear();
         document.getElementById("btn-female").classList.toggle("active", gender === "female");
         document.getElementById("btn-male").classList.toggle("active", gender === "male");
         refreshAllSelects();
@@ -528,6 +530,7 @@
     };
 
     window.resetWorkspace = function() {
+        POSE_VARIATION_CACHE.clear();
         document.getElementById("select-ratio").value = "4:5";
         document.getElementById("input-eyewear").value = "";
         if (currentMode === "model") {
@@ -551,6 +554,33 @@
             return Object.prototype.hasOwnProperty.call(context, key) ? String(context[key] ?? "") : match;
         });
     }
+
+    function resolvePromptVariations(text, cacheKey = "") {
+        const source = String(text || "");
+        if (!source.includes("[[pick|")) return source;
+
+        if (cacheKey && POSE_VARIATION_CACHE.has(cacheKey)) {
+            return POSE_VARIATION_CACHE.get(cacheKey);
+        }
+
+        const resolved = source.replace(/\[\[pick\|([\s\S]*?)\]\]/g, (match, body) => {
+            const options = body
+                .split("||")
+                .map(option => option.trim())
+                .filter(Boolean);
+            if (!options.length) return "";
+            return options[Math.floor(Math.random() * options.length)];
+        });
+
+        if (cacheKey) POSE_VARIATION_CACHE.set(cacheKey, resolved);
+        return resolved;
+    }
+
+    window.rerollPoseVariation = function() {
+        const poseId = document.getElementById("select-poses")?.value;
+        if (poseId) POSE_VARIATION_CACHE.delete(`${currentGender}:${poseId}`);
+        window.generatePrompt();
+    };
 
     function getSelectedPromptItems() {
         return {
@@ -582,7 +612,11 @@
         if (section.source_type === "module") {
             text = PROMPT_MODULES[section.source_key]?.prompt_text || "";
         } else if (section.source_type === "category") {
-            text = selectedItems[section.source_key]?.prompt_text || "";
+            const item = selectedItems[section.source_key];
+            text = item?.prompt_text || "";
+            if (section.source_key === "POSES" && item) {
+                text = resolvePromptVariations(text, `${currentGender}:${item.id}`);
+            }
         } else if (section.source_type === "profile") {
             text = framingProfile?.prompt_text || "";
         } else if (section.source_type === "user_input") {
@@ -1006,6 +1040,7 @@
             return new Date(a.created_at) - new Date(b.created_at);
         });
 
+        POSE_VARIATION_CACHE.clear();
         DATA_MAP = { APPEARANCES: [], OUTFITS: [], SCENES: [], POSES: [], STYLES: [], PRODUCT_LAYOUTS: [] };
         data.forEach(item => {
             if (DATA_MAP[item.category]) DATA_MAP[item.category].push(item);
@@ -1045,7 +1080,7 @@
         populateSelect("select-appearances", DATA_MAP.APPEARANCES, true, preserveSelection);
         populateSelect("select-outfits", DATA_MAP.OUTFITS, true, preserveSelection);
         populateSelect("select-scenes", DATA_MAP.SCENES, false, preserveSelection);
-        populateSelect("select-poses", DATA_MAP.POSES, false, preserveSelection);
+        populateSelect("select-poses", DATA_MAP.POSES, true, preserveSelection);
         populateSelect("select-styles", DATA_MAP.STYLES, false, preserveSelection);
         populateSelect("select-product-layouts", DATA_MAP.PRODUCT_LAYOUTS, false, preserveSelection);
     }
@@ -1099,8 +1134,11 @@
             const summary = document.getElementById(summaryId);
             if (!summary) return;
             const item = getSelectedItem(category, selectId);
-            summary.textContent = item?.prompt_text || "尚無內容";
-            summary.title = item?.prompt_text || "";
+            const summaryText = category === "POSES" && item
+                ? resolvePromptVariations(item.prompt_text, `${currentGender}:${item.id}`)
+                : (item?.prompt_text || "");
+            summary.textContent = summaryText || "尚無內容";
+            summary.title = summaryText || "";
         });
     }
 
