@@ -133,6 +133,7 @@
         .reference-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .reference-item { color: #d2d0ca; font-size: 13px; }
         .reference-item strong { display: block; color: var(--text); margin-bottom: 2px; }
+        .reference-item:last-child:nth-child(3) { grid-column: 1 / -1; }
 
         .form-group { margin-bottom: 17px; }
         .form-label { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 7px; }
@@ -290,6 +291,7 @@
             .toolbar { grid-template-columns: 1fr; }
             .toolbar-actions { display: grid; grid-template-columns: 1fr 1fr; }
             .reference-grid { grid-template-columns: 1fr; }
+            .reference-item:last-child:nth-child(3) { grid-column: auto; }
             .modal-body { grid-template-columns: 1fr; overflow-y: auto; }
             .item-list { max-height: 34vh; border-right: 0; border-bottom: 1px solid var(--border); padding: 0 0 12px; }
         }
@@ -351,6 +353,10 @@
                             <strong>眼鏡產品圖</strong>
                             用來鎖定鏡框結構、比例、材質與顏色
                         </div>
+                        <div class="reference-item">
+                            <strong>中性姿勢參考圖</strong>
+                            用來鎖定身體朝向、頭部、眼神、手勢和鏡頭方位；不繼承性別、服裝或髮型
+                        </div>
                     </div>
                 </div>
 
@@ -370,9 +376,11 @@
                 </div>
 
                 <div class="form-group">
-                    <div class="form-label"><label for="select-poses">3. 姿勢與取景</label><span>POSE & FRAMING</span></div>
-                    <select id="select-poses" onchange="rerollPoseVariation()"></select>
-                    <div class="option-summary" id="summary-poses"></div>
+                    <div class="form-label"><label for="select-framing">3. 取景比例／鏡位</label><span>SHOT SCALE · FRAMING</span></div>
+                    <select id="select-framing" onchange="generatePrompt()" aria-label="獨立選擇特寫、半身或全身鏡位"></select>
+                    <p class="option-summary" style="margin-top:8px">取景與姿勢圖分開控制：選「特寫」就只拍頭部至鎖骨／上胸，不會因姿勢圖露出全身而拉遠。</p>
+                    <div class="option-summary" id="summary-framing"></div>
+                    <p class="option-summary" style="margin-top:8px">在 Gemini 上傳人物、眼鏡和一張<a href="https://drive.google.com/drive/folders/1ifz-QgGEnSqit2IBPCuHCk7jzS_ufAah" target="_blank" rel="noopener noreferrer">中性姿勢參考圖</a>。本工作台不再選取文字姿勢。</p>
                 </div>
 
                 <div class="form-group">
@@ -450,10 +458,6 @@
                         <option value="male">限男性</option>
                     </select>
                 </div>
-                <div class="form-group" id="framing-profile-group" hidden>
-                    <div class="form-label"><label for="edit-framing-profile">鏡位 Profile</label></div>
-                    <select id="edit-framing-profile"></select>
-                </div>
                 <div class="form-group">
                     <div class="form-label"><label for="edit-prompt">英文 Prompt 內容</label></div>
                     <textarea id="edit-prompt" style="min-height:190px" placeholder="輸入完整英文 Prompt 片段"></textarea>
@@ -481,7 +485,6 @@
         APPEARANCES: "人物參考",
         OUTFITS: "服裝",
         SCENES: "場景",
-        POSES: "姿勢",
         STYLES: "攝影風格",
         PRODUCT_LAYOUTS: "產品佈局"
     };
@@ -489,14 +492,13 @@
     let currentMode = "model";
     let currentGender = "female";
     let currentManageCategory = "OUTFITS";
-    let DATA_MAP = { APPEARANCES: [], OUTFITS: [], SCENES: [], POSES: [], STYLES: [], PRODUCT_LAYOUTS: [] };
+    let DATA_MAP = { APPEARANCES: [], OUTFITS: [], SCENES: [], STYLES: [], PRODUCT_LAYOUTS: [] };
     let PROMPT_MODULES = {};
     let PROMPT_PROFILES = {};
     let PROMPT_SECTIONS = [];
     let draggedIndex = null;
     let fullPromptText = "";
     let currentPreviewSections = [];
-    const POSE_VARIATION_CACHE = new Map();
     const WORKSPACE_STATE_KEY = "wakoPromptWorkspaceStateV1";
     const USAGE_SESSION_KEY = "wakoPromptUsageSessionV1";
     const USAGE_DEDUPE_WINDOW_MS = 5000;
@@ -522,7 +524,6 @@
 
     window.setGender = function(gender) {
         currentGender = gender;
-        POSE_VARIATION_CACHE.clear();
         document.getElementById("btn-female").classList.toggle("active", gender === "female");
         document.getElementById("btn-male").classList.toggle("active", gender === "male");
         refreshAllSelects();
@@ -530,7 +531,6 @@
     };
 
     window.resetWorkspace = function() {
-        POSE_VARIATION_CACHE.clear();
         document.getElementById("select-ratio").value = "4:5";
         document.getElementById("input-eyewear").value = "";
         if (currentMode === "model") {
@@ -538,7 +538,7 @@
             document.getElementById("btn-female").classList.add("active");
             document.getElementById("btn-male").classList.remove("active");
             refreshAllSelects(false);
-            ["select-outfits", "select-scenes", "select-poses", "select-styles"].forEach(id => {
+            ["select-outfits", "select-scenes", "select-styles"].forEach(id => {
                 const el = document.getElementById(id);
                 if (el.options.length) el.selectedIndex = 0;
             });
@@ -555,39 +555,11 @@
         });
     }
 
-    function resolvePromptVariations(text, cacheKey = "") {
-        const source = String(text || "");
-        if (!source.includes("[[pick|")) return source;
-
-        if (cacheKey && POSE_VARIATION_CACHE.has(cacheKey)) {
-            return POSE_VARIATION_CACHE.get(cacheKey);
-        }
-
-        const resolved = source.replace(/\[\[pick\|([\s\S]*?)\]\]/g, (match, body) => {
-            const options = body
-                .split("||")
-                .map(option => option.trim())
-                .filter(Boolean);
-            if (!options.length) return "";
-            return options[Math.floor(Math.random() * options.length)];
-        });
-
-        if (cacheKey) POSE_VARIATION_CACHE.set(cacheKey, resolved);
-        return resolved;
-    }
-
-    window.rerollPoseVariation = function() {
-        const poseId = document.getElementById("select-poses")?.value;
-        if (poseId) POSE_VARIATION_CACHE.delete(`${currentGender}:${poseId}`);
-        window.generatePrompt();
-    };
-
     function getSelectedPromptItems() {
         return {
             APPEARANCES: getAppearanceForGender(),
             OUTFITS: getSelectedItem("OUTFITS", "select-outfits"),
             SCENES: getSelectedItem("SCENES", "select-scenes"),
-            POSES: getSelectedItem("POSES", "select-poses"),
             STYLES: getSelectedItem("STYLES", "select-styles"),
             PRODUCT_LAYOUTS: getSelectedItem("PRODUCT_LAYOUTS", "select-product-layouts")
         };
@@ -600,10 +572,28 @@
         return profiles.find(profile => profile.is_default === true) || profiles[0] || null;
     }
 
-    function getSelectedFramingProfile(selectedItems) {
-        const pose = selectedItems.POSES;
-        const requestedKey = pose?.framing_profile;
-        return (requestedKey && PROMPT_PROFILES[requestedKey]) || getDefaultFramingProfile();
+    function getSelectedFramingProfile() {
+        const key = document.getElementById("select-framing")?.value;
+        const selected = key && PROMPT_PROFILES[key];
+        return (selected && selected.enabled !== false ? selected : null) || getDefaultFramingProfile();
+    }
+
+    function refreshFramingSelect(preserve = true) {
+        const select = document.getElementById("select-framing");
+        if (!select) return;
+        const previous = preserve ? select.value : "";
+        const profiles = Object.values(PROMPT_PROFILES)
+            .filter(profile => profile.enabled !== false)
+            .sort((a, b) => (a.sort_order ?? 9999) - (b.sort_order ?? 9999));
+        select.replaceChildren();
+        profiles.forEach(profile => {
+            const option = document.createElement("option");
+            option.value = profile.profile_key;
+            option.textContent = profile.label + (profile.profile_key === "closeup" ? "｜眼鏡／臉部優先" : "");
+            select.appendChild(option);
+        });
+        const fallback = getDefaultFramingProfile()?.profile_key || profiles[0]?.profile_key || "";
+        select.value = profiles.some(profile => profile.profile_key === previous) ? previous : fallback;
     }
 
     function resolvePromptSection(section, selectedItems, context, framingProfile) {
@@ -614,9 +604,6 @@
         } else if (section.source_type === "category") {
             const item = selectedItems[section.source_key];
             text = item?.prompt_text || "";
-            if (section.source_key === "POSES" && item) {
-                text = resolvePromptVariations(text, `${currentGender}:${item.id}`);
-            }
         } else if (section.source_type === "profile") {
             text = framingProfile?.prompt_text || "";
         } else if (section.source_type === "user_input") {
@@ -637,7 +624,7 @@
         const ratio = document.getElementById("select-ratio").value;
         const selectedItems = getSelectedPromptItems();
         const eyewear = document.getElementById("input-eyewear").value.trim();
-        const framingProfile = currentMode === "model" ? getSelectedFramingProfile(selectedItems) : null;
+        const framingProfile = currentMode === "model" ? getSelectedFramingProfile() : null;
         const context = {
             ratio,
             mode: currentMode,
@@ -736,6 +723,8 @@
                 product_layout_label: layout?.label || null,
                 selection_signature: signature,
                 prompt_length: fullPromptText.length,
+                resolved_full_prompt: fullPromptText,
+                framing_profile: null,
                 eyewear_details_present: false
             };
         }
@@ -743,12 +732,11 @@
         const appearance = getAppearanceForGender();
         const outfit = getSelectedItem("OUTFITS", "select-outfits");
         const scene = getSelectedItem("SCENES", "select-scenes");
-        const pose = getSelectedItem("POSES", "select-poses");
         const style = getSelectedItem("STYLES", "select-styles");
         const signature = [
             "model", currentGender, ratio,
             appearance?.id || "", outfit?.id || "", scene?.id || "",
-            pose?.id || "", style?.id || "", eyewearDetailsPresent ? "eyewear:1" : "eyewear:0"
+            getSelectedFramingProfile()?.profile_key || "", style?.id || "", eyewearDetailsPresent ? "eyewear:1" : "eyewear:0"
         ].join("|");
 
         return {
@@ -762,12 +750,15 @@
             outfit_label: outfit?.label || null,
             scene_id: scene?.id || null,
             scene_label: scene?.label || null,
-            pose_id: pose?.id || null,
-            pose_label: pose?.label || null,
+            pose_id: null, // Legacy usage schema retained; pose is now supplied as a separate image.
+            pose_label: null,
             style_id: style?.id || null,
             style_label: style?.label || null,
             selection_signature: signature,
             prompt_length: fullPromptText.length,
+            framing_profile: getSelectedFramingProfile()?.profile_key || null,
+            resolved_full_prompt: fullPromptText,
+            resolved_pose_prompt: PROMPT_MODULES.pose_reference_control?.prompt_text || null,
             eyewear_details_present: eyewearDetailsPresent
         };
     }
@@ -835,34 +826,12 @@
         renderModalList();
     }
 
-    function refreshFramingProfileEditor(selectedKey = "") {
-        const group = document.getElementById("framing-profile-group");
-        const select = document.getElementById("edit-framing-profile");
-        const isPose = currentManageCategory === "POSES";
-        group.hidden = !isPose;
-        select.replaceChildren();
-        if (!isPose) return;
-
-        const profiles = Object.values(PROMPT_PROFILES)
-            .filter(profile => profile.enabled !== false)
-            .sort((a, b) => (a.sort_order ?? 9999) - (b.sort_order ?? 9999));
-        profiles.forEach(profile => {
-            const option = document.createElement("option");
-            option.value = profile.profile_key;
-            option.textContent = profile.label;
-            select.appendChild(option);
-        });
-        const preferred = selectedKey || getDefaultFramingProfile()?.profile_key || "";
-        if ([...select.options].some(option => option.value === preferred)) select.value = preferred;
-    }
-
     window.resetForm = function() {
         document.getElementById("formTitle").textContent = "新增項目";
         document.getElementById("edit-id").value = "";
         document.getElementById("edit-label").value = "";
         document.getElementById("edit-gender").value = "both";
         document.getElementById("edit-prompt").value = "";
-        refreshFramingProfileEditor();
     };
 
     window.editItem = function(id) {
@@ -873,7 +842,6 @@
         document.getElementById("edit-label").value = item.label;
         document.getElementById("edit-gender").value = item.gender;
         document.getElementById("edit-prompt").value = item.prompt_text;
-        refreshFramingProfileEditor(item.framing_profile || getDefaultFramingProfile()?.profile_key || "");
     };
 
     window.saveItem = async function() {
@@ -881,9 +849,6 @@
         const label = document.getElementById("edit-label").value.trim();
         const gender = document.getElementById("edit-gender").value;
         const prompt_text = document.getElementById("edit-prompt").value.trim();
-        const framing_profile = currentManageCategory === "POSES"
-            ? (document.getElementById("edit-framing-profile").value || getDefaultFramingProfile()?.profile_key || null)
-            : null;
         if (!label || !prompt_text) return alert("請填寫顯示名稱與 Prompt 內容");
 
         const button = document.getElementById("saveBtn");
@@ -892,7 +857,6 @@
         try {
             if (id) {
                 const updatePayload = { label, gender, prompt_text };
-                if (currentManageCategory === "POSES") updatePayload.framing_profile = framing_profile;
                 const { error } = await supabase.from("wako_prompts").update(updatePayload).eq("id", id);
                 if (error) throw error;
                 window.showToast("雲端修改成功");
@@ -904,8 +868,7 @@
                     label,
                     gender,
                     prompt_text,
-                    sort_order: maxSort + 1,
-                    ...(currentManageCategory === "POSES" ? { framing_profile } : {})
+                    sort_order: maxSort + 1
                 }]);
                 if (error) throw error;
                 window.showToast("雲端新增成功");
@@ -944,7 +907,7 @@
                 appearances: document.getElementById("select-appearances")?.value || "",
                 outfits: document.getElementById("select-outfits")?.value || "",
                 scenes: document.getElementById("select-scenes")?.value || "",
-                poses: document.getElementById("select-poses")?.value || "",
+                framing: document.getElementById("select-framing")?.value || "",
                 styles: document.getElementById("select-styles")?.value || "",
                 productLayouts: document.getElementById("select-product-layouts")?.value || ""
             }
@@ -979,6 +942,7 @@
     function restoreWorkspaceState(state) {
         if (!state || typeof state !== "object") {
             refreshAllSelects();
+            refreshFramingSelect();
             return;
         }
 
@@ -998,11 +962,12 @@
         document.getElementById("input-eyewear").value = typeof state.eyewear === "string" ? state.eyewear : "";
 
         refreshAllSelects(false);
+        refreshFramingSelect(false);
         const selections = state.selections || {};
         setSelectValueIfAvailable("select-appearances", selections.appearances);
         setSelectValueIfAvailable("select-outfits", selections.outfits);
         setSelectValueIfAvailable("select-scenes", selections.scenes);
-        setSelectValueIfAvailable("select-poses", selections.poses);
+        setSelectValueIfAvailable("select-framing", selections.framing);
         setSelectValueIfAvailable("select-styles", selections.styles);
         setSelectValueIfAvailable("select-product-layouts", selections.productLayouts);
     }
@@ -1040,8 +1005,7 @@
             return new Date(a.created_at) - new Date(b.created_at);
         });
 
-        POSE_VARIATION_CACHE.clear();
-        DATA_MAP = { APPEARANCES: [], OUTFITS: [], SCENES: [], POSES: [], STYLES: [], PRODUCT_LAYOUTS: [] };
+        DATA_MAP = { APPEARANCES: [], OUTFITS: [], SCENES: [], STYLES: [], PRODUCT_LAYOUTS: [] };
         data.forEach(item => {
             if (DATA_MAP[item.category]) DATA_MAP[item.category].push(item);
         });
@@ -1080,7 +1044,6 @@
         populateSelect("select-appearances", DATA_MAP.APPEARANCES, true, preserveSelection);
         populateSelect("select-outfits", DATA_MAP.OUTFITS, true, preserveSelection);
         populateSelect("select-scenes", DATA_MAP.SCENES, false, preserveSelection);
-        populateSelect("select-poses", DATA_MAP.POSES, true, preserveSelection);
         populateSelect("select-styles", DATA_MAP.STYLES, false, preserveSelection);
         populateSelect("select-product-layouts", DATA_MAP.PRODUCT_LAYOUTS, false, preserveSelection);
     }
@@ -1126,17 +1089,20 @@
         const map = [
             ["OUTFITS", "select-outfits", "summary-outfits"],
             ["SCENES", "select-scenes", "summary-scenes"],
-            ["POSES", "select-poses", "summary-poses"],
             ["STYLES", "select-styles", "summary-styles"],
             ["PRODUCT_LAYOUTS", "select-product-layouts", "summary-product-layouts"]
         ];
+        const framingSummary = document.getElementById("summary-framing");
+        if (framingSummary) {
+            const description = getSelectedFramingProfile()?.prompt_text || "";
+            framingSummary.textContent = description || "尚未載入鏡位設定";
+            framingSummary.title = description;
+        }
         map.forEach(([category, selectId, summaryId]) => {
             const summary = document.getElementById(summaryId);
             if (!summary) return;
             const item = getSelectedItem(category, selectId);
-            const summaryText = category === "POSES" && item
-                ? resolvePromptVariations(item.prompt_text, `${currentGender}:${item.id}`)
-                : (item?.prompt_text || "");
+            const summaryText = item?.prompt_text || "";
             summary.textContent = summaryText || "尚無內容";
             summary.title = summaryText || "";
         });
@@ -1169,10 +1135,7 @@
             strong.textContent = item.label;
             const meta = document.createElement("span");
             const genderText = item.gender === "both" ? "通用" : item.gender === "female" ? "女性" : "男性";
-            const profileText = currentManageCategory === "POSES" && item.framing_profile
-                ? ` · ${PROMPT_PROFILES[item.framing_profile]?.label || item.framing_profile}`
-                : "";
-            meta.textContent = `${genderText}${profileText}`;
+            meta.textContent = genderText;
             info.append(strong, meta);
             main.append(handle, info);
 
